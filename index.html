@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORCA — Autonomous Marine Intelligence & Bridge Console</title>
+  <meta name="description" content="Reasoning-first marine intelligence and vessel safety bridge console. Real-time oceanographic AI reasoning, potential fishing zone (PFZ) detection, and hazard avoidance routing.">
+  <meta name="theme-color" content="#0A1014">
+
+  <!-- Typography: Fraunces (Display), Inter (Body), IBM Plex Mono (Data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet.js Cartography Library -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Chart.js Oceanographic Telemetry Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Bridge Console Design System -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app-root">
+    <!-- Top Tactical Telemetry Bar -->
+    <header id="top-bar">
+      <div class="brand-section">
+        <div class="brand-logo-badge">⚓</div>
+        <div class="brand-titles">
+          <div class="brand-name" id="brand-title-text">ORCA <span>CONSOLE</span></div>
+          <div class="brand-subtitle" id="brand-sub-text">AUTONOMOUS VESSEL SAFETY & REASONING BRIDGE</div>
+        </div>
+      </div>
+
+      <div class="tactical-telemetry">
+        <div class="telemetry-item">
+          <span class="telemetry-label">POSITION (GPS)</span>
+          <span class="telemetry-value text-amber" id="telemetry-gps">18.9812°N, 72.8245°E</span>
+        </div>
+
+        <div class="telemetry-item">
+          <span class="telemetry-label">TACTICAL UTC CLOCK</span>
+          <span class="telemetry-value text-parchment" id="telemetry-clock">07:55:00 UTC</span>
+        </div>
+
+        <div class="telemetry-status-pill">
+          <span class="beacon-pulse"></span>
+          <span>SYS NOMINAL</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Slim Left Console Rail Navigation (Icon-Only) -->
+    <nav id="console-rail">
+      <div class="rail-nav-group">
+        <a href="#/" class="rail-nav-item active" id="nav-landing" title="Bridge Home">
+          ⚓
+          <span class="rail-tooltip">Bridge Overview (/)</span>
+        </a>
+        <a href="#/chat" class="rail-nav-item" id="nav-chat" title="Generative Canvas">
+          💬
+          <span class="rail-tooltip">Generative Canvas (/chat)</span>
+        </a>
+        <a href="#/map" class="rail-nav-item" id="nav-map" title="Marine Chart">
+          🗺️
+          <span class="rail-tooltip">Marine Chart (/map)</span>
+        </a>
+        <a href="#/safety" class="rail-nav-item" id="nav-safety" title="Safety & Alerts">
+          🛡️
+          <span class="rail-tooltip">Safety & Hazard Gauges (/safety)</span>
+        </a>
+        <a href="#/route" class="rail-nav-item" id="nav-route" title="Route Planner">
+          🚢
+          <span class="rail-tooltip">Pareto Route Planner (/route)</span>
+        </a>
+        <a href="#/research" class="rail-nav-item" id="nav-research" title="Ocean Research">
+          🔬
+          <span class="rail-tooltip">Oceanographic Research (/research)</span>
+        </a>
+        <a href="#/admin" class="rail-nav-item" id="nav-admin" title="Data Sources & Agent Config">
+          ⚙️
+          <span class="rail-tooltip">Data Sources & Agent Config (/admin)</span>
+        </a>
+      </div>
+
+      <div class="rail-nav-group" style="gap: 4px;">
+        <button class="audio-toggle-btn sound-on" id="btn-sound-toggle" title="Toggle Bridge Sound Effects">
+          🔊
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Viewport for Routed Components -->
+    <main id="app-viewport"></main>
+
+    <!-- Bottom Status & Localization Bar -->
+    <footer id="bottom-bar">
+      <div class="bottom-left">
+        <span>SECURITY: <strong class="text-green">ENCRYPTED MF-DSC</strong></span>
+        <span>•</span>
+        <span>RADAR MESH: <strong class="text-amber">INCOIS / IMD DWR</strong></span>
+        <span>•</span>
+        <span>CORRIDOR: <strong class="text-parchment">MUMBAI HIGH SECTOR 4B</strong></span>
+      </div>
+
+      <div class="bottom-right">
+        <!-- Language Switcher (EN / HI / MR) -->
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">हिन्दी</button>
+          <button class="lang-btn" data-lang="mr">मराठी</button>
+        </div>
+        <span>v2.4.0-BRIDGE</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Master Application Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
