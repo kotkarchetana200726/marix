@@ -2,7 +2,7 @@
 // Handles Server-Sent Events (SSE) from SpringBoot/FastAPI backend and mounts UI components dynamically
 
 import { COMPONENT_REGISTRY } from '../components/components.js';
-import { findMockResponse } from '../data/mockResponses.js';
+import { findMockResponse, detectOrResolveLanguage } from '../data/mockResponses.js';
 
 export class CanvasRenderer {
   constructor(mountEl) {
@@ -164,9 +164,12 @@ export class SpringBootBridge {
     this.fallback    = opts.fallback !== false;
   }
 
-  async streamTo(queryText, renderer) {
+  async streamTo(queryText, renderer, userLang) {
+    const selectedLang = userLang || localStorage.getItem('orca_chat_lang') || localStorage.getItem('orca_fisherman_lang') || 'en';
+    const activeLang = detectOrResolveLanguage(queryText, selectedLang);
+
     // 1. Check Centralized Mock Response System first
-    const mockMatch = findMockResponse(queryText);
+    const mockMatch = findMockResponse(queryText, activeLang);
     if (mockMatch) {
       return this._streamMockMatch(mockMatch, renderer);
     }
@@ -175,24 +178,22 @@ export class SpringBootBridge {
     try {
       await renderer.stream(
         this.endpoint,
-        { message: queryText },
+        { message: queryText, lang: activeLang },
         { bearerToken: this.bearerToken }
       );
     } catch (err) {
       console.warn('[ORCA SpringBootBridge] Backend call bypassed, using clean simulation:', err.message);
-      this._mockFallback(queryText, renderer);
+      this._mockFallback(queryText, renderer, activeLang);
     }
   }
 
   async _streamMockMatch(mockMatch, renderer) {
-    renderer.handleEvent({ type: 'status', message: 'Connecting to INCOIS & IMD Doppler weather mesh...' });
-    await new Promise(r => setTimeout(r, 250));
+    const steps = mockMatch.steps || ["Processing marine query..."];
 
-    renderer.handleEvent({ type: 'status', message: 'Analyzing bathymetry & oceanic thermal gradients...' });
-    await new Promise(r => setTimeout(r, 250));
-
-    renderer.handleEvent({ type: 'status', message: 'Synthesizing multimodal reasoning & UI component specs...' });
-    await new Promise(r => setTimeout(r, 250));
+    for (let i = 0; i < steps.length; i++) {
+      renderer.handleEvent({ type: 'status', message: steps[i] });
+      await new Promise(r => setTimeout(r, 220));
+    }
 
     renderer.handleEvent({
       type: 'result',
@@ -204,36 +205,33 @@ export class SpringBootBridge {
     });
   }
 
-  async _mockFallback(queryText, renderer) {
-    renderer.handleEvent({ type: 'status', message: 'Analyzing marine query...' });
+  async _mockFallback(queryText, renderer, activeLang = 'en') {
+    const statusMsg = activeLang === 'mr' ? 'समुद्री माहिती शोधत आहे...' : activeLang === 'hi' ? 'समुद्री जानकारी खोज रहे हैं...' : 'Analyzing marine query...';
+    renderer.handleEvent({ type: 'status', message: statusMsg });
     await new Promise(r => setTimeout(r, 400));
+
+    const prose = activeLang === 'mr'
+      ? `**ORCA सागरी माहिती उत्तर** ("${queryText}" साठी)\n\nरत्नागिरी किनारी भागात समुद्रस्थिती मध्यम आहे. समुद्राच्या पृष्ठभागाचे तापमान **28.4°C** आणि लाटांची उंची **1.4 मीटर** आहे. निघण्यापूर्वी माहिती तपासा.`
+      : activeLang === 'hi'
+      ? `**ORCA समुद्री जानकारी उत्तर** ("${queryText}" के लिए)\n\nरत्नागिरी तटीय क्षेत्र में समुद्र की स्थिति मध्यम है। समुद्र की सतह का तापमान **28.4°C** और लहरों की ऊँचाई **1.4 मीटर** है। जाने से पहले जानकारी की जाँच करें।`
+      : `**MARIX Marine Intelligence Response** for *"${queryText}"*\n\nSea conditions across Ratnagiri sector are moderate. Sea Surface Temp is **28.4°C** with **1.4 m** wave height. Check latest advisory before departure.`;
+
+    const title = activeLang === 'mr' ? 'ORCA सागरी माहिती' : activeLang === 'hi' ? 'ORCA समुद्री जानकारी' : 'MARIX Operational Intelligence';
+
     renderer.handleEvent({
       type: 'result',
-      text: `**MARIX Marine Intelligence Response** for *"${queryText}"*\n\nAll marine data adapters synchronized. Regional weather, bathymetry, and thermal gradients analyzed across coastal sectors.`,
+      text: prose,
       ui_json: {
-        title: 'MARIX Operational Intelligence',
+        title: title,
         components: [
           {
             type: 'weather-card',
             data: {
               pressure: '1009.4 hPa',
-              sst: '28.3°C',
-              wind: '16 km/h WNW',
-              swell: '1.5 m @ 10.4s',
-              visibility: '8.0 nm (Clear)'
-            }
-          },
-          {
-            type: 'evidence-panel',
-            data: {
-              title: 'TELEMETRY & EVIDENCE SOURCES',
-              entries: [
-                { label: 'Query Transmitted', value: queryText, confidence: '98%', source: 'ORCA Bridge' },
-                { label: 'INCOIS PFZ Adapter', value: 'High yield probability along Konkan shelf', confidence: '92%', source: 'INCOIS' },
-                { label: 'IMD Doppler Radar', value: 'Nominal coastal weather conditions', confidence: '96%', source: 'IMD Radar' }
-              ],
-              summary: 'Operational status nominal.',
-              modelVersion: 'MARIX REASONING ENGINE'
+              sst: '28.4°C',
+              wind: activeLang === 'mr' ? '18 किमी/तास नैऋत्य' : activeLang === 'hi' ? '18 किमी/घंटा दक्षिण-पश्चिम' : '18 km/h SW',
+              swell: activeLang === 'mr' ? '1.4 मीटर' : activeLang === 'hi' ? '1.4 मीटर' : '1.4 m',
+              visibility: '7.2 km'
             }
           }
         ]

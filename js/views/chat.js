@@ -4,6 +4,7 @@
 import { GenerativeAgentBridge, GenerativeUIRenderer } from '../services/generativeUI.js';
 import { SpringBootBridge, CanvasRenderer } from '../services/renderer.js';
 import { voiceService, FISHERMAN_I18N } from '../services/voiceService.js';
+import { detectOrResolveLanguage } from '../data/mockResponses.js';
 
 export function renderChatView(container, { i18n, soundEngine, persona = 'fisherman', initialQuery = '' }) {
   const bridge = new GenerativeAgentBridge();
@@ -44,9 +45,9 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
 
         <!-- Language Selector for Chat & Voice -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="font-data text-muted" style="font-size: 0.70rem;">LANGUAGE:</span>
+          <span class="font-data text-muted" style="font-size: 0.70rem;">RESPONSE LANGUAGE:</span>
           <div class="lang-selector" style="display: flex; gap: 4px; background: rgba(10,16,20,0.8); padding: 3px; border: 1px solid var(--brass); border-radius: var(--radius);">
-            <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">EN</button>
+            <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">English</button>
             <button class="chat-lang-btn ${activeChatLang === 'hi' ? 'active' : ''}" data-clang="hi" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">हिन्दी</button>
             <button class="chat-lang-btn ${activeChatLang === 'mr' ? 'active' : ''}" data-clang="mr" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">मराठी</button>
           </div>
@@ -70,7 +71,7 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
             </p>
 
             <div class="font-data text-brass" style="font-size: 0.70rem; letter-spacing: 0.10em; text-align: center; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">
-              ▶ PREDEFINED STAKEHOLDER DEMO QUESTIONS
+              ▶ STAKEHOLDER DEMO QUESTIONS — TAP TO ASK
             </div>
             
             <!-- STAKEHOLDER PERSONA CHIPS -->
@@ -134,7 +135,7 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
             type="text" 
             id="chat-input" 
             class="intercom-textarea" 
-            placeholder="${activeRole === 'fisherman' ? 'Ask ORCA in your language (e.g. Is it safe to fish tomorrow?)...' : 'Ask ORCA marine intelligence platform...'}" 
+            placeholder="${activeRole === 'fisherman' ? (activeChatLang === 'mr' ? 'काहीही विचारा (उदा. उद्या मासेमारी सुरक्षित आहे का?)...' : activeChatLang === 'hi' ? 'कुछ भी पूछें (जैसे क्या कल मछली पकड़ना सुरक्षित है?)...' : 'Ask ORCA in your language (e.g. Is it safe to fish tomorrow?)...') : 'Ask ORCA marine intelligence platform...'}" 
             style="height: 44px; font-size: 0.90rem; padding: 0 14px; flex: 1;"
           />
           
@@ -265,8 +266,10 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     emptyState.style.display = 'none';
     if (soundEngine) soundEngine.playTransmissionSound();
 
+    const resolvedLang = detectOrResolveLanguage(promptText, activeChatLang);
+
     // Stream SSE to backend canvas
-    sbBridge.streamTo(promptText, canvasRenderer).catch(e => console.warn('[SpringBootBridge Error]:', e));
+    sbBridge.streamTo(promptText, canvasRenderer, resolvedLang).catch(e => console.warn('[SpringBootBridge Error]:', e));
 
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
 
@@ -289,7 +292,7 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     agentBubble.innerHTML = `
       <div class="msg-header">
         <span class="beacon-pulse" style="width: 5px; height: 5px;"></span>
-        <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem;">ORCA REASONING AGENT</span>
+        <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem;">ORCA REASONING AGENT [${resolvedLang.toUpperCase()}]</span>
         <span class="text-muted">•</span>
         <span class="font-data text-muted" style="font-size: 0.68rem;">${timestamp}</span>
         <span class="genui-status-badge panel-badge badge-amber" style="margin-left: 6px;">⚙ SYNTHESIZING...</span>
@@ -297,7 +300,7 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
       <div class="msg-content-agent bezel-panel">
         <div class="genui-steps font-data" style="font-size: 0.72rem; color: var(--brass); display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; padding: 10px 12px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);"></div>
         <div class="genui-prose agent-prose-text" style="margin-bottom: 14px;">
-          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">Initializing marine reasoning engine...</span>
+          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">${resolvedLang === 'mr' ? 'सागरी बुद्धिमत्ता प्रणाली कार्य करत आहे...' : resolvedLang === 'hi' ? 'समुद्री बुद्धिमत्ता प्रणाली कार्य कर रही है...' : 'Initializing marine reasoning engine...'}</span>
         </div>
         <div class="genui-card-deck" style="display: flex; flex-direction: column; gap: 12px;"></div>
       </div>
@@ -310,17 +313,17 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     txStatusText.textContent = 'TRANSMITTING...';
     txStatusText.style.color = 'var(--phosphor-amber)';
 
-    // Stream events
-    await bridge.streamTo(promptText, renderer);
+    // Stream events matching exact language contract
+    await bridge.streamTo(promptText, renderer, resolvedLang);
 
     txStatusText.textContent = 'TX READY';
     txStatusText.style.color = 'var(--phosphor-green)';
     streamBox.scrollTop = streamBox.scrollHeight;
 
-    // Automatic TTS readout
+    // Automatic TTS readout in exact same language
     const responseProse = agentBubble.querySelector('.genui-prose')?.textContent || '';
     if (responseProse) {
-      voiceService.speak(responseProse, activeChatLang);
+      voiceService.speak(responseProse, resolvedLang);
     }
   }
 
@@ -343,7 +346,7 @@ function _renderPersonaPresetChips(role, lang, fDict) {
           <span>🌦️</span><span>"हवामान आणि भरती-ओहोटीची स्थिती कशी आहे?"</span>
         </button>
         <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
-          <span>⚠️</span><span>"काही वादळाचा इशारा आहे का?"</span>
+          <span>⚠️</span><span>"काही वादळाचा किंवा विजांचा इशारा आहे का?"</span>
         </button>
         <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
           <span>🧭</span><span>"सुरक्षित मार्ग कोणता आहे?"</span>

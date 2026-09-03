@@ -39,435 +39,132 @@ class ChatRequest(BaseModel):
     message: Optional[str] = None
     prompt: Optional[str] = None
     session_id: str = "default"
-    lang: str = "en"
+    lang: Optional[str] = "en"
 
 # ─── SSE FORMATTER ────────────────────────────────────────────────────────────
 def sse_event(data: dict) -> str:
     return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
 
-# ─── DATA FIXTURES (PFZ & GEOFENCES) ──────────────────────────────────────────
+# ─── DATA FIXTURES ────────────────────────────────────────────────────────────
 PFZ_DATA = [
     {
         "id": "pfz-01",
-        "name": "Konkan Thermal Front Alpha (PRIMARY)",
-        "lat": 17.42,
-        "lng": 72.35,
-        "confidence": "96%",
-        "sstAnomaly": "-1.4°C",
-        "chlorophyll": "3.4 mg/m³",
-        "species": ["Indian Mackerel", "Sardinella longiceps", "Yellowfin Tuna"],
-        "advisory": "Optimal window 0300Z–1100Z. Deploy purse seine along 65m isobath heading SW at 4 knots.",
-        "distanceNm": "25.9",
-        "depthM": 65,
-        "fuelSavingsEst": "28%"
-    },
-    {
-        "id": "pfz-02",
-        "name": "Ratnagiri Pelagic Edge (SECONDARY)",
-        "lat": 16.55,
-        "lng": 72.85,
-        "confidence": "91%",
-        "sstAnomaly": "-0.9°C",
-        "chlorophyll": "2.8 mg/m³",
-        "species": ["Seer Fish (Surmai)", "Squid / Cephalopods", "Horse Mackerel"],
-        "advisory": "Favorable current (0.6 kts SE). Strong thermal gradient at 50m isobath.",
-        "distanceNm": "17.3",
+        "name": "Ratnagiri Southwest Thermal Front (PRIMARY)",
+        "lat": 16.85,
+        "lng": 73.18,
+        "confidence": "87%",
+        "sstAnomaly": "27.9°C",
+        "chlorophyll": "4.7 mg/m³",
+        "species": ["Indian Mackerel", "Sardinella longiceps"],
+        "advisory": "Favorable fishing conditions 18 km SW of Ratnagiri.",
+        "distanceNm": "9.7",
         "depthM": 48,
-        "fuelSavingsEst": "22%"
+        "fuelSavingsEst": "28%"
     }
 ]
 
 GEOFENCE_DATA = [
     {
-        "id": "geo-cyclone-core",
-        "name": "Cyclone Varuna Gale Danger Core",
-        "type": "hazard",
-        "center": [20.8, 68.5],
-        "radiusMeters": 180000,
-        "colour": "#FF5C5C",
-        "description": "52-knot sustained gale winds & 5.8m phenomenal swells. No vessel movement permitted."
-    },
-    {
         "id": "geo-malvan-mpa",
-        "name": "Malvan Marine Sanctuary MPA",
+        "name": "Malvan Marine Protected Area",
         "type": "protected",
         "latlngs": [[16.02, 73.42], [16.08, 73.48], [16.04, 73.55], [15.98, 73.49]],
         "colour": "#6BCB77",
-        "description": "Protected Coral & Ecosystem Reserve. Mechanized trawling strictly prohibited under Wildlife Act."
-    },
-    {
-        "id": "geo-mumbai-high-naval",
-        "name": "Mumbai High Offshore Exclusion Zone",
-        "type": "restricted",
-        "latlngs": [[19.2, 72.6], [19.5, 73.0], [19.0, 73.2], [18.8, 72.8]],
-        "colour": "#FF5C5C",
-        "description": "Restricted Petroleum & Naval Exercise Sector. Keep 5 nm clearance from oil platforms."
+        "description": "Protected Coral & Ecosystem Reserve."
     }
 ]
 
-# ─── GET /api/pfz ─────────────────────────────────────────────────────────────
 @app.get("/api/pfz")
 async def get_pfz():
     return PFZ_DATA
 
-# ─── GET /api/geofences ────────────────────────────────────────────────────────
 @app.get("/api/geofences")
 async def get_geofences():
     return GEOFENCE_DATA
 
-# ─── GET /api/health ──────────────────────────────────────────────────────────
 @app.get("/api/health")
 async def health():
     return {
         "status": "OPERATIONAL",
         "agent_engine": "ORCA_REASONING_V2",
-        "version": "2.4.0",
-        "adapters": {
-            "incois_pfz": "ONLINE (24ms)",
-            "noaa_sst": "ONLINE (52ms)",
-            "sentinel3_olci": "ONLINE (80ms)",
-            "imd_radar": "ONLINE (45ms)",
-            "ais_mesh": "ONLINE (18ms)"
-        }
+        "version": "2.4.0"
     }
 
-# ─── POST /api/chat (SPRING BOOT CONTRACT SSE WITH MOCK SYSTEM) ────────────────
+# ─── POST /api/chat ───────────────────────────────────────────────────────────
 @app.post("/api/chat")
 async def chat_sse(req: ChatRequest):
     query = req.message or req.prompt or ""
     
+    # Resolve target language strictly
+    target_lang = req.lang or "en"
+    if any(c in query for c in ["आहे", "मासेमारी", "कुठे", "झाले"]):
+        target_lang = "mr"
+    elif any(c in query for c in ["कहाँ", "है", "मछली", "जगह"]):
+        target_lang = "hi"
+
     async def event_generator():
         p = query.lower().strip()
         
-        # Progressive Status Events
-        yield sse_event({"type": "status", "message": "Connecting to INCOIS & IMD Doppler weather mesh..."})
-        await asyncio.sleep(0.2)
-        
-        yield sse_event({"type": "status", "message": "Analyzing bathymetry & oceanic thermal gradients..."})
-        await asyncio.sleep(0.2)
-        
-        yield sse_event({"type": "status", "message": "Synthesizing final decision & bulletins summary..."})
-        await asyncio.sleep(0.2)
+        status_steps = {
+            "mr": ["समुद्राची स्थिती तपासत आहे...", "हवामान विश्लेषण करत आहे...", "उत्तर तयार करत आहे..."],
+            "hi": ["समुद्र की स्थिति जाँच रहे हैं...", "मौसम विश्लेषण कर रहे हैं...", "उत्तर तैयार कर रहे हैं..."],
+            "en": ["Connecting to INCOIS & IMD weather mesh...", "Analyzing ocean telemetry...", "Synthesizing answer..."]
+        }
 
-        # ── DEMO INTENT MATCHERS ──────────────────────────────────────────────
+        steps = status_steps.get(target_lang, status_steps["en"])
+        for s in steps:
+            yield sse_event({"type": "status", "message": s})
+            await asyncio.sleep(0.2)
 
-        # 1. MUMBAI FISHING CONDITIONS
-        if ((("fish" in p or "pfz" in p) and "mumbai" in p) or 
-            p in ["fishing conditions in mumbai", "is fishing good near mumbai", "mumbai fishing forecast"]):
+        # 1. PFZ QUERY
+        if "fish" in p or "pfz" in p or "मासेमारी" in p or "मछली" in p:
+            if target_lang == "mr":
+                text = "तुमच्या सध्याच्या ठिकाणापासून **सुमारे 18 किमी नैऋत्य दिशेला (Southwest)** मासेमारीसाठी अनुकूल क्षेत्र आहे.\n\nया भागात क्लोरोफिलचे प्रमाण जास्त असून समुद्राचे तापमान मासेमारीसाठी अनुकूल आहे.\n\n### 📋 मुख्य माहिती आणि शिफारस\n- 🎣 **मासेमारीची शक्यता**: **उच्च (87%)**\n- 📍 **अंतर**: **18 किलोमीटर**\n- 🧭 **दिशा**: **नैऋत्य (Southwest)**\n- 🌿 **क्लोरोफिलचे प्रमाण**: **4.7 mg/m³**\n- 🌡️ **समुद्र तापमान (SST)**: **27.9°C**\n- 🌊 **समुद्रस्थिती**: **मध्यम (लाटा 1.4m)**\n\nसमुद्रात जाण्यापूर्वी ताजे हवामान आणि समुद्री इशारे तपासा."
+                title = "🎣 संभाव्य मासेमारी क्षेत्र (PFZ-01)"
+            elif target_lang == "hi":
+                text = "आपकी वर्तमान स्थिति से **लगभग 18 किलोमीटर दक्षिण-पश्चिम (Southwest)** दिशा में मछली पकड़ने के लिए अनुकूल क्षेत्र है।\n\nइस क्षेत्र में क्लोरोफिल की मात्रा अधिक है और समुद्र का तापमान मछली पकड़ने के लिए अनुकूल है।\n\n### 📋 मुख्य जानकारी और सिफारिश\n- 🎣 **मछली पकड़ने की संभावना**: **उच्च (87%)**\n- 📍 **दूरी**: **18 किलोमीटर**\n- 🧭 **दिशा**: **दक्षिण-पश्चिम (Southwest)**\n- 🌿 **क्लोरोफिल का स्तर**: **4.7 mg/m³**\n- 🌡️ **समुद्र का तापमान (SST)**: **27.9°C**\n- 🌊 **समुद्र की स्थिति**: **मध्यम (लहरें 1.4m)**\n\nसमुद्र में जाने से पहले नवीनतम मौसम और समुद्री चेतावनियों की जाँच करें।"
+                title = "🎣 संभावित मत्स्य पालन क्षेत्र (PFZ-01)"
+            else:
+                text = "The nearest high-potential fishing zone (**PFZ-01**) is about **18 km southwest** of your current location.\n\nThe area shows high chlorophyll concentration and a suitable sea-surface temperature.\n\n### 📋 KEY DECISION BULLETINS\n- 🎣 **Fishing Potential**: **HIGH (87%)**\n- 📍 **Distance**: **18 km**\n- 🧭 **Direction**: **Southwest**\n- 🌿 **Chlorophyll-a**: **4.7 mg/m³**\n- 🌡️ **SST**: **27.9°C**\n- 🌊 **Sea State**: **Moderate (1.4m waves)**"
+                title = "🎣 Potential Fishing Zone (PFZ-01)"
+
             ui_json = {
-                "title": "Mumbai Offshore Fishing Conditions Assessment",
+                "title": title,
                 "components": [
                     {
                         "type": "pfz-card",
                         "data": {
-                            "name": "Mumbai Offshore High-Yield Fishing Zone",
-                            "latLonStr": "18°55'N, 72°45'E",
-                            "sstAnomaly": "28.4°C (-0.8°C Anomaly)",
-                            "chlorophyll": "1.82 mg/m³ (High Bloom)",
+                            "name": "PFZ-01",
+                            "latLonStr": "16°51'N, 73°10'E",
+                            "sstAnomaly": "27.9°C",
+                            "chlorophyll": "4.7 mg/m³",
                             "confidence": "87%",
-                            "targetSpecies": ["Pelagic Fishes", "Indian Mackerel", "Sardinella"],
-                            "distanceNm": "24.5 nm (35–55 km)",
-                            "depthM": 52,
-                            "fuelSavingsEst": "28%",
-                            "advisory": "Favorable fishing conditions expected 35–55 km off the Mumbai coast. Deploy gear along 50m isobath."
-                        }
-                    },
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "1010.4 hPa",
-                            "sst": "28.4°C",
-                            "wind": "14 km/h WNW",
-                            "swell": "1.2 m @ 9.5s",
-                            "visibility": "8.5 nm (Good)"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "MUMBAI OFFSHORE PFZ & FISHING ZONE",
-                            "center": [18.92, 72.75],
-                            "zoom": 8,
-                            "markers": [
-                                {"latlng": [18.92, 72.75], "icon": "🐟", "popup": "Mumbai Offshore PFZ (SST 28.4°C)"}
-                            ]
-                        }
-                    },
-                    {
-                        "type": "evidence-panel",
-                        "data": {
-                            "title": "EVIDENCE TRACE & TELEMETRY SOURCES",
-                            "entries": [
-                                {"label": "INCOIS PFZ Feed", "value": "High-yield thermal front identified 35–55 km off Mumbai", "confidence": "87%", "source": "INCOIS Advisory"},
-                                {"label": "NOAA SST Satellite", "value": "Sea Surface Temp: 28.4°C | Chlorophyll-a: 1.82 mg/m³", "confidence": "92%", "source": "NOAA Geo-Polar"},
-                                {"label": "IMD Weather Mesh", "value": "Wind: 14 km/h WNW | Wave Height: 1.2 m", "confidence": "95%", "source": "IMD Radar"}
-                            ],
-                            "summary": "Favorable fishing conditions verified off Mumbai. DEMO NOTICE: Predefined mock data for demonstration.",
-                            "modelVersion": "MARIX DEMO MODE"
+                            "distanceNm": "18 km SW"
                         }
                     }
                 ]
             }
-            text = "### 🟢 FINAL DECISION DIRECTIVE: SAFE TO GO FISHING TODAY\n\nFavorable fishing conditions expected **35–55 km off the Mumbai coast**. Oceanographic telemetry confirms active thermal front boundaries and high plankton accumulation along 50m bathymetric contour.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟢 SAFE FOR COASTAL & OFFSHORE FISHING (87% Confidence)\n- **Sea Surface Temperature (SST)**: **28.4°C** (-0.8°C thermal anomaly front)\n- **Chlorophyll-a Concentration**: **1.82 mg/m³** (High plankton bloom)\n- **Wave Height**: **1.2 m** (Slight Swell)\n- **Wind Speed & Direction**: **14 km/h WNW**\n- **Recommended Fishing Zone**: **35–55 km off Mumbai Coast (18°55'N, 72°45'E)**"
 
-        # 2. MUMBAI CYCLONE RISK
-        elif (("cyclone" in p or "storm" in p or "threat" in p) and "mumbai" in p):
-            ui_json = {
-                "title": "Mumbai Regional Cyclone & Sea State Risk Assessment",
-                "components": [
-                    {
-                        "type": "risk-card",
-                        "data": {
-                            "score": 48,
-                            "riskScore": 48,
-                            "status": "MODERATE RISK",
-                            "zone": "MUMBAI COASTAL & OFFSHORE SECTOR",
-                            "title": "Cyclone & Sea Hazard Advisory — Mumbai Coast",
-                            "description": "No active cyclone directly affecting Mumbai. Elevated wave activity (2.1–2.8 m) and wind gusts expected over next 24 hours.",
-                            "coordinates": "18.98°N, 72.82°E",
-                            "swell": "2.1–2.8 m Moderate-Rough",
-                            "wind": "28–35 km/h WSW"
-                        }
-                    },
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "1005.8 hPa",
-                            "sst": "28.1°C",
-                            "wind": "28–35 km/h WSW",
-                            "swell": "2.1–2.8 m @ 11.2s",
-                            "visibility": "5.2 nm (Moderate Squall)"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "MUMBAI COASTAL RISK SECTOR & HAZARD AREA",
-                            "center": [18.98, 72.82],
-                            "zoom": 8,
-                            "markers": [
-                                {"latlng": [18.98, 72.82], "icon": "⚠️", "popup": "Moderate Swell Hazard Area (2.1-2.8m)"}
-                            ]
-                        }
-                    },
-                    {
-                        "type": "recommendation-card",
-                        "data": {
-                            "priority": "ADVISORY",
-                            "heading": "Small Craft Safety Directive",
-                            "text": "Small fishing vessels (< 15m LOA) should avoid deep offshore transit over the next 24 hours. Maintain VHF Channel 16 guard.",
-                            "safeHarbor": "Sassoon Dock / Mumbai Harbour",
-                            "vhf": "VHF CH 16 / 08"
-                        }
-                    }
-                ]
-            }
-            text = "### 🟡 FINAL DECISION DIRECTIVE: EXERCISE CAUTION NEAR COAST\n\nThere is **no active cyclone directly affecting Mumbai** at present. However, **elevated wave activity (2.1–2.8 m)** and sustained winds of **28–35 km/h** are expected over the next 24 hours.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟡 MODERATE RISK — SMALL VESSELS AVOID DEEP WATER\n- **Sea Surface Temperature (SST)**: **28.1°C**\n- **Sea State**: Moderate to Rough\n- **Wave Height**: **2.1–2.8 m** (Elevated Swell)\n- **Wind Speed**: **28–35 km/h** WSW (Gusts to 42 km/h)\n- **Recommendation**: Small fishing vessels advised to remain within 20 km of coast."
-
-        # 3. MUMBAI SEA CONDITION
-        elif (("sea condition" in p or "sea state" in p or "waves" in p) and "mumbai" in p):
-            ui_json = {
-                "title": "Mumbai Coastal Sea State & Navigational Condition",
-                "components": [
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "1009.2 hPa",
-                            "sst": "28.2°C",
-                            "wind": "18 km/h NW",
-                            "swell": "1.8 m @ 10.1s",
-                            "visibility": "Good (7.8 nm)"
-                        }
-                    },
-                    {
-                        "type": "risk-card",
-                        "data": {
-                            "score": 28,
-                            "riskScore": 28,
-                            "status": "NOMINAL",
-                            "zone": "MUMBAI COASTAL SECTOR",
-                            "title": "Mumbai Coastal Sea Condition Overview",
-                            "description": "Moderate sea state with 1.8m wave swell and 18 km/h winds. Navigational conditions generally stable.",
-                            "coordinates": "18.96°N, 72.80°E",
-                            "swell": "1.8 m Moderate",
-                            "wind": "18 km/h NW"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "MUMBAI SEA STATE MONITORING LOCATION",
-                            "center": [18.96, 72.80],
-                            "zoom": 8,
-                            "markers": [
-                                {"latlng": [18.96, 72.80], "icon": "🌊", "popup": "Mumbai Sea State Buoy (1.8m Swell, 28.2°C SST)"}
-                            ]
-                        }
-                    }
-                ]
-            }
-            text = "### 🟢 FINAL DECISION DIRECTIVE: SEA CONDITIONS NOMINAL\n\nCurrent sea conditions near Mumbai are **moderate and safe for normal coastal vessel operations**.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟢 NOMINAL — SAFE FOR COASTAL NAVIGATION\n- **Sea Surface Temperature (SST)**: **28.2°C**\n- **Sea State**: Moderate Swell\n- **Wave Height**: **1.8 m** (@ 10.1s Period)\n- **Wind Speed**: **18 km/h NW**\n- **Visibility**: **Good (7.8 nm)**\n- **Overall Risk Score**: **28 / 100 (LOW–MODERATE)**"
-
-        # 4. POTENTIAL FISHING ZONES LIST
-        elif (("where" in p or "find" in p or "list" in p or "show" in p) and ("pfz" in p or "fishing zone" in p)):
-            ui_json = {
-                "title": "Regional Potential Fishing Zones (PFZ) Directory",
-                "components": [
-                    {
-                        "type": "pfz-card",
-                        "data": {
-                            "name": "1. Mumbai Offshore PFZ (Sector Alpha)",
-                            "latLonStr": "18°52'N, 72°38'E",
-                            "sstAnomaly": "-1.1°C Upwelling Front",
-                            "chlorophyll": "1.82 mg/m³",
-                            "confidence": "87%",
-                            "targetSpecies": ["Indian Mackerel", "Sardinella longiceps"],
-                            "distanceNm": "21.6 nm (40 km)",
-                            "depthM": 54,
-                            "fuelSavingsEst": "25%",
-                            "advisory": "Primary front active along 50m bathymetric contour."
-                        }
-                    },
-                    {
-                        "type": "pfz-card",
-                        "data": {
-                            "name": "2. Ratnagiri Offshore PFZ (Front Beta)",
-                            "latLonStr": "16°58'N, 72°42'E",
-                            "sstAnomaly": "-1.4°C Strong Upwelling",
-                            "chlorophyll": "2.95 mg/m³",
-                            "confidence": "92%",
-                            "targetSpecies": ["Kingfish (Surmai)", "Seer Fish", "Squid"],
-                            "distanceNm": "15.1 nm (28 km)",
-                            "depthM": 48,
-                            "fuelSavingsEst": "32%",
-                            "advisory": "Strong thermal gradient. Deploy purse seine along edge."
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "REGIONAL POTENTIAL FISHING ZONES MAP",
-                            "center": [17.5, 72.8],
-                            "zoom": 7,
-                            "markers": [
-                                {"latlng": [18.86, 72.63], "icon": "🐟", "popup": "Mumbai Offshore PFZ (87% conf, SST 28.4°C)"},
-                                {"latlng": [16.96, 72.70], "icon": "🐟", "popup": "Ratnagiri Offshore PFZ (92% conf, SST 27.8°C)"}
-                            ]
-                        }
-                    }
-                ]
-            }
-            text = "### 🟢 FINAL DECISION DIRECTIVE: 3 ACTIVE PFZ ZONES IDENTIFIED\n\nHigh-yield fishing opportunities identified across Maharashtra and Konkan shelf zones.\n\n### 📋 KEY DECISION BULLETINS\n- **1. Mumbai Offshore PFZ**: `18°52'N, 72°38'E` | SST: **28.4°C** | Confidence: **87%**\n- **2. Ratnagiri Offshore PFZ**: `16°58'N, 72°42'E` | SST: **27.8°C** | Confidence: **92%**\n- **3. Goa Coastal PFZ**: `15°24'N, 73°35'E` | SST: **28.1°C** | Confidence: **89%**"
-
-        # 5. MARINE SNAPSHOT
-        elif ("snapshot" in p or "marine summary" in p or "daily status" in p or "marine overview" in p):
-            ui_json = {
-                "title": "Daily Marine Intelligence Snapshot & Status Report",
-                "components": [
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "1009.4 hPa",
-                            "sst": "28.3°C",
-                            "wind": "16 km/h WNW",
-                            "swell": "1.5 m @ 10.4s",
-                            "visibility": "8.0 nm (Clear)"
-                        }
-                    },
-                    {
-                        "type": "risk-card",
-                        "data": {
-                            "score": 34,
-                            "riskScore": 34,
-                            "status": "NOMINAL",
-                            "zone": "ARABIAN SEA / KONKAN QUADRANT",
-                            "title": "Regional Marine Risk Index — Snapshot",
-                            "description": "Low-to-moderate hazard index (34/100). Safe transit across coastal corridors.",
-                            "coordinates": "17.5°N, 72.8°E",
-                            "swell": "1.5 m Moderate",
-                            "wind": "16 km/h WNW"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "REGIONAL COASTAL SNAPSHOT MAP",
-                            "center": [17.5, 72.8],
-                            "zoom": 7,
-                            "markers": [
-                                {"latlng": [17.5, 72.8], "icon": "⚓", "popup": "Konkan Marine Operational Quadrant (SST 28.3°C)"}
-                            ]
-                        }
-                    }
-                ]
-            }
-            text = "### 🟢 FINAL DECISION DIRECTIVE: OVERALL MARINE STATUS OPERATIONAL\n\nCoastal conditions across Maharashtra and Konkan sectors are **nominal and safe for routine marine operations**.\n\n### 📋 KEY DECISION BULLETINS\n- **Overall Status**: 🟢 OPERATIONAL / SYS NOMINAL\n- **Sea Surface Temperature (SST)**: **28.3°C**\n- **Chlorophyll-a Concentration**: **2.15 mg/m³**\n- **Wave Height**: **1.5 m** (@ 10.4s Swell)\n- **Wind Speed**: **16 km/h WNW**\n- **Fishing Potential**: **HIGH (88%)**"
-
-        # DEFAULT FALLBACK FOR UNMATCHED QUERIES
+        # DEFAULT FALLBACK
         else:
-            ui_json = {
-                "title": f"ORCA Intelligence Directive — {query[:30]}",
-                "components": [
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "1009.6 hPa",
-                            "sst": "28.1°C",
-                            "wind": "18 kts WNW",
-                            "swell": "1.6m Moderate",
-                            "visibility": "7.2 nm"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "CURRENT SECTOR MAP",
-                            "center": [18.96, 72.80],
-                            "zoom": 8,
-                            "markers": [
-                                {"latlng": [18.96, 72.80], "icon": "⚓", "popup": "Vessel Location (18.96°N 72.80°E)"}
-                            ]
-                        }
-                    }
-                ]
-            }
-            text = f"### 🟢 FINAL DECISION DIRECTIVE: MARIX RESPONSE READY\n\nResponse generated for *\"{query}\"*\n\n### 📋 KEY DECISION BULLETINS\n- **Status**: Synchronized with INCOIS & NOAA Telemetry\n- **Sea Surface Temperature (SST)**: **28.1°C**\n- **Wave Height**: **1.6 m**\n- **Wind Speed**: **18 kts WNW**"
+            if target_lang == "mr":
+                text = f"**ORCA सागरी माहिती उत्तर** (\"{query}\" साठी)\n\nरत्नागिरी किनारी भागात समुद्रस्थिती मध्यम आहे. समुद्राच्या पृष्ठभागाचे तापमान **28.4°C** आणि लाटांची उंची **1.4 मीटर** आहे."
+                title = "ORCA सागरी माहिती"
+            elif target_lang == "hi":
+                text = f"**ORCA समुद्री जानकारी उत्तर** (\"{query}\" के लिए)\n\nरत्नागिरी तटीय क्षेत्र में समुद्र की स्थिति मध्यम है। समुद्र की सतह का तापमान **28.4°C** और लहरों की ऊँचाई **1.4 मीटर** है।"
+                title = "ORCA समुद्री जानकारी"
+            else:
+                text = f"**MARIX Response** for *\"{query}\"*\n\nSea conditions across Ratnagiri sector are moderate. SST is **28.4°C** with **1.4 m** wave height."
+                title = "MARIX Marine Intelligence"
+
+            ui_json = {"title": title, "components": []}
 
         yield sse_event({"type": "result", "ui_json": ui_json, "text": text})
 
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
-        }
-    )
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-# ─── POST /api/orca/reason (LEGACY SIMULATED BRIDGE FORMAT) ───────────────────
-@app.post("/api/orca/reason")
-async def reason_legacy(request: ChatRequest):
-    async def legacy_stream():
-        yield sse_event({"type": "STEP", "step": "Querying INCOIS & IMD Doppler weather mesh...", "stepIndex": 0})
-        await asyncio.sleep(0.2)
-        yield sse_event({"type": "STEP", "step": "Computing oceanographic risk coefficient...", "stepIndex": 1})
-        await asyncio.sleep(0.2)
-        yield sse_event({"type": "PROSE_DELTA", "text": "### 🟢 FINAL DECISION DIRECTIVE: SAFE TO GO FISHING TODAY\n\n- **SST**: 28.4°C\n- **Waves**: 1.2 m\n- **Wind**: 14 km/h"})
-        await asyncio.sleep(0.2)
-        yield sse_event({"type": "COMPONENT", "componentType": "RiskCard", "props": {"riskScore": 32, "status": "NOMINAL", "zoneName": "LOCAL SECTOR", "title": "Marine Zone Nominal", "description": "Conditions normal."}})
-        await asyncio.sleep(0.2)
-        yield sse_event({"type": "COMPLETE", "prose": "ORCA analysis complete."})
-
-    return StreamingResponse(
-        legacy_stream(),
-        media_type="text/event-stream",
-        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
-    )
-
-# ─── STATIC FILES (SERVE FRONTEND ROOT DIRECTORY) ─────────────────────────────
+# ─── STATIC FILES ─────────────────────────────────────────────────────────────
 root_dir = Path(__file__).resolve().parent.parent
-
 if (root_dir / "index.html").exists():
     @app.get("/")
     async def serve_index():
@@ -478,7 +175,6 @@ if (root_dir / "index.html").exists():
     if (root_dir / "js").exists():
         app.mount("/js", StaticFiles(directory=str(root_dir / "js")), name="js")
 
-# ─── RUN SERVER ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
