@@ -1,5 +1,5 @@
 // MARIX Marine AI — Centralized Mock Data & Response System
-// High-fidelity deterministic responses for hackathon demonstration
+// High-fidelity deterministic responses for hackathon demonstration with bulletins & map
 
 export const MOCK_MODE = true; // Set to false to disable mock mode and use live backend APIs
 
@@ -20,9 +20,9 @@ export const MOCK_RESPONSES = [
       "Querying INCOIS PFZ thermal front advisory dataset (87% confidence)...",
       "Fetching NOAA SST Geo-Polar satellite telemetry (28.4°C)...",
       "Analyzing IMD marine weather radar vectors (Wind 14 km/h, Wave 1.2 m)...",
-      "Synthesizing high-yield fishing recommendation..."
+      "Synthesizing final decision & bulletins summary..."
     ],
-    prose: "**Potential Fishing Zone: HIGH (87% Confidence)**\n\nFavorable fishing conditions expected **35–55 km off the Mumbai coast**. Oceanographic telemetry confirms active thermal front boundaries and high plankton accumulation along the 50m bathymetric contour.\n\n- **Sea Surface Temperature**: 28.4°C\n- **Chlorophyll-a**: 1.82 mg/m³\n- **Wave Height**: 1.2 m (Slight Swell)\n- **Wind Speed**: 14 km/h WNW\n- **Recommendation**: Favorable fishing conditions expected 35–55 km off the Mumbai coast. Target pelagic species in photic zone using purse seine nets.\n\n*Data Sources: INCOIS PFZ Advisories, NOAA SST Blended Satellites, IMD Marine Weather.*",
+    prose: "### 🟢 FINAL DECISION DIRECTIVE: SAFE TO GO FISHING TODAY\n\nFavorable fishing conditions expected **35–55 km off the Mumbai coast**. Oceanographic telemetry confirms active thermal front boundaries and high plankton accumulation along the 50m bathymetric contour.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟢 SAFE FOR COASTAL & OFFSHORE FISHING (87% Confidence)\n- **Sea Surface Temperature (SST)**: **28.4°C** (-0.8°C thermal anomaly front)\n- **Chlorophyll-a Concentration**: **1.82 mg/m³** (High plankton bloom)\n- **Wave Height**: **1.2 m** (Slight Swell)\n- **Wind Speed & Direction**: **14 km/h WNW**\n- **Recommended Fishing Zone**: **35–55 km off Mumbai Coast (18°55'N, 72°45'E)**\n\n*Data Sources: INCOIS PFZ Advisories, NOAA SST Blended Satellites, IMD Marine Weather.*",
     components: [
       {
         type: "pfz-card",
@@ -66,6 +66,25 @@ export const MOCK_RESPONSES = [
           wind: "14 km/h WNW",
           swell: "1.2 m @ 9.5s",
           visibility: "8.5 nm (Good)"
+        }
+      },
+      {
+        type: "marine-map",
+        props: {
+          label: "MUMBAI OFFSHORE PFZ & FISHING ZONE",
+          center: [18.92, 72.75],
+          zoom: 8,
+          markers: [
+            { latlng: [18.92, 72.75], icon: "🐟", popup: "Mumbai Offshore PFZ (SST 28.4°C)" }
+          ]
+        },
+        data: {
+          label: "MUMBAI OFFSHORE PFZ & FISHING ZONE",
+          center: [18.92, 72.75],
+          zoom: 8,
+          markers: [
+            { latlng: [18.92, 72.75], icon: "🐟", popup: "Mumbai Offshore PFZ (SST 28.4°C)" }
+          ]
         }
       },
       {
@@ -108,9 +127,9 @@ export const MOCK_RESPONSES = [
       "Accessing IMD Doppler weather radar & regional storm tracking mesh...",
       "Evaluating barometric pressure trends & wind shear fields near Mumbai...",
       "Computing vessel hazard risk index (Score 48 / MODERATE)...",
-      "Generating small craft navigational advisory..."
+      "Generating final decision & small craft advisory bulletins..."
     ],
-    prose: "**Cyclone Risk Level: MODERATE (Score: 48/100)**\n\nThere is **no active cyclone directly affecting Mumbai** at present. However, **elevated wave activity (2.1–2.8 m)** and sustained winds of **28–35 km/h** are expected over the next 24 hours due to a peripheral swell system.\n\n- **Sea State**: Moderate to Rough\n- **Wave Height**: 2.1–2.8 m\n- **Wind Speed**: 28–35 km/h (WSW Gusts to 42 km/h)\n- **Recommendation**: Small fishing vessels are advised to exercise caution and avoid deep offshore waters (> 30 nm) over the next 24 hours.\n\n*DISCLAIMER: Simulated demonstration advisory. Verify with official Coast Guard / IMD weather bulletins.*",
+    prose: "### 🟡 FINAL DECISION DIRECTIVE: EXERCISE CAUTION NEAR COAST\n\nThere is **no active cyclone directly affecting Mumbai** at present. However, **elevated wave activity (2.1–2.8 m)** and sustained winds of **28–35 km/h** are expected over the next 24 hours.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟡 MODERATE RISK — SMALL VESSELS AVOID DEEP WATER\n- **Sea Surface Temperature (SST)**: **28.1°C**\n- **Sea State**: Moderate to Rough\n- **Wave Height**: **2.1–2.8 m** (Elevated Swell)\n- **Wind Speed**: **28–35 km/h** WSW (Gusts to 42 km/h)\n- **Recommendation**: Small fishing vessels advised to remain within 20 km of coast and monitor VHF CH 16.\n\n*DISCLAIMER: Simulated demonstration advisory. Verify with official Coast Guard / IMD weather bulletins.*",
     components: [
       {
         type: "risk-card",
@@ -125,10 +144,10 @@ export const MOCK_RESPONSES = [
           wind: "28–35 km/h WSW"
         },
         data: {
-          score: 48,
           riskScore: 48,
+          score: 48,
           status: "MODERATE RISK",
-          zone: "MUMBAI COASTAL & OFFSHORE SECTOR",
+          zoneName: "MUMBAI COASTAL & OFFSHORE SECTOR",
           title: "Cyclone & Sea Hazard Advisory — Mumbai Coast",
           description: "No active cyclone directly affecting Mumbai. Elevated wave activity (2.1–2.8 m) and wind gusts expected over next 24 hours.",
           coordinates: "18.98°N, 72.82°E",
@@ -154,11 +173,35 @@ export const MOCK_RESPONSES = [
         }
       },
       {
+        type: "marine-map",
+        props: {
+          label: "MUMBAI COASTAL RISK SECTOR & HAZARD AREA",
+          center: [18.98, 72.82],
+          zoom: 8,
+          markers: [
+            { latlng: [18.98, 72.82], icon: "⚠️", popup: "Moderate Swell Hazard Area (2.1-2.8m)" }
+          ]
+        },
+        data: {
+          label: "MUMBAI COASTAL RISK SECTOR & HAZARD AREA",
+          center: [18.98, 72.82],
+          zoom: 8,
+          markers: [
+            { latlng: [18.98, 72.82], icon: "⚠️", popup: "Moderate Swell Hazard Area (2.1-2.8m)" }
+          ]
+        }
+      },
+      {
         type: "recommendation-card",
         props: {
           priority: "ADVISORY",
           heading: "Small Craft Safety Directive",
           text: "Small fishing vessels (< 15m LOA) should avoid deep offshore transit over the next 24 hours. Maintain VHF Channel 16 guard.",
+          actions: [
+            "Remain within 20 km of coast",
+            "Monitor VHF Channel 16 listening watch",
+            "Check barometric pressure before setting sail"
+          ],
           safeHarbor: "Sassoon Dock / Mumbai Harbour",
           vhf: "VHF CH 16 / 08"
         },
@@ -166,29 +209,13 @@ export const MOCK_RESPONSES = [
           priority: "ADVISORY",
           heading: "Small Craft Safety Directive",
           text: "Small fishing vessels (< 15m LOA) should avoid deep offshore transit over the next 24 hours. Maintain VHF Channel 16 guard.",
+          actions: [
+            "Remain within 20 km of coast",
+            "Monitor VHF Channel 16 listening watch",
+            "Check barometric pressure before setting sail"
+          ],
           safeHarbor: "Sassoon Dock / Mumbai Harbour",
           vhf: "VHF CH 16 / 08"
-        }
-      },
-      {
-        type: "evidence-panel",
-        props: {
-          title: "CYCLONE RISK REASONING TRACE",
-          entries: [
-            { label: "IMD Doppler Radar", value: "No cyclone core within 300 km of Mumbai. Peripheral trough active.", confidence: "94%", source: "IMD Weather Radar" },
-            { label: "INCOIS Wave Buoy 2304", value: "Swell period 11.2s, wave heights 2.1–2.8 m", confidence: "91%", source: "INCOIS Buoy" }
-          ],
-          summary: "Moderate risk level confirmed. DEMO NOTICE: Predefined mock telemetry for demonstration.",
-          modelVersion: "MARIX DEMO MODE"
-        },
-        data: {
-          title: "CYCLONE RISK REASONING TRACE",
-          entries: [
-            { label: "IMD Doppler Radar", value: "No cyclone core within 300 km of Mumbai. Peripheral trough active.", confidence: "94%", source: "IMD Weather Radar" },
-            { label: "INCOIS Wave Buoy 2304", value: "Swell period 11.2s, wave heights 2.1–2.8 m", confidence: "91%", source: "INCOIS Buoy" }
-          ],
-          summary: "Moderate risk level confirmed. DEMO NOTICE: Predefined mock telemetry for demonstration.",
-          modelVersion: "MARIX DEMO MODE"
         }
       }
     ]
@@ -198,19 +225,19 @@ export const MOCK_RESPONSES = [
   {
     id: "SEA_CONDITION_MUMBAI",
     title: "Mumbai Coastal Sea State & Navigational Condition",
-    keywords: ["sea", "condition", "mumbai"],
+    keywords: ["sea condition", "mumbai"],
     match: function(query) {
       const q = query.toLowerCase().trim();
-      if ((q.includes("sea condition") || q.includes("sea state") || q.includes("waves")) && q.includes("mumbai")) return true;
-      if (q === "what is the sea condition near mumbai" || q === "sea state near mumbai" || q === "mumbai sea status today") return true;
+      if ((q.includes("sea condition") || q.includes("sea state") || q.includes("wave")) && q.includes("mumbai")) return true;
       return false;
     },
     steps: [
-      "Polling oceanographic buoy telemetries off Mumbai harbour...",
-      "Analyzing wave spectrum, surface wind speed & photic visibility...",
-      "Synthesizing sea condition report..."
+      "Polling INCOIS directional wave buoy telemetry (1.8 m swell)...",
+      "Analyzing coastal wind velocity & visibility vectors...",
+      "Evaluating overall marine risk coefficient (28 / LOW-MODERATE)...",
+      "Synthesizing final decision bulletins..."
     ],
-    prose: "**Sea State: Moderate (Overall Risk: LOW–MODERATE)**\n\nCurrent sea conditions near Mumbai are **moderate and safe for normal vessel operations**.\n\n- **Sea State**: Moderate\n- **Wave Height**: 1.8 m\n- **Wind Speed**: 18 km/h (NW)\n- **Visibility**: Good (7.8 nm)\n- **Overall Risk**: LOW–MODERATE (Score: 28/100)\n- **Recommendation**: Normal coastal navigation and fishing operations permitted. Exercise standard lookout.\n\n*DEMO DISCLAIMER: Deterministic mock demonstration dataset.*",
+    prose: "### 🟢 FINAL DECISION DIRECTIVE: SEA CONDITIONS NOMINAL\n\nCurrent sea conditions near Mumbai are **moderate and safe for normal coastal vessel operations**.\n\n### 📋 KEY DECISION BULLETINS\n- **Final Decision**: 🟢 NOMINAL — SAFE FOR COASTAL NAVIGATION\n- **Sea Surface Temperature (SST)**: **28.2°C**\n- **Sea State**: Moderate Swell\n- **Wave Height**: **1.8 m** (@ 10.1s Period)\n- **Wind Speed**: **18 km/h NW**\n- **Visibility**: **Good (7.8 nm)**\n- **Overall Risk Score**: **28 / 100 (LOW–MODERATE)**\n- **Recommendation**: Normal coastal transit and fishing permitted within safety limits.",
     components: [
       {
         type: "weather-card",
@@ -242,10 +269,10 @@ export const MOCK_RESPONSES = [
           wind: "18 km/h NW"
         },
         data: {
-          score: 28,
           riskScore: 28,
+          score: 28,
           status: "NOMINAL",
-          zone: "MUMBAI COASTAL SECTOR",
+          zoneName: "MUMBAI COASTAL SECTOR",
           title: "Mumbai Coastal Sea Condition Overview",
           description: "Moderate sea state with 1.8m wave swell and 18 km/h winds. Navigational conditions generally stable.",
           coordinates: "18.96°N, 72.80°E",
@@ -254,73 +281,70 @@ export const MOCK_RESPONSES = [
         }
       },
       {
-        type: "evidence-panel",
+        type: "marine-map",
         props: {
-          title: "SEA STATE TELEMETRY EVIDENCE",
-          entries: [
-            { label: "Buoy Wave Telemetry", value: "1.8 m wave swell, period 10.1s (Moderate)", confidence: "96%", source: "INCOIS Buoy" },
-            { label: "Coastal Anemometer", value: "Wind 18 km/h NW, clear visibility 7.8 nm", confidence: "98%", source: "Mumbai Port Trust" }
-          ],
-          summary: "Sea conditions nominal. DEMO NOTICE: Predefined mock telemetry for demonstration.",
-          modelVersion: "MARIX DEMO MODE"
+          label: "MUMBAI SEA STATE MONITORING LOCATION",
+          center: [18.96, 72.80],
+          zoom: 8,
+          markers: [
+            { latlng: [18.96, 72.80], icon: "🌊", popup: "Mumbai Sea State Buoy (1.8m Swell, 28.2°C SST)" }
+          ]
         },
         data: {
-          title: "SEA STATE TELEMETRY EVIDENCE",
-          entries: [
-            { label: "Buoy Wave Telemetry", value: "1.8 m wave swell, period 10.1s (Moderate)", confidence: "96%", source: "INCOIS Buoy" },
-            { label: "Coastal Anemometer", value: "Wind 18 km/h NW, clear visibility 7.8 nm", confidence: "98%", source: "Mumbai Port Trust" }
-          ],
-          summary: "Sea conditions nominal. DEMO NOTICE: Predefined mock telemetry for demonstration.",
-          modelVersion: "MARIX DEMO MODE"
+          label: "MUMBAI SEA STATE MONITORING LOCATION",
+          center: [18.96, 72.80],
+          zoom: 8,
+          markers: [
+            { latlng: [18.96, 72.80], icon: "🌊", popup: "Mumbai Sea State Buoy (1.8m Swell, 28.2°C SST)" }
+          ]
         }
       }
     ]
   },
 
-  // ── 4. POTENTIAL FISHING ZONES (PFZ LIST) ─────────────────────────────────
+  // ── 4. POTENTIAL FISHING ZONES DIRECTORY ─────────────────────────────────
   {
     id: "POTENTIAL_FISHING_ZONES",
     title: "Regional Potential Fishing Zones (PFZ) Directory",
-    keywords: ["potential fishing zones", "pfz", "where are"],
+    keywords: ["where are", "pfz", "potential fishing zones"],
     match: function(query) {
       const q = query.toLowerCase().trim();
-      if ((q.includes("where") || q.includes("find") || q.includes("list") || q.includes("show")) && (q.includes("pfz") || q.includes("fishing zone"))) return true;
-      if (q === "where are the potential fishing zones" || q === "where are pfz zones located" || q === "potential fishing zones") return true;
+      if ((q.includes("where") || q.includes("find") || q.includes("list")) && (q.includes("pfz") || q.includes("fishing zone"))) return true;
       return false;
     },
     steps: [
-      "Scanning Copernicus Sentinel-3 OLCI & NOAA Geo-Polar SST datasets...",
-      "Isolating high-density chlorophyll-a thermal front convergence zones...",
-      "Mapping regional PFZ targets for Mumbai, Ratnagiri, and Goa coasts...",
-      "Generating confidence ratings & coordinate advisories..."
+      "Accessing Copernicus Sentinel-3 OLCI ocean color satellite imagery...",
+      "Extracting active thermal front coordinates & chlorophyll anomalies...",
+      "Compiling ranked regional Potential Fishing Zone advisories...",
+      "Synthesizing final decision bulletins & zone map..."
     ],
-    prose: "**Active Potential Fishing Zones (PFZ) Identification**\n\nMARIX has identified **3 high-yielding Potential Fishing Zones** along the West Coast of India based on thermal front upwelling and chlorophyll-a concentrations:\n\n1. **Mumbai Offshore PFZ Sector Alpha**\n   - Coordinates: `18°52'N, 72°38'E` (40 km offshore)\n   - Confidence: **87%** | Target: Indian Mackerel, Sardinella\n2. **Ratnagiri Offshore PFZ Front Beta**\n   - Coordinates: `16°58'N, 72°42'E` (28 km offshore)\n   - Confidence: **92%** | Target: Kingfish (Surmai), Seer Fish, Squid\n3. **Goa Coastal Upwelling Front Gamma**\n   - Coordinates: `15°24'N, 73°35'E` (18 km offshore)\n   - Confidence: **89%** | Target: Yellowfin Tuna, Anchovies\n\n*DEMO NOTICE: These coordinates and advisories represent MOCK DEMO DATA created for hackathon demonstration.*",
+    prose: "### 🟢 FINAL DECISION DIRECTIVE: 3 ACTIVE PFZ ZONES IDENTIFIED\n\nHigh-yield fishing opportunities identified across Maharashtra and Konkan shelf zones.\n\n### 📋 KEY DECISION BULLETINS\n- **1. Mumbai Offshore PFZ**: `18°52'N, 72°38'E` | SST: **28.4°C** | Confidence: **87%** | Yield: **HIGH**\n- **2. Ratnagiri Offshore PFZ**: `16°58'N, 72°42'E` | SST: **27.8°C** | Confidence: **92%** | Yield: **VERY HIGH**\n- **3. Goa Coastal PFZ**: `15°24'N, 73°35'E` | SST: **28.1°C** | Confidence: **89%** | Yield: **HIGH**\n- **Target Depth**: 36m to 54m bathymetric contours\n- **Target Species**: Indian Mackerel, Sardinella, Kingfish (Surmai)\n\n*DEMO NOTICE: Coordinates and advisories represent mock demonstration data for hackathon presentation.*",
     components: [
       {
         type: "pfz-card",
         props: {
           name: "1. Mumbai Offshore PFZ (Sector Alpha)",
           latLonStr: "18°52'N, 72°38'E",
-          sstAnomaly: "-1.1°C Upwelling Front",
+          sstAnomaly: "28.4°C (-1.1°C Anomaly)",
           chlorophyll: "1.82 mg/m³",
           confidence: "87%",
           targetSpecies: ["Indian Mackerel", "Sardinella longiceps"],
           distanceNm: "21.6 nm (40 km)",
           depthM: 54,
           fuelSavingsEst: "25%",
-          advisory: "Primary front active along 50m bathymetric contour. Favorable window 0400Z–1200Z."
+          advisory: "Primary front active along 50m bathymetric contour."
         },
         data: {
           name: "1. Mumbai Offshore PFZ (Sector Alpha)",
           latLonStr: "18°52'N, 72°38'E",
-          sstAnomaly: "-1.1°C Upwelling Front",
+          sstAnomaly: "28.4°C (-1.1°C Anomaly)",
           chlorophyll: "1.82 mg/m³",
           confidence: "87%",
           targetSpecies: ["Indian Mackerel", "Sardinella longiceps"],
           distanceNm: "21.6 nm (40 km)",
           depthM: 54,
           fuelSavingsEst: "25%",
-          advisory: "Primary front active along 50m bathymetric contour. Favorable window 0400Z–1200Z."
+          advisory: "Primary front active along 50m bathymetric contour."
         }
       },
       {
@@ -328,80 +352,55 @@ export const MOCK_RESPONSES = [
         props: {
           name: "2. Ratnagiri Offshore PFZ (Front Beta)",
           latLonStr: "16°58'N, 72°42'E",
-          sstAnomaly: "-1.4°C Strong Upwelling",
-          chlorophyll: "2.95 mg/m³ (Peak Bloom)",
+          sstAnomaly: "27.8°C (-1.4°C Anomaly)",
+          chlorophyll: "2.95 mg/m³",
           confidence: "92%",
           targetSpecies: ["Kingfish (Surmai)", "Seer Fish", "Squid"],
           distanceNm: "15.1 nm (28 km)",
           depthM: 48,
           fuelSavingsEst: "32%",
-          advisory: "Strong thermal gradient. Deploy purse seine along thermal edge."
+          advisory: "Strong thermal gradient. Deploy purse seine along edge."
         },
         data: {
           name: "2. Ratnagiri Offshore PFZ (Front Beta)",
           latLonStr: "16°58'N, 72°42'E",
-          sstAnomaly: "-1.4°C Strong Upwelling",
-          chlorophyll: "2.95 mg/m³ (Peak Bloom)",
+          sstAnomaly: "27.8°C (-1.4°C Anomaly)",
+          chlorophyll: "2.95 mg/m³",
           confidence: "92%",
           targetSpecies: ["Kingfish (Surmai)", "Seer Fish", "Squid"],
           distanceNm: "15.1 nm (28 km)",
           depthM: 48,
           fuelSavingsEst: "32%",
-          advisory: "Strong thermal gradient. Deploy purse seine along thermal edge."
+          advisory: "Strong thermal gradient. Deploy purse seine along edge."
         }
       },
       {
-        type: "pfz-card",
+        type: "marine-map",
         props: {
-          name: "3. Goa Coastal PFZ (Front Gamma)",
-          latLonStr: "15°24'N, 73°35'E",
-          sstAnomaly: "-1.2°C Upwelling",
-          chlorophyll: "2.40 mg/m³",
-          confidence: "89%",
-          targetSpecies: ["Yellowfin Tuna", "Anchovies"],
-          distanceNm: "9.7 nm (18 km)",
-          depthM: 36,
-          fuelSavingsEst: "29%",
-          advisory: "Favorable coastal current convergence."
+          label: "REGIONAL POTENTIAL FISHING ZONES MAP",
+          center: [17.5, 72.8],
+          zoom: 7,
+          markers: [
+            { latlng: [18.86, 72.63], icon: "🐟", popup: "Mumbai Offshore PFZ (87% conf, SST 28.4°C)" },
+            { latlng: [16.96, 72.70], icon: "🐟", popup: "Ratnagiri Offshore PFZ (92% conf, SST 27.8°C)" },
+            { latlng: [15.40, 73.58], icon: "🐟", popup: "Goa Coastal PFZ (89% conf, SST 28.1°C)" }
+          ]
         },
         data: {
-          name: "3. Goa Coastal PFZ (Front Gamma)",
-          latLonStr: "15°24'N, 73°35'E",
-          sstAnomaly: "-1.2°C Upwelling",
-          chlorophyll: "2.40 mg/m³",
-          confidence: "89%",
-          targetSpecies: ["Yellowfin Tuna", "Anchovies"],
-          distanceNm: "9.7 nm (18 km)",
-          depthM: 36,
-          fuelSavingsEst: "29%",
-          advisory: "Favorable coastal current convergence."
-        }
-      },
-      {
-        type: "evidence-panel",
-        props: {
-          title: "PFZ SATELLITE EVIDENCE & DISCLAIMER",
-          entries: [
-            { label: "Copernicus Sentinel-3", value: "Chlorophyll-a optical imagery pass complete", confidence: "93%", source: "ESA Copernicus" },
-            { label: "NOAA Geo-Polar SST", value: "Thermal gradient anomaly mapping active", confidence: "90%", source: "NOAA Geo-Polar" }
-          ],
-          summary: "DEMO NOTICE: All PFZ locations listed above are mock demonstration datasets for hackathon presentation.",
-          modelVersion: "MARIX DEMO MODE"
-        },
-        data: {
-          title: "PFZ SATELLITE EVIDENCE & DISCLAIMER",
-          entries: [
-            { label: "Copernicus Sentinel-3", value: "Chlorophyll-a optical imagery pass complete", confidence: "93%", source: "ESA Copernicus" },
-            { label: "NOAA Geo-Polar SST", value: "Thermal gradient anomaly mapping active", confidence: "90%", source: "NOAA Geo-Polar" }
-          ],
-          summary: "DEMO NOTICE: All PFZ locations listed above are mock demonstration datasets for hackathon presentation.",
-          modelVersion: "MARIX DEMO MODE"
+          label: "REGIONAL POTENTIAL FISHING ZONES MAP",
+          center: [17.5, 72.8],
+          zoom: 7,
+          markers: [
+            { latlng: [18.86, 72.63], icon: "🐟", popup: "Mumbai Offshore PFZ (87% conf, SST 28.4°C)" },
+            { latlng: [16.96, 72.70], icon: "🐟", popup: "Ratnagiri Offshore PFZ (92% conf, SST 27.8°C)" },
+            { latlng: [15.40, 73.58], icon: "🐟", popup: "Goa Coastal PFZ (89% conf, SST 28.1°C)" }
+          ]
         }
       }
     ]
   },
 
-  // ── 5. TODAY'S MARINE SNAPSHOT ────────────────────────────────────────────
+  // ── 5. TODAY'S MARINE SNAPSHOT ───────────────────────────────────────────
   {
     id: "MARINE_SNAPSHOT",
     title: "Daily Marine Intelligence Snapshot & Status Report",
@@ -409,15 +408,15 @@ export const MOCK_RESPONSES = [
     match: function(query) {
       const q = query.toLowerCase().trim();
       if (q.includes("snapshot") || q.includes("marine summary") || q.includes("daily status") || q.includes("marine overview")) return true;
-      if (q === "give me today's marine snapshot" || q === "today's marine snapshot" || q === "marine snapshot") return true;
       return false;
     },
     steps: [
-      "Polling all 6 oceanographic data adapters (INCOIS, NOAA, Sentinel-3, IMD, AIS mesh)...",
-      "Aggregating regional SST, chlorophyll, wind, swell & hazard indices...",
-      "Generating MARIX Daily Marine Dashboard Snapshot..."
+      "Polling all 6 data adapters (INCOIS, NOAA, Sentinel-3, IMD, AIS)...",
+      "Aggregating regional temperature, wave & wind telemetry...",
+      "Computing overall coastal risk index (34 / LOW-MODERATE)...",
+      "Synthesizing final decision bulletins..."
     ],
-    prose: "**MARIX Daily Marine Snapshot & Operational Status**\n\nOverall Marine Status: **OPERATIONAL / NOMINAL**\nRegional oceanographic conditions across the Konkan & Arabian Sea quadrant are stable with high biological productivity.\n\n### Ocean Telemetry Highlights:\n- **Sea Surface Temperature (SST)**: 28.3°C (-1.2°C Upwelling Anomaly)\n- **Chlorophyll-a Concentration**: 2.15 mg/m³ (High Bloom)\n- **Surface Wind Velocity**: 16 km/h (WNW)\n- **Significant Wave Height**: 1.5 m (Moderate Swell)\n- **Weather Risk Index**: 34/100 (LOW–MODERATE)\n- **Fishing Potential**: HIGH (88% Confidence)\n- **Overall Status**: SYS NOMINAL — All operational corridors open.\n\n*DEMO DISCLAIMER: Deterministic mock snapshot prepared for hackathon demonstration.*",
+    prose: "### 🟢 FINAL DECISION DIRECTIVE: OVERALL MARINE STATUS OPERATIONAL\n\nCoastal conditions across Maharashtra and Konkan sectors are **nominal and safe for routine marine operations**.\n\n### 📋 KEY DECISION BULLETINS\n- **Overall Marine Status**: 🟢 OPERATIONAL / SYS NOMINAL\n- **Sea Surface Temperature (SST)**: **28.3°C**\n- **Chlorophyll-a Concentration**: **2.15 mg/m³**\n- **Wave Height**: **1.5 m** (@ 10.4s Swell)\n- **Wind Speed & Direction**: **16 km/h WNW**\n- **Weather Risk Index**: **34 / 100 (LOW–MODERATE)**\n- **Fishing Yield Potential**: **HIGH (88%)**",
     components: [
       {
         type: "weather-card",
@@ -449,10 +448,10 @@ export const MOCK_RESPONSES = [
           wind: "16 km/h WNW"
         },
         data: {
-          score: 34,
           riskScore: 34,
+          score: 34,
           status: "NOMINAL",
-          zone: "ARABIAN SEA / KONKAN QUADRANT",
+          zoneName: "ARABIAN SEA / KONKAN QUADRANT",
           title: "Regional Marine Risk Index — Snapshot",
           description: "Low-to-moderate hazard index (34/100). No active storm core within 250 NM. Safe transit across coastal corridors.",
           coordinates: "17.5°N, 72.8°E",
@@ -461,75 +460,34 @@ export const MOCK_RESPONSES = [
         }
       },
       {
-        type: "pfz-card",
+        type: "marine-map",
         props: {
-          name: "Regional Fishing Potential Summary",
-          latLonStr: "17°40'N, 72°30'E",
-          sstAnomaly: "-1.2°C Upwelling Anomaly",
-          chlorophyll: "2.15 mg/m³",
-          confidence: "88%",
-          targetSpecies: ["Indian Mackerel", "Sardinella", "Squid"],
-          distanceNm: "18.5 nm",
-          depthM: 45,
-          fuelSavingsEst: "30%",
-          advisory: "Optimal fishing conditions along 50m bathymetric contour."
+          label: "REGIONAL COASTAL SNAPSHOT MAP",
+          center: [17.5, 72.8],
+          zoom: 7,
+          markers: [
+            { latlng: [17.5, 72.8], icon: "⚓", popup: "Konkan Marine Operational Quadrant (SST 28.3°C)" }
+          ]
         },
         data: {
-          name: "Regional Fishing Potential Summary",
-          latLonStr: "17°40'N, 72°30'E",
-          sstAnomaly: "-1.2°C Upwelling Anomaly",
-          chlorophyll: "2.15 mg/m³",
-          confidence: "88%",
-          targetSpecies: ["Indian Mackerel", "Sardinella", "Squid"],
-          distanceNm: "18.5 nm",
-          depthM: 45,
-          fuelSavingsEst: "30%",
-          advisory: "Optimal fishing conditions along 50m bathymetric contour."
-        }
-      },
-      {
-        type: "evidence-panel",
-        props: {
-          title: "MARINE SNAPSHOT DATA AGGREGATION",
-          entries: [
-            { label: "INCOIS PFZ Adapter", value: "88% Yield probability on Konkan shelf", confidence: "88%", source: "INCOIS" },
-            { label: "NOAA SST Adapter", value: "SST 28.3°C, Chlorophyll-a 2.15 mg/m³", confidence: "94%", source: "NOAA" },
-            { label: "IMD Weather Mesh", value: "Wind 16 km/h WNW, Wave height 1.5 m", confidence: "96%", source: "IMD Radar" }
-          ],
-          summary: "Overall marine status operational. DEMO NOTICE: Predefined mock data for demonstration purposes.",
-          modelVersion: "MARIX DEMO MODE"
-        },
-        data: {
-          title: "MARINE SNAPSHOT DATA AGGREGATION",
-          entries: [
-            { label: "INCOIS PFZ Adapter", value: "88% Yield probability on Konkan shelf", confidence: "88%", source: "INCOIS" },
-            { label: "NOAA SST Adapter", value: "SST 28.3°C, Chlorophyll-a 2.15 mg/m³", confidence: "94%", source: "NOAA" },
-            { label: "IMD Weather Mesh", value: "Wind 16 km/h WNW, Wave height 1.5 m", confidence: "96%", source: "IMD Radar" }
-          ],
-          summary: "Overall marine status operational. DEMO NOTICE: Predefined mock data for demonstration purposes.",
-          modelVersion: "MARIX DEMO MODE"
+          label: "REGIONAL COASTAL SNAPSHOT MAP",
+          center: [17.5, 72.8],
+          zoom: 7,
+          markers: [
+            { latlng: [17.5, 72.8], icon: "⚓", popup: "Konkan Marine Operational Quadrant (SST 28.3°C)" }
+          ]
         }
       }
     ]
   }
 ];
 
-/**
- * Match a user query string against the centralized mock dataset.
- * Normalizes input (lowercase, trimmed) and uses keyword/intent rules.
- * 
- * @param {string} userQuery 
- * @returns {object|null} The matched mock response object, or null if no match found.
- */
-export function findMockResponse(userQuery) {
-  if (!MOCK_MODE || !userQuery || typeof userQuery !== 'string') return null;
-
-  const normalized = userQuery.toLowerCase().trim();
-  if (!normalized) return null;
+export function findMockResponse(queryText) {
+  if (!MOCK_MODE || !queryText) return null;
+  const q = queryText.toLowerCase().trim();
 
   for (const resp of MOCK_RESPONSES) {
-    if (typeof resp.match === 'function' && resp.match(normalized)) {
-      console.log(`[MARIX Mock System] Query "${userQuery}" matched mock intent "${resp.id}"`);
+    if (typeof resp.match === 'function' && resp.match(q)) {
       return resp;
     }
   }
