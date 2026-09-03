@@ -2,6 +2,7 @@
 // Manages zero-build client side routing, view mounting, and navigation state
 
 import { renderLandingView } from './views/landing.js';
+import { renderFishermanView } from './views/fisherman.js';
 import { renderChatView } from './views/chat.js';
 import { renderMapView } from './views/map.js';
 import { renderSafetyView } from './views/safety.js';
@@ -25,7 +26,7 @@ export class Router {
 
   handleRoute() {
     const rawHash = window.location.hash || '#/';
-    const cleanRoute = rawHash.replace(/^#/, '') || '/';
+    const cleanRoute = rawHash.replace(/^#/, '').split('?')[0] || '/';
     
     // Match route handler
     const handler = this.routes[cleanRoute] || this.routes['/'] || renderLandingView;

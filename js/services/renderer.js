@@ -6,11 +6,6 @@
 // SSE event shapes (from backend):
 //   { "type": "status",  "message": "Checking weather..." }
 //   { "type": "result",  "ui_json": { "title": "...", "components": [{ "type": "risk-card", "data": {...} }] }, "text": "..." }
-//
-// Usage:
-//   import { CanvasRenderer } from '../services/renderer.js';
-//   const renderer = new CanvasRenderer(document.getElementById('canvas'));
-//   await renderer.stream('/api/chat', { message: 'Assess cyclone risk' });
 
 import { renderComponent } from '../components/components.js';
 
@@ -46,6 +41,39 @@ function buildEmptyState() {
     '       padding:4px 10px;border-radius:2px;">VHF CH 16</div>',
     '</div>',
   ].join('');
+  return div;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SKELETON UI LOADING DECK — "The dashboard is forming..."
+// ─────────────────────────────────────────────────────────────
+function buildSkeletonDeck() {
+  var div = document.createElement('div');
+  div.id = 'canvas-skeleton-deck';
+  div.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:12px;';
+  div.innerHTML = `
+    <div class="orca-skeleton-card bezel-panel" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="orca-skeleton-line" style="width:40%;height:14px;"></div>
+        <div class="orca-skeleton-line" style="width:20%;height:12px;"></div>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <div class="orca-skeleton-circle" style="width:90px;height:60px;border-radius:60px 60px 0 0;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div class="orca-skeleton-line" style="width:70%;height:14px;"></div>
+          <div class="orca-skeleton-line" style="width:95%;height:10px;"></div>
+          <div class="orca-skeleton-line" style="width:50%;height:10px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="orca-skeleton-card bezel-panel" style="padding:16px;">
+      <div class="orca-skeleton-line" style="width:45%;height:14px;margin-bottom:12px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="orca-skeleton-line" style="height:38px;"></div>
+        <div class="orca-skeleton-line" style="height:38px;"></div>
+      </div>
+    </div>
+  `;
   return div;
 }
 
@@ -96,7 +124,7 @@ function buildTitleBar(title) {
   ].join('');
   bar.innerHTML = [
     '<span class="font-data" style="font-size:.65rem;color:var(--phosphor-amber);letter-spacing:.1em;flex-shrink:0;">',
-    '  &#10003; ORCA RESULT',
+    '  ✓ ORCA RESULT',
     '</span>',
     '<span class="font-display" style="font-size:.90rem;font-weight:700;color:var(--parchment);">',
     '  ' + (title || 'Analysis Complete'),
@@ -112,11 +140,10 @@ function buildProseBlock(text) {
   var div = document.createElement('div');
   div.className = 'canvas-prose';
   div.style.cssText = [
-    'font-size:.83rem;color:var(--parchment);line-height:1.55;',
+    'font-size:.84rem;color:var(--parchment);line-height:1.55;',
     'padding:10px 14px;margin-bottom:12px;',
     'border-left:2px solid var(--chart-line);',
   ].join('');
-  // Simple **bold** → <strong> markdown
   div.innerHTML = (text || '').replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--parchment-bright);">$1</strong>');
   return div;
 }
@@ -132,7 +159,7 @@ function buildErrorBlock(message) {
     'border-radius:var(--radius);background:rgba(255,92,92,.08);',
     'font-family:var(--font-data);font-size:.78rem;color:var(--radar-red);',
   ].join('');
-  div.innerHTML = '&#128680; <strong>TRANSMISSION ERROR</strong> — ' + (message || 'Unknown error. Check backend connection.');
+  div.innerHTML = '🚨 <strong>TRANSMISSION ERROR</strong> — ' + (message || 'Unknown error. Check backend connection.');
   return div;
 }
 
@@ -140,10 +167,6 @@ function buildErrorBlock(message) {
 // CANVAS RENDERER CLASS
 // ─────────────────────────────────────────────────────────────
 export class CanvasRenderer {
-  /**
-   * @param {HTMLElement} canvasEl  The #canvas div to render into.
-   *                                Managed exclusively by this renderer.
-   */
   constructor(canvasEl) {
     this._canvas    = canvasEl;
     this._statusBar = null;
@@ -153,18 +176,6 @@ export class CanvasRenderer {
     this._renderEmptyState();
   }
 
-  // ── Public API ────────────────────────────────────────────
-
-  /**
-   * Stream a query to POST /api/chat and render the results.
-   * Handles both "status" and "result" SSE events.
-   *
-   * @param {string} apiUrl         The backend endpoint (e.g. '/api/chat')
-   * @param {object} payload        JSON body to POST  (e.g. { message: '...' })
-   * @param {object} [opts]
-   * @param {string} [opts.bearerToken]  Optional Authorization header value
-   * @returns {Promise<void>}
-   */
   async stream(apiUrl, payload, opts) {
     if (this._streaming) return;
     this._streaming = true;
@@ -202,12 +213,6 @@ export class CanvasRenderer {
     }
   }
 
-  /**
-   * Feed a single parsed SSE event object directly.
-   * Useful for testing or when the caller owns the stream reader.
-   *
-   * @param {{ type: string, message?: string, ui_json?: object, text?: string }} event
-   */
   handleEvent(event) {
     if (!event || !event.type) return;
 
@@ -223,18 +228,14 @@ export class CanvasRenderer {
       return;
     }
 
-    // Unknown event types are silently ignored per spec
     console.debug('[ORCA Renderer] Unrecognised event type "' + event.type + '" — ignored.');
   }
 
-  /** Reset the canvas back to the empty state. */
   reset() {
     this._streaming = false;
     this._hideStatusBar();
     this._renderEmptyState();
   }
-
-  // ── Private helpers ───────────────────────────────────────
 
   async _consumeSSEStream(readableBody) {
     var reader  = readableBody.getReader();
@@ -246,17 +247,13 @@ export class CanvasRenderer {
       if (chunk.done) break;
 
       buffer += decoder.decode(chunk.value, { stream: true });
-
-      // SSE messages are separated by blank lines (\n\n)
       var parts = buffer.split('\n\n');
-      // Last element may be an incomplete chunk — keep it in buffer
       buffer = parts.pop();
 
       for (var i = 0; i < parts.length; i++) {
         var raw = parts[i].trim();
         if (!raw) continue;
 
-        // Each SSE message may have multiple "data:" lines
         var dataLines = raw.split('\n').filter(function(l) {
           return l.indexOf('data:') === 0;
         });
@@ -274,7 +271,6 @@ export class CanvasRenderer {
       }
     }
 
-    // Flush any remaining buffered data
     if (buffer.trim()) {
       var remaining = buffer.trim().split('\n').filter(function(l) {
         return l.indexOf('data:') === 0;
@@ -288,7 +284,6 @@ export class CanvasRenderer {
       }
     }
 
-    // If the stream ended without a result event, show empty state
     if (this._canvas.children.length === 0 ||
         (this._canvas.children.length === 1 && this._canvas.querySelector('#canvas-status-bar'))) {
       this._hideStatusBar();
@@ -299,19 +294,15 @@ export class CanvasRenderer {
   _renderResult(uiJson, text) {
     var components = uiJson.components || [];
 
-    // Title bar
     if (uiJson.title) {
       this._canvas.appendChild(buildTitleBar(uiJson.title));
     }
 
-    // Prose text answer
     if (text) {
       this._canvas.appendChild(buildProseBlock(text));
     }
 
-    // Component deck
     if (components.length === 0) {
-      // No components — render empty state fallback
       this._canvas.appendChild(buildEmptyState());
       return;
     }
@@ -321,14 +312,13 @@ export class CanvasRenderer {
     deck.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
     this._canvas.appendChild(deck);
 
-    var self = this;
     components.forEach(function(spec, idx) {
-      // Staggered mount animation (80ms apart)
+      // Staggered 180ms entrance animation per specification
       setTimeout(function() {
-        var compEl = renderComponent(spec); // returns null for unknown types
-        if (!compEl) return;               // skip silently — no crash
+        var compEl = renderComponent(spec);
+        if (!compEl) return;
 
-        compEl.style.cssText += ';opacity:0;transform:translateY(10px);transition:opacity .3s ease,transform .3s ease;';
+        compEl.style.cssText += ';opacity:0;transform:translateY(8px);transition:opacity 0.22s ease, transform 0.22s ease;';
         deck.appendChild(compEl);
 
         requestAnimationFrame(function() {
@@ -337,7 +327,7 @@ export class CanvasRenderer {
             compEl.style.transform = 'translateY(0)';
           });
         });
-      }, idx * 100);
+      }, idx * 180);
     });
   }
 
@@ -347,7 +337,6 @@ export class CanvasRenderer {
   }
 
   _clearCanvas() {
-    // Remove everything except the persistent status bar
     var children = Array.prototype.slice.call(this._canvas.children);
     var self = this;
     children.forEach(function(child) {
@@ -360,21 +349,28 @@ export class CanvasRenderer {
   _showStatusBar(message) {
     if (!this._statusBar) {
       this._statusBar = buildStatusBar();
-      // Prepend so it always sits above content
       this._canvas.insertBefore(this._statusBar, this._canvas.firstChild);
     }
     this._statusBar.style.display = 'flex';
     var textEl = this._statusBar.querySelector('#canvas-status-text');
     if (textEl) textEl.textContent = message;
+
+    // Show skeleton loading deck while status bar is active
+    if (!this._canvas.querySelector('#canvas-skeleton-deck')) {
+      this._canvas.appendChild(buildSkeletonDeck());
+    }
   }
 
   _hideStatusBar() {
     if (this._statusBar) {
       this._statusBar.style.display = 'none';
     }
+    var skel = this._canvas.querySelector('#canvas-skeleton-deck');
+    if (skel) {
+      this._canvas.removeChild(skel);
+    }
   }
 
-  /** Inject radar-sweep keyframe CSS once per document. */
   _injectKeyframes() {
     if (document.getElementById('orca-renderer-styles')) return;
     var style = document.createElement('style');
@@ -384,7 +380,6 @@ export class CanvasRenderer {
       '  from { transform: rotate(0deg); }',
       '  to   { transform: rotate(360deg); }',
       '}',
-      // Respect prefers-reduced-motion
       '@media (prefers-reduced-motion: reduce) {',
       '  #canvas-radar-sweep { animation: none !important; }',
       '}',
@@ -393,20 +388,7 @@ export class CanvasRenderer {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// SPRING BOOT SSE BRIDGE
-//
-// Drop-in replacement for GenerativeAgentBridge that speaks
-// the backend's actual SSE protocol (status / result events)
-// and drives a CanvasRenderer.
-// ─────────────────────────────────────────────────────────────
 export class SpringBootBridge {
-  /**
-   * @param {object}  [opts]
-   * @param {string}  [opts.endpoint]    Default '/api/chat'
-   * @param {string}  [opts.bearerToken] Optional auth token
-   * @param {boolean} [opts.fallback]    Fall back to mock on error (default true)
-   */
   constructor(opts) {
     opts = opts || {};
     this.endpoint    = opts.endpoint    || (localStorage.getItem('orca_chat_endpoint') || '/api/chat');
@@ -414,12 +396,6 @@ export class SpringBootBridge {
     this.fallback    = opts.fallback !== false;
   }
 
-  /**
-   * Send a query and stream results into a CanvasRenderer.
-   *
-   * @param {string}        queryText
-   * @param {CanvasRenderer} renderer
-   */
   async streamTo(queryText, renderer) {
     try {
       await renderer.stream(
@@ -436,7 +412,6 @@ export class SpringBootBridge {
     }
   }
 
-  /** Minimal mock — fires a status then a result with an evidence panel. */
   async _mockFallback(queryText, renderer) {
     renderer.handleEvent({ type: 'status', message: 'Backend offline — using mock data...' });
     await new Promise(function(r) { setTimeout(r, 900); });
@@ -463,7 +438,7 @@ export class SpringBootBridge {
               entries: [
                 'POST /api/chat → connection refused (backend not running)',
                 'Fallback mock triggered by SpringBootBridge',
-                'Start Spring Boot with: ./mvnw spring-boot:run',
+                'Start Spring Boot or FastAPI backend at localhost:8000',
               ],
               summary: 'No live data available. All components above are mock placeholders.',
             }

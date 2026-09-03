@@ -4,6 +4,7 @@
 import { I18N } from './data/mockData.js';
 import { Router } from './router.js';
 import { renderLandingView } from './views/landing.js';
+import { renderFishermanView } from './views/fisherman.js';
 import { renderChatView } from './views/chat.js';
 import { renderMapView } from './views/map.js';
 import { renderSafetyView } from './views/safety.js';
@@ -64,7 +65,7 @@ class BridgeSoundEngine {
       const osc = this.audioCtx.createOscillator();
       const gain = this.audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, this.audioCtx.currentTime); // A5 note
+      osc.frequency.setValueAtTime(880, this.audioCtx.currentTime);
       gain.gain.setValueAtTime(0.08, this.audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.08);
       osc.connect(gain);
@@ -128,6 +129,7 @@ class OrcaBridgeApp {
 
     const routes = {
       '/': renderLandingView,
+      '/fisherman': renderFishermanView,
       '/chat': renderChatView,
       '/map': renderMapView,
       '/safety': renderSafetyView,
@@ -189,7 +191,6 @@ class OrcaBridgeApp {
 
     this.updateStaticTranslations();
 
-    // Update router options and refresh current view
     if (this.router) {
       this.router.options.i18n = I18N[lang] || I18N.en;
       this.router.options.currentLang = lang;
@@ -218,7 +219,6 @@ class OrcaBridgeApp {
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Subtle drift in GPS simulation
     let baseLat = 18.9812;
     let baseLon = 72.8245;
     setInterval(() => {
@@ -233,7 +233,6 @@ class OrcaBridgeApp {
   }
 }
 
-// Boot application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   window.OrcaApp = new OrcaBridgeApp();
   window.OrcaApp.init();

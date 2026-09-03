@@ -1,116 +1,165 @@
 // ORCA Marine Bridge Console — Landing View (/# or /#/)
-// Atmospheric Bridge Introduction, Radar Sweep Hero, and Direct Gateway
+// Stakeholder-Centric Persona Selection Landing Experience
+
+import { getMarineIcon } from '../components/components.js';
 
 export function renderLandingView(container, { i18n, soundEngine }) {
   container.innerHTML = `
-    <div class="landing-view">
-      <div class="landing-hero-grid">
-        <!-- Left Hero Content -->
-        <div class="hero-left">
-          <div class="hero-wordmark-plate">
-            <span class="beacon-pulse"></span>
-            <span class="font-data text-brass" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;">
-              ORCA MARITIME REASONING ENGINE v2.4
-            </span>
+    <div class="landing-view" style="max-width: 1280px; margin: 0 auto; padding: 24px 20px;">
+      
+      <!-- Top Brand & Telemetry Bar -->
+      <div class="telemetry-status-strip bezel-panel" style="margin-bottom: 28px; padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: rgba(10,16,20,0.85); border-left: 3px solid var(--phosphor-amber);">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <div class="telemetry-pill" style="display: flex; align-items: center; gap: 6px; font-family: var(--font-data); font-size: 0.72rem;">
+            <span class="beacon-pulse" style="width:6px; height:6px;"></span>
+            <span class="text-green" style="font-weight: 700;">ORCA ONLINE</span>
           </div>
-
-          <h1 class="hero-title">
-            The Bridge Console for <em>Autonomous Marine Intelligence</em>.
-          </h1>
-
-          <p class="hero-prose">
-            ${i18n.landing_sub}
-          </p>
-
-          <div class="hero-actions">
-            <a href="#/chat" id="btn-enter-console" class="btn-tactical btn-tactical-amber" style="padding: 12px 24px; font-size: 0.88rem;">
-              <span>⚡</span> ${i18n.enter_console}
-            </a>
-            <a href="#/map" class="btn-tactical" style="padding: 12px 20px;">
-              <span>🗺️</span> ${i18n.view_live_map}
-            </a>
-            <a href="#/safety" class="btn-tactical" style="padding: 12px 20px;">
-              <span>🛡️</span> SAFETY ALERTS
-            </a>
+          <span class="text-muted">•</span>
+          <div class="telemetry-pill" style="display: flex; align-items: center; gap: 6px; font-family: var(--font-data); font-size: 0.72rem;">
+            <span class="text-brass" style="font-weight: 700;">4 STAKEHOLDER PERSONAS ACTIVE</span>
           </div>
-
-          <div class="hero-stat-ribbon">
-            <div class="stat-item">
-              <span class="stat-label">MONITORED MARITIME AREA</span>
-              <span class="stat-val">1.2M NM²</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">ACTIVE PFZ THERMAL FRONTS</span>
-              <span class="stat-val text-green">4 DETECTED</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">STORM HAZARD INDEX</span>
-              <span class="stat-val text-red">78/100 (HIGH)</span>
-            </div>
+          <span class="text-muted">•</span>
+          <div class="telemetry-pill" style="display: flex; align-items: center; gap: 6px; font-family: var(--font-data); font-size: 0.72rem;">
+            <span class="text-amber" style="font-weight: 700;">ADAPTIVE INTELLIGENCE ENGINE</span>
           </div>
         </div>
+        
+        <div class="font-data text-muted" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+          SYSTEM: <span class="text-brass">ONE ORCA — FOUR EXPERIENCES</span>
+        </div>
+      </div>
 
-        <!-- Right Visual: Analog Radar Sweep Display -->
-        <div class="hero-right" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div class="radar-display-bezel">
-            <div class="radar-grid-rings"></div>
-            <div class="radar-crosshairs"></div>
-            <div class="radar-sweep-wedge"></div>
+      <!-- Welcome Hero Section -->
+      <div class="hero-welcome-box" style="text-align: center; margin-bottom: 36px; padding: 24px; background: rgba(18,27,34,0.4); border-radius: var(--radius); border: 1px dashed rgba(201,166,107,0.25);">
+        <div style="font-size: 2.8rem; margin-bottom: 8px;">⚓</div>
+        <h1 class="font-display" style="font-size: 2.5rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 10px; line-height: 1.2;">
+          Welcome to <span style="color: var(--brass);">ORCA</span>
+        </h1>
+        <p class="font-display" style="font-size: 1.25rem; color: var(--phosphor-amber); font-style: italic; margin-bottom: 14px;">
+          Intelligent Marine Operations
+        </p>
+        <p class="font-body text-parchment" style="font-size: 0.95rem; max-width: 680px; margin: 0 auto 16px auto; line-height: 1.6;">
+          Understand the ocean. Make safer decisions. Act with confidence.
+        </p>
+        <div style="display: inline-block; padding: 4px 14px; background: rgba(107,203,119,0.12); border: 1px solid var(--phosphor-green); border-radius: 20px; font-family: var(--font-data); font-size: 0.72rem; color: var(--phosphor-green); font-weight: 700; letter-spacing: 0.08em;">
+          SELECT YOUR STAKEHOLDER ROLE TO BEGIN
+        </div>
+      </div>
+
+      <!-- STAKEHOLDER CARDS GRID (EXACTLY 4 CARDS) -->
+      <div style="margin-bottom: 40px;">
+        <h2 class="font-display" style="font-size: 1.4rem; font-weight: 700; color: var(--parchment-bright); text-align: center; margin-bottom: 24px; letter-spacing: 0.04em;">
+          Who are you?
+        </h2>
+
+        <div class="stakeholder-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+          
+          <!-- CARD 1 — FISHERMAN (Redirects directly to chat section) -->
+          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--phosphor-green); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/chat?role=fisherman'">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(107,203,119,0.15); border: 1px solid var(--phosphor-green); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--phosphor-green);">
+                  🛶
+                </div>
+                <span class="panel-badge badge-green" style="font-size: 0.65rem;">VOICE &amp; CHAT</span>
+              </div>
+              <h3 class="font-display" style="font-size: 1.35rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
+                Fisherman
+              </h3>
+              <p class="font-body text-muted" style="font-size: 0.86rem; line-height: 1.5; margin-bottom: 20px;">
+                Get simple answers about weather, sea conditions, fishing safety and routes in English, Hindi, or Marathi.
+              </p>
+            </div>
             
-            <!-- Simulated Radar Target Blips -->
-            <div class="radar-blip" style="top: 32%; left: 65%;" title="PFZ Alpha Thermal Front"></div>
-            <div class="radar-blip" style="top: 70%; left: 40%; background: var(--radar-red); box-shadow: 0 0 8px var(--radar-red);" title="Cyclone Depression Varuna"></div>
-            <div class="radar-blip" style="top: 48%; left: 52%; background: var(--phosphor-amber); box-shadow: 0 0 8px var(--phosphor-amber);" title="Vessel INS Sagar Vikram"></div>
-            <div class="radar-blip" style="top: 25%; left: 30%;" title="Fishing Fleet Alpha"></div>
-
-            <div style="position: absolute; bottom: 12px; font-family: var(--font-data); font-size: 0.65rem; color: var(--brass); letter-spacing: 0.08em;">
-              RADAR RANGE: 120 NM
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="#/chat?role=fisherman" class="btn-tactical btn-tactical-green" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
+                💬 Open Fisherman Chat Section →
+              </a>
+              <a href="#/fisherman" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 6px 12px; font-size: 0.75rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
+                🎙️ Simple Voice Mode
+              </a>
             </div>
           </div>
 
-          <div class="font-data text-muted" style="font-size: 0.72rem; margin-top: 14px; text-align: center;">
-            STATION ID: <span class="text-brass">IN-BOM-09</span> • MODE: <span class="text-green">PASSIVE MULTISPECTRAL</span>
+          <!-- CARD 2 — RESEARCHER -->
+          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--brass); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/chat?role=researcher'">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(201,166,107,0.15); border: 1px solid var(--brass); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--brass);">
+                  🔬
+                </div>
+                <span class="panel-badge badge-amber" style="font-size: 0.65rem;">DATA RICH</span>
+              </div>
+              <h3 class="font-display" style="font-size: 1.35rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
+                Marine Researcher
+              </h3>
+              <p class="font-body text-muted" style="font-size: 0.86rem; line-height: 1.5; margin-bottom: 20px;">
+                Explore marine data, patterns, satellite evidence, SST anomalies, and deep research insights.
+              </p>
+            </div>
+            <a href="#/chat?role=researcher" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
+              I'm a Researcher →
+            </a>
           </div>
+
+          <!-- CARD 3 — GOVERNMENT / AUTHORITY -->
+          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--radar-red); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/chat?role=government'">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,92,92,0.15); border: 1px solid var(--radar-red); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--radar-red);">
+                  🛡️
+                </div>
+                <span class="panel-badge badge-red" style="font-size: 0.65rem;">COASTAL CONTROL</span>
+              </div>
+              <h3 class="font-display" style="font-size: 1.35rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
+                Government &amp; Authority
+              </h3>
+              <p class="font-body text-muted" style="font-size: 0.86rem; line-height: 1.5; margin-bottom: 20px;">
+                Monitor marine risks, active alerts, coastal weather warnings, and hazard perimeters for better decisions.
+              </p>
+            </div>
+            <a href="#/chat?role=government" class="btn-tactical btn-tactical-amber" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
+              I'm an Authority →
+            </a>
+          </div>
+
+          <!-- CARD 4 — MARINE BUSINESS -->
+          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--phosphor-amber); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/chat?role=business'">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,180,84,0.15); border: 1px solid var(--phosphor-amber); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--phosphor-amber);">
+                  🚢
+                </div>
+                <span class="panel-badge badge-amber" style="font-size: 0.65rem;">OPERATIONS</span>
+              </div>
+              <h3 class="font-display" style="font-size: 1.35rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
+                Marine Business
+              </h3>
+              <p class="font-body text-muted" style="font-size: 0.86rem; line-height: 1.5; margin-bottom: 20px;">
+                Make smarter operational, route and risk decisions using Pareto-optimal marine intelligence.
+              </p>
+            </div>
+            <a href="#/chat?role=business" class="btn-tactical btn-tactical-amber" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
+              I'm a Marine Operator →
+            </a>
+          </div>
+
         </div>
       </div>
 
-      <!-- Quick Operational Highlights -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 30px;">
-        <div class="bezel-panel panel-body" style="background: rgba(18,27,34,0.6);">
-          <div class="font-data text-amber" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
-            01 // REASONING-FIRST CANVAS
-          </div>
-          <div style="font-size: 0.84rem; color: var(--parchment);">
-            Natural language vessel guidance streaming real-time analog risk dials, PFZ thermal coordinates, and weather cards.
-          </div>
-        </div>
-
-        <div class="bezel-panel panel-body" style="background: rgba(18,27,34,0.6);">
-          <div class="font-data text-green" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
-            02 // SATELLITE & SENSOR FUSION
-          </div>
-          <div style="font-size: 0.84rem; color: var(--parchment);">
-            Direct integration with INCOIS, NOAA SST Geo-Polar, Sentinel-3 Chlorophyll, and IMD Coastal Doppler radars.
-          </div>
-        </div>
-
-        <div class="bezel-panel panel-body" style="background: rgba(18,27,34,0.6);">
-          <div class="font-data text-brass" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
-            03 // PARETO ROUTE OPTIMIZATION
-          </div>
-          <div style="font-size: 0.84rem; color: var(--parchment);">
-            Evaluates bathymetry and rogue swell fields to generate fuel-optimal routes that avoid cyclone danger cores.
-          </div>
-        </div>
+      <!-- Operational System Footer -->
+      <div style="border-top: 1px solid var(--chart-line); padding-top: 20px; text-align: center; font-family: var(--font-data); font-size: 0.75rem; color: var(--muted);">
+        ORCA REASONING CORE v2.4 • MULTI-AGENT ADAPTIVE PRESENTATION LAYER
       </div>
+
     </div>
   `;
 
-  // Attach interactive sounds
-  const enterBtn = container.querySelector('#btn-enter-console');
-  if (enterBtn && soundEngine) {
-    enterBtn.addEventListener('click', () => {
-      soundEngine.playTacticalChirp();
+  // Attach interactive hover sounds if sound engine available
+  if (soundEngine) {
+    container.querySelectorAll('.stakeholder-card').forEach(card => {
+      card.addEventListener('mouseenter', () => soundEngine.playMechanicalClick());
+      card.addEventListener('click', () => soundEngine.playTacticalChirp());
     });
   }
 }

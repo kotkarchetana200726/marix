@@ -1,5 +1,5 @@
-// ORCA Marine Bridge Console — Route Planner (/#route)
-// Side-by-side shortest vs safe route comparison with dual-path Leaflet visualization
+// ORCA Marine Bridge Console — Marine Business Persona (/#route)
+// Marine Operations Intelligence, Pareto Route Planner & Operational Risk Decision Support
 
 import { ROUTE_PRESETS } from '../data/mockData.js';
 import { createRiskGaugeHTML, updateRiskGauge } from '../components/riskGauge.js';
@@ -8,222 +8,180 @@ export function renderRouteView(container, { i18n, soundEngine }) {
   let activePreset = ROUTE_PRESETS[0];
 
   container.innerHTML = `
-    <div class="route-view-container">
-      <!-- Left Route Configuration & Comparison Sidebar -->
-      <div class="route-sidebar">
-        <div class="panel-header" style="background: transparent; padding: 0; border: none;">
-          <span class="panel-title">
-            <span class="icon">🚢</span> PARETO ROUTE PLANNER
-          </span>
-          <span class="panel-badge badge-green">OPTIMIZER READY</span>
+    <div class="route-view-container" style="display: flex; flex-direction: column; gap: 16px;">
+      
+      <!-- Stakeholder Header & Persona Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--chart-line); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="#/" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; padding: 4px 12px; font-size: 0.78rem;">
+            ← Change Role
+          </a>
+          <span class="panel-badge badge-amber" style="font-size: 0.70rem;">🚢 MARINE BUSINESS &amp; SHIPPING OPERATOR</span>
         </div>
 
-        <!-- Route Preset Selector -->
-        <div class="route-form-group">
-          <label class="font-data text-muted" style="font-size: 0.68rem; text-transform: uppercase;">
-            TACTICAL PASSAGE PRESET
-          </label>
-          <select class="route-select" id="route-preset-select">
-            ${ROUTE_PRESETS.map(rt => `<option value="${rt.id}">${rt.name}</option>`).join('')}
-          </select>
+        <div class="telemetry-status-pill">
+          <span class="beacon-pulse"></span>
+          PARETO ROUTE OPTIMIZER &amp; FUEL EFFICIENCY ACTIVE
         </div>
-
-        <!-- Ports Display -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div class="orca-data-cell">
-            <span class="label">Origin Port</span>
-            <span class="val font-data" id="rt-origin-text" style="font-size: 0.72rem;">${activePreset.origin.name}</span>
-          </div>
-          <div class="orca-data-cell">
-            <span class="label">Destination Port</span>
-            <span class="val font-data" id="rt-dest-text" style="font-size: 0.72rem;">${activePreset.destination.name}</span>
-          </div>
-        </div>
-
-        <!-- Side-by-Side Comparison Readout -->
-        <div class="route-comparison-card">
-          <!-- ORCA Safe Route Column -->
-          <div class="comparison-column safe-col">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span class="font-data text-green" style="font-size: 0.72rem; font-weight: 700;">ORCA SAFE ROUTE</span>
-              <span class="panel-badge badge-green">RECOMMENDED</span>
-            </div>
-
-            <div id="safe-gauge-container">
-              ${createRiskGaugeHTML({ id: 'route-safe-gauge', score: activePreset.safe.riskScore, title: 'RISK INDEX', size: 120 })}
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px; font-family: var(--font-data); font-size: 0.70rem;">
-              <div>• Distance: <strong class="text-parchment" id="safe-dist">${activePreset.safe.distanceNm} nm</strong></div>
-              <div>• ETA: <strong class="text-parchment" id="safe-eta">${activePreset.safe.etaHours}</strong></div>
-              <div>• Fuel: <strong class="text-green" id="safe-fuel">${activePreset.safe.fuelEstLiters}</strong></div>
-            </div>
-
-            <div style="font-size: 0.72rem; color: var(--parchment); line-height: 1.3; margin-top: 4px;" id="safe-desc">
-              ${activePreset.safe.hazardSummary}
-            </div>
-          </div>
-
-          <!-- Shortest Hazardous Route Column -->
-          <div class="comparison-column hazardous-col">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span class="font-data text-red" style="font-size: 0.72rem; font-weight: 700;">SHORTEST DIRECT</span>
-              <span class="panel-badge badge-red">HAZARDOUS</span>
-            </div>
-
-            <div id="short-gauge-container">
-              ${createRiskGaugeHTML({ id: 'route-short-gauge', score: activePreset.shortest.riskScore, title: 'RISK INDEX', size: 120 })}
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px; font-family: var(--font-data); font-size: 0.70rem;">
-              <div>• Distance: <strong class="text-parchment" id="short-dist">${activePreset.shortest.distanceNm} nm</strong></div>
-              <div>• ETA: <strong class="text-parchment" id="short-eta">${activePreset.shortest.etaHours}</strong></div>
-              <div>• Fuel: <strong class="text-red" id="short-fuel">${activePreset.shortest.fuelEstLiters}</strong></div>
-            </div>
-
-            <div style="font-size: 0.72rem; color: var(--parchment); line-height: 1.3; margin-top: 4px;" id="short-desc">
-              ${activePreset.shortest.hazardSummary}
-            </div>
-          </div>
-        </div>
-
-        <button class="btn-tactical btn-tactical-amber" id="btn-export-waypoints" style="margin-top: 8px;">
-          🧭 EXPORT WAYPOINTS TO ECDIS
-        </button>
       </div>
 
-      <!-- Right Leaflet Map with Dual Route Trajectories -->
-      <div style="position: relative; width: 100%; height: 100%;">
-        <div id="route-leaflet-map" style="width: 100%; height: 100%; background: #080D11;"></div>
+      <!-- Business Hero Header -->
+      <div class="bezel-panel" style="padding: 20px; background: rgba(18,27,34,0.85); border-top: 3px solid var(--phosphor-amber);">
+        <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 4px;">
+          Marine Operations Intelligence
+        </h1>
+        <div class="font-data text-muted" style="font-size: 0.78rem; margin-bottom: 14px;">
+          Make smarter operational, route and risk decisions using Pareto-optimal marine intelligence.
+        </div>
 
-        <!-- Legend Overlay -->
-        <div style="position: absolute; bottom: 20px; right: 20px; background: var(--bg-panel-translucent); border: 1px solid var(--brass); border-radius: var(--radius); padding: 8px 12px; font-family: var(--font-data); font-size: 0.70rem; z-index: 50; backdrop-filter: blur(4px); display: flex; flex-direction: column; gap: 4px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 18px; height: 3px; background: var(--phosphor-amber);"></div>
-            <span class="text-amber">ORCA Safe Trajectory (Favorable Current)</span>
+        <!-- Operational Decision Summary -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 14px;">
+          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">OPERATIONAL RISK</span>
+            <strong class="font-data text-amber" style="font-size: 1.05rem;">MODERATE (19 vs 84)</strong>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 18px; height: 2px; background: var(--muted); border-bottom: 1px dashed var(--radar-red);"></div>
-            <span class="text-muted">Shortest Direct Course (Storm Hazard)</span>
+          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">KEY FACTORS</span>
+            <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">24kt Wind, 2.4m Swell</strong>
+          </div>
+          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">ESTIMATED IMPACT</span>
+            <strong class="font-data text-green" style="font-size: 0.88rem;">Saves 530L Fuel (-28%)</strong>
           </div>
         </div>
+
+        <!-- Business Quick Questions -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a href="#/chat?q=Safe+route+vs+shortest+route+from+Veraval+to+Ratnagiri" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.75rem;">
+            🧭 "Is this route operationally safe?"
+          </a>
+          <a href="#/chat?q=What+weather+could+affect+shipping+operations%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
+            🌊 "What weather affects operations?"
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Route Planner Grid -->
+      <div style="display: grid; grid-template-columns: 340px 1fr; gap: 16px;">
+        
+        <!-- Left Sidebar -->
+        <div class="route-sidebar bezel-panel" style="padding: 16px; display: flex; flex-direction: column; gap: 14px; background: rgba(18,27,34,0.85);">
+          <div class="panel-header" style="background: transparent; padding: 0; border: none;">
+            <span class="panel-title">
+              <span class="icon">🚢</span> PARETO ROUTE COMPARISON
+            </span>
+            <span class="panel-badge badge-green">OPTIMIZER READY</span>
+          </div>
+
+          <!-- Route Preset Selector -->
+          <div class="route-form-group">
+            <label class="font-data text-muted" style="font-size: 0.68rem; text-transform: uppercase;">
+              TACTICAL PASSAGE PRESET
+            </label>
+            <select class="route-select" id="route-preset-select" style="width: 100%; padding: 8px; background: var(--bg-void); color: var(--parchment-bright); border: 1px solid var(--brass); border-radius: var(--radius); font-family: var(--font-data); font-size: 0.80rem;">
+              ${ROUTE_PRESETS.map(rt => `<option value="${rt.id}">${rt.name}</option>`).join('')}
+            </select>
+          </div>
+
+          <!-- Ports Display -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="orca-data-cell">
+              <span class="label">Origin Port</span>
+              <span class="val font-data" id="rt-origin-text" style="font-size: 0.72rem;">${activePreset.origin.name}</span>
+            </div>
+            <div class="orca-data-cell">
+              <span class="label">Destination Port</span>
+              <span class="val font-data" id="rt-dest-text" style="font-size: 0.72rem;">${activePreset.destination.name}</span>
+            </div>
+          </div>
+
+          <!-- Side-by-Side Comparison Readout -->
+          <div class="route-comparison-card" style="display: flex; flex-direction: column; gap: 12px; background: rgba(10,16,20,0.6); padding: 12px; border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <!-- ORCA Safe Route Column -->
+            <div class="comparison-column safe-col" style="border-left: 3px solid var(--phosphor-green); padding-left: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="font-data text-green" style="font-size: 0.75rem; font-weight: 700;">ORCA SAFE ROUTE</span>
+                <span class="panel-badge badge-green">RECOMMENDED</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; font-family: var(--font-data); font-size: 0.72rem;">
+                <div>Distance: <strong class="text-parchment-bright" id="rt-safe-dist">${activePreset.safeRoute.distanceNm} nm</strong></div>
+                <div>ETA: <strong class="text-parchment-bright" id="rt-safe-eta">${activePreset.safeRoute.etaHours}h</strong></div>
+                <div>Fuel Est: <strong class="text-green" id="rt-safe-fuel">${activePreset.safeRoute.fuelLitre} L</strong></div>
+                <div>Risk Score: <strong class="text-green" id="rt-safe-risk">${activePreset.safeRoute.riskScore}/100</strong></div>
+              </div>
+            </div>
+
+            <!-- Shortest Hazardous Route Column -->
+            <div class="comparison-column hazard-col" style="border-left: 3px solid var(--radar-red); padding-left: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="font-data text-red" style="font-size: 0.75rem; font-weight: 700;">SHORTEST ROUTE</span>
+                <span class="panel-badge badge-red">HAZARDOUS</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; font-family: var(--font-data); font-size: 0.72rem;">
+                <div>Distance: <strong class="text-parchment-bright" id="rt-direct-dist">${activePreset.directRoute.distanceNm} nm</strong></div>
+                <div>ETA: <strong class="text-parchment-bright" id="rt-direct-eta">${activePreset.directRoute.etaHours}h</strong></div>
+                <div>Fuel Est: <strong class="text-red" id="rt-direct-fuel">${activePreset.directRoute.fuelLitre} L</strong></div>
+                <div>Risk Score: <strong class="text-red" id="rt-direct-risk">${activePreset.directRoute.riskScore}/100</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Map Display -->
+        <div class="bezel-panel" style="padding: 16px; background: rgba(18,27,34,0.85); display: flex; flex-direction: column;">
+          <div class="panel-header" style="background: transparent; padding: 0 0 8px 0; border-bottom: 1px solid var(--chart-line); margin-bottom: 10px;">
+            <span class="panel-title">
+              <span class="icon">🗺️</span> NAVIGATIONAL CORRIDOR &amp; DIVERSION CHART
+            </span>
+            <span class="panel-badge badge-amber">LIVE LEAFLET CHART</span>
+          </div>
+
+          <div id="route-map-canvas" style="width: 100%; height: 420px; border-radius: var(--radius); border: 1px solid var(--chart-line); background: var(--bg-void);"></div>
+        </div>
+
       </div>
     </div>
   `;
 
   // Initialize Route Leaflet Map
-  const mapEl = container.querySelector('#route-leaflet-map');
-  if (!mapEl || typeof L === 'undefined') return;
+  requestAnimationFrame(() => {
+    if (typeof L === 'undefined') return;
 
-  const map = L.map(mapEl, {
-    center: [18.8, 72.0],
-    zoom: 7,
-    zoomControl: true,
-    attributionControl: false
-  });
+    const mapEl = container.querySelector('#route-map-canvas');
+    if (!mapEl) return;
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18,
-    subdomains: 'abcd',
-  }).addTo(map);
+    try {
+      const map = L.map(mapEl, {
+        center: activePreset.mapCenter || [18.5, 72.0],
+        zoom: activePreset.mapZoom || 7,
+        zoomControl: true,
+        attributionControl: false
+      });
 
-  const routeLayerGroup = L.layerGroup().addTo(map);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18, subdomains: 'abcd'
+      }).addTo(map);
 
-  function drawRoutes(preset) {
-    routeLayerGroup.clearLayers();
+      // Draw Routes
+      if (activePreset.safeRoute.waypoints) {
+        L.polyline(activePreset.safeRoute.waypoints, { color: '#6BCB77', weight: 4, opacity: 0.9 }).addTo(map);
+      }
 
-    // 1. Draw Shortest Hazardous Route (Muted dashed line with red markers)
-    const shortPolyline = L.polyline(preset.shortest.waypoints, {
-      color: '#7C8B93',
-      weight: 2.5,
-      dashArray: '6, 6',
-      opacity: 0.8
-    }).addTo(routeLayerGroup);
+      if (activePreset.directRoute.waypoints) {
+        L.polyline(activePreset.directRoute.waypoints, { color: '#FF5C5C', weight: 3, dashArray: '6,6', opacity: 0.8 }).addTo(map);
+      }
 
-    shortPolyline.bindPopup(`
-      <div class="map-instrument-popup" style="border-top: 3px solid var(--radar-red);">
-        <div class="map-popup-header text-red">SHORTEST DIRECT LINE</div>
-        <div>Risk Rating: <strong class="text-red">${preset.shortest.riskScore}/100</strong></div>
-        <div>${preset.shortest.hazardSummary}</div>
-      </div>
-    `);
+      // Add Origin and Destination Markers
+      if (activePreset.origin.latlng) {
+        L.marker(activePreset.origin.latlng).bindPopup(`<b>${activePreset.origin.name}</b> (Origin)`).addTo(map);
+      }
+      if (activePreset.destination.latlng) {
+        L.marker(activePreset.destination.latlng).bindPopup(`<b>${activePreset.destination.name}</b> (Destination)`).addTo(map);
+      }
 
-    // 2. Draw Safe Route (Phosphor Amber solid line with glow)
-    const safePolyline = L.polyline(preset.safe.waypoints, {
-      color: '#FFB454',
-      weight: 4,
-      opacity: 0.95
-    }).addTo(routeLayerGroup);
-
-    safePolyline.bindPopup(`
-      <div class="map-instrument-popup" style="border-top: 3px solid var(--phosphor-green);">
-        <div class="map-popup-header text-green">ORCA RECOMMENDED SAFE PASSAGE</div>
-        <div>Risk Rating: <strong class="text-green">${preset.safe.riskScore}/100</strong></div>
-        <div>${preset.safe.hazardSummary}</div>
-      </div>
-    `);
-
-    // 3. Add Origin & Destination Markers
-    const startIcon = L.divIcon({
-      className: 'start-marker',
-      html: `<div style="background: var(--phosphor-green); width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px var(--phosphor-green);"></div>`,
-      iconSize: [14, 14]
-    });
-
-    const endIcon = L.divIcon({
-      className: 'end-marker',
-      html: `<div style="background: var(--brass); width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px var(--brass);"></div>`,
-      iconSize: [14, 14]
-    });
-
-    L.marker(preset.origin.coords, { icon: startIcon }).addTo(routeLayerGroup).bindPopup(`<b>ORIGIN:</b> ${preset.origin.name}`);
-    L.marker(preset.destination.coords, { icon: endIcon }).addTo(routeLayerGroup).bindPopup(`<b>DESTINATION:</b> ${preset.destination.name}`);
-
-    // Fit map bounds to routes
-    map.fitBounds(safePolyline.getBounds().pad(0.2));
-  }
-
-  // Initial draw
-  drawRoutes(activePreset);
-
-  // Handle Preset Change
-  const presetSelect = container.querySelector('#route-preset-select');
-  presetSelect.addEventListener('change', (e) => {
-    const selected = ROUTE_PRESETS.find(r => r.id === e.target.value);
-    if (!selected) return;
-    activePreset = selected;
-
-    if (soundEngine) soundEngine.playMechanicalClick();
-
-    // Update Text Data
-    container.querySelector('#rt-origin-text').textContent = selected.origin.name;
-    container.querySelector('#rt-dest-text').textContent = selected.destination.name;
-    container.querySelector('#safe-dist').textContent = `${selected.safe.distanceNm} nm`;
-    container.querySelector('#safe-eta').textContent = selected.safe.etaHours;
-    container.querySelector('#safe-fuel').textContent = selected.safe.fuelEstLiters;
-    container.querySelector('#safe-desc').textContent = selected.safe.hazardSummary;
-
-    container.querySelector('#short-dist').textContent = `${selected.shortest.distanceNm} nm`;
-    container.querySelector('#short-eta').textContent = selected.shortest.etaHours;
-    container.querySelector('#short-fuel').textContent = selected.shortest.fuelEstLiters;
-    container.querySelector('#short-desc').textContent = selected.shortest.hazardSummary;
-
-    // Update Analog Gauges
-    const safeGaugeEl = container.querySelector('#route-safe-gauge');
-    const shortGaugeEl = container.querySelector('#route-short-gauge');
-    if (safeGaugeEl) updateRiskGauge(safeGaugeEl, selected.safe.riskScore);
-    if (shortGaugeEl) updateRiskGauge(shortGaugeEl, selected.shortest.riskScore);
-
-    // Redraw map
-    drawRoutes(selected);
-  });
-
-  const btnExport = container.querySelector('#btn-export-waypoints');
-  btnExport.addEventListener('click', () => {
-    if (soundEngine) soundEngine.playTacticalChirp();
-    btnExport.textContent = '✓ WAYPOINTS EXPORTED TO GPX';
-    setTimeout(() => {
-      btnExport.textContent = '🧭 EXPORT WAYPOINTS TO ECDIS';
-    }, 2500);
+      setTimeout(() => map.invalidateSize(), 150);
+    } catch (e) {
+      console.warn('[Route Map] Init error:', e);
+    }
   });
 }

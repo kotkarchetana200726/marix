@@ -59,94 +59,45 @@ PFZ_DATA = [
         "advisory": "Optimal window 0300Z–1100Z. Deploy purse seine along 65m isobath heading SW at 4 knots.",
         "distanceNm": "25.9",
         "depthM": 65,
-        "fuelSavingsEst": "28% vs Blind Trawling",
-        "radiusKm": 18
+        "fuelSavingsEst": "28%"
     },
     {
         "id": "pfz-02",
-        "name": "Ratnagiri-Devgad Pelagic Edge",
+        "name": "Ratnagiri Pelagic Edge (SECONDARY)",
         "lat": 16.55,
         "lng": 72.85,
         "confidence": "91%",
         "sstAnomaly": "-0.9°C",
         "chlorophyll": "2.8 mg/m³",
         "species": ["Seer Fish (Surmai)", "Squid / Cephalopods", "Horse Mackerel"],
-        "advisory": "Favorable 0.6 kt SE current. Strong thermal gradient at 50m isobath.",
+        "advisory": "Favorable current (0.6 kts SE). Strong thermal gradient at 50m isobath.",
         "distanceNm": "17.3",
         "depthM": 48,
-        "fuelSavingsEst": "22% vs Blind Trawling",
-        "radiusKm": 14
-    },
-    {
-        "id": "pfz-03",
-        "name": "Kochi-Alleppey Mud Bank (Chakara Zone)",
-        "lat": 9.77,
-        "lng": 75.82,
-        "confidence": "98%",
-        "sstAnomaly": "-1.6°C",
-        "chlorophyll": "4.2 mg/m³",
-        "species": ["Penaeid Prawns", "Oil Sardine", "Anchovy"],
-        "advisory": "Exceptional artisanal fishing probability. Calm waters inside 15m contour. Best prawn grounds in decade.",
-        "distanceNm": "11.8",
-        "depthM": 35,
-        "fuelSavingsEst": "40% vs Blind Trawling",
-        "radiusKm": 12
-    },
-    {
-        "id": "pfz-04",
-        "name": "Saurashtra Shelf Break Convergence",
-        "lat": 20.85,
-        "lng": 69.95,
-        "confidence": "89%",
-        "sstAnomaly": "-1.1°C",
-        "chlorophyll": "3.1 mg/m³",
-        "species": ["Ribbonfish", "Croakers", "Pomfret"],
-        "advisory": "Cyclonic eddy periphery. High pelagic density at 75m drop-off.",
-        "distanceNm": "34.2",
-        "depthM": 75,
-        "fuelSavingsEst": "25% vs Blind Trawling",
-        "radiusKm": 20
+        "fuelSavingsEst": "22%"
     }
 ]
 
 GEOFENCE_DATA = [
     {
-        "id": "hz-01",
-        "name": "Tropical Depression Varuna — Gale Core",
+        "id": "geo-cyclone-core",
+        "name": "Cyclone Varuna Gale Danger Core",
         "type": "hazard",
-        "center": [20.80, 68.50],
-        "radius": 185000,
+        "center": [20.8, 68.5],
+        "radiusMeters": 180000,
         "colour": "#FF5C5C",
-        "description": "Sustained 52-kt winds, 5.8m waves. All vessels evacuate. Port Warning Signal No. 8 hoisted."
+        "description": "52-knot sustained gale winds & 5.8m phenomenal swells. No vessel movement permitted."
     },
     {
-        "id": "hz-02",
-        "name": "Tropical Depression Varuna — Warning Zone",
-        "type": "hazard",
-        "center": [20.50, 68.80],
-        "radius": 350000,
-        "colour": "rgba(255, 92, 92, 0.4)",
-        "description": "Extended gale-force wind radius. Small craft must seek immediate shelter."
-    },
-    {
-        "id": "mpa-01",
-        "name": "Gulf of Khambhat Marine Protected Area",
-        "type": "MPA",
-        "latlngs": [[22.2, 72.2], [22.8, 72.9], [22.5, 73.4], [21.9, 73.1], [21.6, 72.5]],
+        "id": "geo-malvan-mpa",
+        "name": "Malvan Marine Sanctuary MPA",
+        "type": "protected",
+        "latlngs": [[16.02, 73.42], [16.08, 73.48], [16.04, 73.55], [15.98, 73.49]],
         "colour": "#6BCB77",
-        "description": "Marine Protected Area. Commercial bottom trawling strictly prohibited by WPA 1972."
+        "description": "Protected Coral & Ecosystem Reserve. Mechanized trawling strictly prohibited under Wildlife Act."
     },
     {
-        "id": "mpa-02",
-        "name": "Malvan Marine Sanctuary",
-        "type": "MPA",
-        "latlngs": [[16.05, 73.45], [16.12, 73.55], [16.08, 73.62], [15.98, 73.56], [15.95, 73.48]],
-        "colour": "#6BCB77",
-        "description": "Protected coral reef and mangrove ecosystem. No unauthorized anchoring or commercial fishing."
-    },
-    {
-        "id": "rz-01",
-        "name": "Mumbai High Offshore Naval Security Zone",
+        "id": "geo-mumbai-high-naval",
+        "name": "Mumbai High Offshore Exclusion Zone",
         "type": "restricted",
         "latlngs": [[19.2, 72.6], [19.5, 73.0], [19.0, 73.2], [18.8, 72.8]],
         "colour": "#FF5C5C",
@@ -180,258 +131,330 @@ async def health():
         }
     }
 
-# ─── POST /api/chat (SPRING BOOT CONTRACT SSE) ────────────────────────────────
+# ─── POST /api/chat (SPRING BOOT CONTRACT SSE WITH MOCK SYSTEM) ────────────────
 @app.post("/api/chat")
 async def chat_sse(req: ChatRequest):
     query = req.message or req.prompt or ""
     
     async def event_generator():
-        p = query.lower()
+        p = query.lower().strip()
         
-        # 1. Progressive Status Events
+        # Progressive Status Events
         yield sse_event({"type": "status", "message": "Connecting to INCOIS & IMD Doppler weather mesh..."})
-        await asyncio.sleep(0.4)
+        await asyncio.sleep(0.3)
         
-        yield sse_event({"type": "status", "message": "Analyzing bathymetry and oceanic thermal gradients..."})
-        await asyncio.sleep(0.4)
+        yield sse_event({"type": "status", "message": "Analyzing bathymetry & oceanic thermal gradients..."})
+        await asyncio.sleep(0.3)
         
-        yield sse_event({"type": "status", "message": "Synthesizing multimodal reasoning & UI component specs..."})
-        await asyncio.sleep(0.4)
+        yield sse_event({"type": "status", "message": "Synthesizing multimodal reasoning & UI components..."})
+        await asyncio.sleep(0.3)
 
-        # 2. Result Event with strict UI component schema
-        if any(w in p for w in ["cyclone", "storm", "wave", "mumbai", "hazard", "gale", "risk"]):
-            ui_json = {
-                "title": "Severe Cyclonic Storm & Hazard Assessment — Sector 4B",
-                "components": [
-                    {
-                        "type": "risk-card",
-                        "data": {
-                            "score": 88,
-                            "status": "CRITICAL GALE WARNING",
-                            "zone": "ARABIAN SEA NORTH",
-                            "title": "Tropical Depression Varuna (Hazard Index 88/100)",
-                            "description": "Sustained 52-knot winds with 5.8m significant wave heights. Storm core tracking NE at 14 kts.",
-                            "coordinates": "20°48'N, 68°30'E",
-                            "swell": "5.8m Phenomenal",
-                            "wind": "52 kts NNE (Gale Force)"
-                        }
-                    },
-                    {
-                        "type": "weather-card",
-                        "data": {
-                            "pressure": "988.4 hPa (Rapid Fall)",
-                            "sst": "29.4°C (+1.8° Anomaly)",
-                            "wind": "52 kts NNE",
-                            "swell": "5.8m @ 14.8s Period",
-                            "visibility": "1.2 nm (Heavy Squalls)",
-                            "current": "1.8 kts SW",
-                            "humidity": "94%"
-                        }
-                    },
-                    {
-                        "type": "alert-card",
-                        "data": {
-                            "level": "critical",
-                            "title": "PORT WARNING SIGNAL NO. 8 HOISTED",
-                            "message": "Okha, Porbandar, Veraval, Ratnagiri. No vessel movement permitted without Coast Guard clearance.",
-                            "source": "IMD Marine Warning Center",
-                            "timestamp": "2026-08-29 07:55:00 UTC",
-                            "areaAffected": "North Arabian Sea / Gujarat & Maharashtra Coast"
-                        }
-                    },
-                    {
-                        "type": "marine-map",
-                        "data": {
-                            "label": "STORM CORE & DIVERSION SECTOR",
-                            "center": [20.8, 68.5],
-                            "zoom": 7,
-                            "markers": [
-                                {"latlng": [20.8, 68.5], "icon": "🌪️", "popup": "Cyclone Varuna Eye (988 hPa)"},
-                                {"latlng": [18.98, 72.82], "icon": "⚓", "popup": "Mumbai Safe Water Anchorage"}
-                            ],
-                            "polygons": [
-                                {"center": [20.8, 68.5], "radius": 180000, "colour": "#FF5C5C"},
-                                {"center": [20.5, 68.8], "radius": 320000, "colour": "rgba(255,92,92,0.3)"}
-                            ]
-                        }
-                    },
-                    {
-                        "type": "recommendation-card",
-                        "data": {
-                            "priority": "CRITICAL",
-                            "heading": "Emergency Anchorage Divert Order",
-                            "text": "Immediately alter course to 120° magnetic towards Ratnagiri / Mumbai shelter. Secure loose gear and maintain continuous watch.",
-                            "actions": [
-                                "Plot diversion waypoint 18°30'N, 72°40'E outside 50m gale contour",
-                                "Reduce cruising speed to bare steerage (6 kts)",
-                                "Operate bilge pump monitoring and maintain VHF CH 16 listening watch"
-                            ],
-                            "safeHarbor": "Ratnagiri Anchorage / Mumbai Inner Harbour",
-                            "vhf": "VHF CH 16 / DSC MF 2187.5 kHz"
-                        }
-                    },
-                    {
-                        "type": "evidence-panel",
-                        "data": {
-                            "title": "Oceanographic & Radar Inference Chain",
-                            "entries": [
-                                {"label": "IMD Doppler DWR-Mumbai", "value": "Reflectivity core > 48 dBZ moving NE", "confidence": "99%", "source": "IMD Radar"},
-                                {"label": "INCOIS Wave Buoy 2304", "value": "Swell period escalated from 8.2s to 14.8s", "confidence": "97%", "source": "INCOIS Buoy"},
-                                {"label": "Barometric Gradient", "value": "Central pressure drop of 14 hPa in 6 hours", "confidence": "95%", "source": "NOAA Surface Analysis"}
-                            ],
-                            "summary": "High risk of rogue breaking swells. Probability of vessel capsize in small craft is > 85%. Immediate harbor shelter required.",
-                            "modelVersion": "ORCA-WaveSpectral-v2.4"
-                        }
-                    }
-                ]
-            }
-            text = "**Tropical Depression Varuna** is intensifying over the North Arabian Sea, accelerating NE at 14 knots. Central pressure has dropped to **988 hPa** with sustained surface winds of 52 knots and gusts to 65 knots. Significant wave heights of **4.8m–6.1m** are recorded by Buoy 2304. All small craft must immediately abort open transit."
+        # ── DEMO INTENT MATCHERS ──────────────────────────────────────────────
 
-        elif any(w in p for w in ["fish", "pfz", "catch", "konkan", "tuna", "mackerel", "yield"]):
+        # 1. MUMBAI FISHING CONDITIONS
+        if ((("fish" in p or "pfz" in p) and "mumbai" in p) or 
+            p in ["fishing conditions in mumbai", "is fishing good near mumbai", "mumbai fishing forecast"]):
             ui_json = {
-                "title": "Potential Fishing Zone (PFZ) Advisory — Konkan Shelf",
+                "title": "Mumbai Offshore Fishing Conditions Assessment",
                 "components": [
                     {
                         "type": "pfz-card",
                         "data": {
-                            "name": "Konkan Thermal Front Alpha (PRIMARY)",
-                            "latLonStr": "17°25'N, 72°21'E",
-                            "sstAnomaly": "-1.4°C (Strong Coastal Upwelling)",
-                            "chlorophyll": "3.4 mg/m³ (Peak Bloom)",
-                            "confidence": "96%",
-                            "targetSpecies": ["Indian Mackerel (Rastrelliger)", "Sardinella longiceps", "Yellowfin Tuna"],
-                            "distanceNm": "25.9",
-                            "depthM": 65,
-                            "fuelSavingsEst": "28% vs Blind Trawling",
-                            "advisory": "Optimal fishing window 0300Z–1100Z. Deploy purse seine along 65m isobath, heading SW at 4 knots."
-                        }
-                    },
-                    {
-                        "type": "ocean-card",
-                        "data": {
-                            "source": "Sentinel-3 OLCI & NOAA Geo-Polar",
-                            "sstAnomaly": "-1.4°C",
-                            "chlorophyll": "3.4 mg/m³",
-                            "thermoclineDepth": "18m (Shallow Upwelling)",
-                            "salinity": "35.2 PSU",
-                            "dissolvedOxygen": "5.8 mg/L",
-                            "ph": "8.15",
-                            "currentSpeed": "0.6 kts",
-                            "currentDirection": "145° (SE)",
-                            "summary": "Ekman transport is drawing nutrient-rich sub-surface water into the photic zone, creating dense diatom clusters."
+                            "name": "Mumbai Offshore High-Yield Fishing Zone",
+                            "latLonStr": "18°55'N, 72°45'E",
+                            "sstAnomaly": "28.4°C (-0.8°C Anomaly)",
+                            "chlorophyll": "1.82 mg/m³ (High Bloom)",
+                            "confidence": "87%",
+                            "targetSpecies": ["Pelagic Fishes", "Indian Mackerel", "Sardinella"],
+                            "distanceNm": "24.5 nm (35–55 km)",
+                            "depthM": 52,
+                            "fuelSavingsEst": "28%",
+                            "advisory": "Favorable fishing conditions expected 35–55 km off the Mumbai coast. Deploy gear along 50m isobath."
                         }
                     },
                     {
                         "type": "weather-card",
                         "data": {
-                            "pressure": "1011.2 hPa",
-                            "sst": "26.8°C (Upwelling Front)",
-                            "wind": "12 kts NW (Favorable)",
-                            "swell": "1.2m Slight",
-                            "visibility": "8.0 nm (Clear)",
-                            "current": "0.6 kts SE"
-                        }
-                    },
-                    {
-                        "type": "recommendation-card",
-                        "data": {
-                            "priority": "ADVISORY",
-                            "heading": "Optimal Harvest Strategy Directive",
-                            "text": "Target the 60m–70m bathymetric contour corridor. Fish aggregations peak at dawn. Avoid Malvan Marine Sanctuary 12nm south.",
-                            "actions": [
-                                "Depart port at 01:30Z to arrive on fishing ground at first light",
-                                "Maintain echo-sounder gain at 70% to detect subsurface pelagic schools",
-                                "Observe 3nm buffer from Malvan Marine Protected Area boundary"
-                            ],
-                            "safeHarbor": "Ratnagiri Fisheries Jetty",
-                            "vhf": "VHF CH 16 / CH 08 (Fisheries)"
-                        }
-                    }
-                ]
-            }
-            text = "**Two high-yield PFZ opportunities** detected along the Konkan Shelf. The primary zone (Thermal Front Alpha, 17°25'N, 72°21'E) shows exceptional upwelling conditions with chlorophyll-a at **3.4 mg/m³** — 300% above seasonal baseline. Indian Mackerel, Sardinella, and Yellowfin Tuna are heavily concentrated at the 65m isobath."
-
-        elif any(w in p for w in ["route", "veraval", "ratnagiri", "navigation", "planner"]):
-            ui_json = {
-                "title": "Pareto Optimal Route Analysis (Veraval → Ratnagiri)",
-                "components": [
-                    {
-                        "type": "risk-card",
-                        "data": {
-                            "score": 19,
-                            "status": "SAFE PASSAGE APPROVED",
-                            "zone": "COASTAL CORRIDOR",
-                            "title": "ORCA Recommended Safe Route (Risk 19 vs Shortest 84)",
-                            "description": "Coastal bathymetric lee shelter via waypoints 20.6°N→18.4°N. Tail current saves 530L fuel.",
-                            "coordinates": "Via 20.6°N, 71.4°E → 18.4°N, 72.8°E",
-                            "swell": "1.8m Moderate",
-                            "wind": "16 kts"
-                        }
-                    },
-                    {
-                        "type": "recommendation-card",
-                        "data": {
-                            "priority": "ADVISORY",
-                            "heading": "Navigational Waypoint Directive",
-                            "text": "Depart Veraval on 090° magnetic. Alter to 130° at WP-2 (20°36'N, 71°24'E). Skirt PFZ Alpha at WP-3 for opportunistic catch before final approach to Ratnagiri.",
-                            "actions": [
-                                "WP-1: 20°54'N, 70°22'E (Veraval Fairway Buoy)",
-                                "WP-2: 20°36'N, 71°24'E (Gulf of Khambhat Lee)",
-                                "WP-3: 18°24'N, 72°48'E (Mumbai High Outer Buffer)",
-                                "WP-4: 16°59'N, 73°16'E (Ratnagiri Safe Water Mark)"
-                            ],
-                            "safeHarbor": "Ratnagiri Port (Deep-Water Berth 4)",
-                            "vhf": "VHF CH 16 / 22A"
+                            "pressure": "1010.4 hPa",
+                            "sst": "28.4°C",
+                            "wind": "14 km/h WNW",
+                            "swell": "1.2 m @ 9.5s",
+                            "visibility": "8.5 nm (Good)"
                         }
                     },
                     {
                         "type": "evidence-panel",
                         "data": {
-                            "title": "Multi-Objective Pareto Trade-Off Optimization",
+                            "title": "EVIDENCE TRACE & TELEMETRY SOURCES",
                             "entries": [
-                                "Direct Route: 312 nm, Risk: 84/100, Fuel: 3,850L (Intersects Cyclone Varuna)",
-                                "ORCA Safe Route: 348 nm, Risk: 19/100, Fuel: 3,320L (Tail-current assist)",
-                                "Net Benefit: 77% Risk Reduction, 530L Fuel Saved, +2h 45m Transit Time"
+                                {"label": "INCOIS PFZ Feed", "value": "High-yield thermal front identified 35–55 km off Mumbai", "confidence": "87%", "source": "INCOIS Advisory"},
+                                {"label": "NOAA SST Satellite", "value": "Sea Surface Temp: 28.4°C | Chlorophyll-a: 1.82 mg/m³", "confidence": "92%", "source": "NOAA Geo-Polar"},
+                                {"label": "IMD Weather Mesh", "value": "Wind: 14 km/h WNW | Wave Height: 1.2 m", "confidence": "95%", "source": "IMD Radar"}
                             ],
-                            "summary": "The coastal detour adds 36 nm but saves fuel due to south-flowing monsoon lee currents while avoiding 5.8m gale seas.",
-                            "modelVersion": "ORCA-ParetoRoute-v2.1"
+                            "summary": "Favorable fishing conditions verified off Mumbai. DEMO NOTICE: Predefined mock data for demonstration.",
+                            "modelVersion": "MARIX DEMO MODE"
                         }
                     }
                 ]
             }
-            text = "Route optimization between **Veraval and Ratnagiri** complete. The direct 312nm course intersects the Cyclone Varuna gale core with an unacceptable risk score of **84/100**. ORCA has computed a coastal waypoint diversion of **348nm** that reduces risk to **19/100** while saving 530 litres of fuel."
+            text = "**Potential Fishing Zone: HIGH (87% Confidence)**\n\nFavorable fishing conditions expected **35–55 km off the Mumbai coast**. Thermal gradient analysis confirms plankton aggregation along 50m contour.\n\n- **SST**: 28.4°C\n- **Chlorophyll-a**: 1.82 mg/m³\n- **Wave Height**: 1.2 m\n- **Wind Speed**: 14 km/h WNW\n- **Recommendation**: Favorable fishing conditions expected 35–55 km off the Mumbai coast."
 
-        else:
+        # 2. MUMBAI CYCLONE RISK
+        elif (("cyclone" in p or "storm" in p or "threat" in p) and "mumbai" in p):
             ui_json = {
-                "title": "ORCA Marine Intelligence Console — Operational Status",
+                "title": "Mumbai Regional Cyclone & Sea State Risk Assessment",
                 "components": [
                     {
-                        "type": "alert-card",
+                        "type": "risk-card",
                         "data": {
-                            "level": "info",
-                            "title": "ALL SENSOR FEEDS SYNCHRONIZED",
-                            "message": "INCOIS PFZ (✓), NOAA SST (✓), IMD Doppler Radar (✓), AIS Vessel Stream (✓). No distress signals in Sector 4B.",
-                            "source": "ORCA Core Mesh",
-                            "timestamp": "2026-08-29 07:55:00 UTC",
-                            "areaAffected": "Arabian Sea Sector 4B"
+                            "score": 48,
+                            "riskScore": 48,
+                            "status": "MODERATE RISK",
+                            "zone": "MUMBAI COASTAL & OFFSHORE SECTOR",
+                            "title": "Cyclone & Sea Hazard Advisory — Mumbai Coast",
+                            "description": "No active cyclone directly affecting Mumbai. Elevated wave activity (2.1–2.8 m) and wind gusts expected over next 24 hours.",
+                            "coordinates": "18.98°N, 72.82°E",
+                            "swell": "2.1–2.8 m Moderate-Rough",
+                            "wind": "28–35 km/h WSW"
+                        }
+                    },
+                    {
+                        "type": "weather-card",
+                        "data": {
+                            "pressure": "1005.8 hPa",
+                            "sst": "28.1°C",
+                            "wind": "28–35 km/h WSW",
+                            "swell": "2.1–2.8 m @ 11.2s",
+                            "visibility": "5.2 nm (Moderate Squall)"
+                        }
+                    },
+                    {
+                        "type": "recommendation-card",
+                        "data": {
+                            "priority": "ADVISORY",
+                            "heading": "Small Craft Safety Directive",
+                            "text": "Small fishing vessels (< 15m LOA) should avoid deep offshore transit over the next 24 hours. Maintain VHF Channel 16 guard.",
+                            "safeHarbor": "Sassoon Dock / Mumbai Harbour",
+                            "vhf": "VHF CH 16 / 08"
+                        }
+                    },
+                    {
+                        "type": "evidence-panel",
+                        "data": {
+                            "title": "CYCLONE RISK REASONING TRACE",
+                            "entries": [
+                                {"label": "IMD Radar", "value": "No cyclone core directly affecting Mumbai. Trough active.", "confidence": "94%", "source": "IMD Radar"},
+                                {"label": "INCOIS Buoy", "value": "Wave height 2.1–2.8 m over next 24h", "confidence": "91%", "source": "INCOIS"}
+                            ],
+                            "summary": "Moderate risk confirmed. DEMO NOTICE: Simulated demonstration advisory.",
+                            "modelVersion": "MARIX DEMO MODE"
+                        }
+                    }
+                ]
+            }
+            text = "**Cyclone Risk Level: MODERATE (Score: 48/100)**\n\nThere is **no active cyclone directly affecting Mumbai**. However, **elevated wave activity (2.1–2.8 m)** and winds of **28–35 km/h** are expected over the next 24 hours.\n\n- **Sea State**: Moderate to Rough\n- **Wave Height**: 2.1–2.8 m\n- **Wind Speed**: 28–35 km/h\n- **Recommendation**: Small fishing vessels advised to exercise caution."
+
+        # 3. MUMBAI SEA CONDITION
+        elif (("sea condition" in p or "sea state" in p or "waves" in p) and "mumbai" in p):
+            ui_json = {
+                "title": "Mumbai Coastal Sea State & Navigational Condition",
+                "components": [
+                    {
+                        "type": "weather-card",
+                        "data": {
+                            "pressure": "1009.2 hPa",
+                            "sst": "28.2°C",
+                            "wind": "18 km/h NW",
+                            "swell": "1.8 m @ 10.1s",
+                            "visibility": "Good (7.8 nm)"
                         }
                     },
                     {
                         "type": "risk-card",
                         "data": {
                             "score": 28,
+                            "riskScore": 28,
                             "status": "NOMINAL",
-                            "zone": "MUMBAI COASTAL QUADRANT",
-                            "title": "Local Maritime Sector Assessment",
-                            "description": "Moderate sea conditions. Tropical Depression Varuna active 180nm NW.",
-                            "coordinates": "18°58'N, 72°49'E",
-                            "swell": "1.6m Slight",
-                            "wind": "14 kts W"
+                            "zone": "MUMBAI COASTAL SECTOR",
+                            "title": "Mumbai Coastal Sea Condition Overview",
+                            "description": "Moderate sea state with 1.8m wave swell and 18 km/h winds. Navigational conditions generally stable.",
+                            "coordinates": "18.96°N, 72.80°E",
+                            "swell": "1.8 m Moderate",
+                            "wind": "18 km/h NW"
+                        }
+                    },
+                    {
+                        "type": "evidence-panel",
+                        "data": {
+                            "title": "SEA STATE TELEMETRY EVIDENCE",
+                            "entries": [
+                                {"label": "Buoy Wave Telemetry", "value": "1.8 m wave swell, period 10.1s (Moderate)", "confidence": "96%", "source": "INCOIS Buoy"},
+                                {"label": "Coastal Anemometer", "value": "Wind 18 km/h NW, clear visibility 7.8 nm", "confidence": "98%", "source": "Mumbai Port"}
+                            ],
+                            "summary": "Sea conditions nominal. DEMO NOTICE: Simulated demonstration telemetry.",
+                            "modelVersion": "MARIX DEMO MODE"
                         }
                     }
                 ]
             }
-            text = "**ORCA Bridge Console** is fully operational. All **6 data adapters** are synchronized with sub-second latency. No MAYDAY or PAN-PAN distress signals detected in your monitoring quadrant."
+            text = "**Sea State: Moderate (Overall Risk: LOW–MODERATE)**\n\nCurrent sea conditions near Mumbai are **moderate and safe for normal vessel operations**.\n\n- **Sea State**: Moderate\n- **Wave Height**: 1.8 m\n- **Wind Speed**: 18 km/h\n- **Visibility**: Good (7.8 nm)\n- **Overall Risk**: LOW–MODERATE (28/100)\n- **Recommendation**: Normal coastal navigation and fishing permitted."
+
+        # 4. POTENTIAL FISHING ZONES LIST
+        elif (("where" in p or "find" in p or "list" in p or "show" in p) and ("pfz" in p or "fishing zone" in p)):
+            ui_json = {
+                "title": "Regional Potential Fishing Zones (PFZ) Directory",
+                "components": [
+                    {
+                        "type": "pfz-card",
+                        "data": {
+                            "name": "1. Mumbai Offshore PFZ (Sector Alpha)",
+                            "latLonStr": "18°52'N, 72°38'E",
+                            "sstAnomaly": "-1.1°C Upwelling Front",
+                            "chlorophyll": "1.82 mg/m³",
+                            "confidence": "87%",
+                            "targetSpecies": ["Indian Mackerel", "Sardinella longiceps"],
+                            "distanceNm": "21.6 nm (40 km)",
+                            "depthM": 54,
+                            "fuelSavingsEst": "25%",
+                            "advisory": "Primary front active along 50m bathymetric contour."
+                        }
+                    },
+                    {
+                        "type": "pfz-card",
+                        "data": {
+                            "name": "2. Ratnagiri Offshore PFZ (Front Beta)",
+                            "latLonStr": "16°58'N, 72°42'E",
+                            "sstAnomaly": "-1.4°C Strong Upwelling",
+                            "chlorophyll": "2.95 mg/m³",
+                            "confidence": "92%",
+                            "targetSpecies": ["Kingfish (Surmai)", "Seer Fish", "Squid"],
+                            "distanceNm": "15.1 nm (28 km)",
+                            "depthM": 48,
+                            "fuelSavingsEst": "32%",
+                            "advisory": "Strong thermal gradient. Deploy purse seine along edge."
+                        }
+                    },
+                    {
+                        "type": "pfz-card",
+                        "data": {
+                            "name": "3. Goa Coastal PFZ (Front Gamma)",
+                            "latLonStr": "15°24'N, 73°35'E",
+                            "sstAnomaly": "-1.2°C Upwelling",
+                            "chlorophyll": "2.40 mg/m³",
+                            "confidence": "89%",
+                            "targetSpecies": ["Yellowfin Tuna", "Anchovies"],
+                            "distanceNm": "9.7 nm (18 km)",
+                            "depthM": 36,
+                            "fuelSavingsEst": "29%",
+                            "advisory": "Favorable coastal current convergence."
+                        }
+                    },
+                    {
+                        "type": "evidence-panel",
+                        "data": {
+                            "title": "PFZ SATELLITE EVIDENCE & DISCLAIMER",
+                            "entries": [
+                                {"label": "Copernicus Sentinel-3", "value": "Chlorophyll-a optical imagery pass complete", "confidence": "93%", "source": "ESA"},
+                                {"label": "NOAA Geo-Polar SST", "value": "Thermal gradient anomaly mapping active", "confidence": "90%", "source": "NOAA"}
+                            ],
+                            "summary": "DEMO NOTICE: All PFZ locations listed above represent mock demonstration data for hackathon presentation.",
+                            "modelVersion": "MARIX DEMO MODE"
+                        }
+                    }
+                ]
+            }
+            text = "**Active Potential Fishing Zones (PFZ) Directory**\n\n1. **Mumbai Offshore PFZ**: `18°52'N, 72°38'E` (87% confidence)\n2. **Ratnagiri Offshore PFZ**: `16°58'N, 72°42'E` (92% confidence)\n3. **Goa Coastal PFZ**: `15°24'N, 73°35'E` (89% confidence)\n\n*DEMO NOTICE: Coordinates and advisories represent MOCK DEMO DATA.*"
+
+        # 5. MARINE SNAPSHOT
+        elif ("snapshot" in p or "marine summary" in p or "daily status" in p or "marine overview" in p):
+            ui_json = {
+                "title": "Daily Marine Intelligence Snapshot & Status Report",
+                "components": [
+                    {
+                        "type": "weather-card",
+                        "data": {
+                            "pressure": "1009.4 hPa",
+                            "sst": "28.3°C",
+                            "wind": "16 km/h WNW",
+                            "swell": "1.5 m @ 10.4s",
+                            "visibility": "8.0 nm (Clear)"
+                        }
+                    },
+                    {
+                        "type": "risk-card",
+                        "data": {
+                            "score": 34,
+                            "riskScore": 34,
+                            "status": "NOMINAL",
+                            "zone": "ARABIAN SEA / KONKAN QUADRANT",
+                            "title": "Regional Marine Risk Index — Snapshot",
+                            "description": "Low-to-moderate hazard index (34/100). No active storm core within 250 NM. Safe transit across coastal corridors.",
+                            "coordinates": "17.5°N, 72.8°E",
+                            "swell": "1.5 m Moderate",
+                            "wind": "16 km/h WNW"
+                        }
+                    },
+                    {
+                        "type": "pfz-card",
+                        "data": {
+                            "name": "Regional Fishing Potential Summary",
+                            "latLonStr": "17°40'N, 72°30'E",
+                            "sstAnomaly": "-1.2°C Upwelling Anomaly",
+                            "chlorophyll": "2.15 mg/m³",
+                            "confidence": "88%",
+                            "targetSpecies": ["Indian Mackerel", "Sardinella", "Squid"],
+                            "distanceNm": "18.5 nm",
+                            "depthM": 45,
+                            "fuelSavingsEst": "30%",
+                            "advisory": "Optimal fishing conditions along 50m bathymetric contour."
+                        }
+                    },
+                    {
+                        "type": "evidence-panel",
+                        "data": {
+                            "title": "MARINE SNAPSHOT DATA AGGREGATION",
+                            "entries": [
+                                {"label": "INCOIS PFZ Adapter", "value": "88% Yield probability on Konkan shelf", "confidence": "88%", "source": "INCOIS"},
+                                {"label": "NOAA SST Adapter", "value": "SST 28.3°C, Chlorophyll-a 2.15 mg/m³", "confidence": "94%", "source": "NOAA"},
+                                {"label": "IMD Weather Mesh", "value": "Wind 16 km/h WNW, Wave height 1.5 m", "confidence": "96%", "source": "IMD Radar"}
+                            ],
+                            "summary": "Overall marine status operational. DEMO NOTICE: Predefined mock data for demonstration purposes.",
+                            "modelVersion": "MARIX DEMO MODE"
+                        }
+                    }
+                ]
+            }
+            text = "**MARIX Daily Marine Snapshot & Operational Status**\n\nOverall Marine Status: **OPERATIONAL / NOMINAL**\n\n- **SST**: 28.3°C\n- **Chlorophyll-a**: 2.15 mg/m³\n- **Wind Speed**: 16 km/h WNW\n- **Wave Height**: 1.5 m\n- **Weather Risk**: 34/100 (LOW–MODERATE)\n- **Fishing Potential**: HIGH (88%)\n- **Overall Status**: OPERATIONAL / SYS NOMINAL"
+
+        # DEFAULT FALLBACK FOR UNMATCHED QUERIES (Preserves existing API behaviour)
+        else:
+            ui_json = {
+                "title": f"ORCA Intelligence Directive — {query[:30]}",
+                "components": [
+                    {
+                        "type": "weather-card",
+                        "data": {
+                            "pressure": "1009.6 hPa",
+                            "sst": "28.1°C",
+                            "wind": "18 kts WNW",
+                            "swell": "1.6m Moderate",
+                            "visibility": "7.2 nm"
+                        }
+                    },
+                    {
+                        "type": "evidence-panel",
+                        "data": {
+                            "title": "REASONING INFERENCE TRACE",
+                            "entries": [
+                                {"label": "Telemetry Query", "value": query, "confidence": "95%", "source": "User Query"}
+                            ],
+                            "summary": "Standard reasoning pipeline executed.",
+                            "modelVersion": "MARIX LIVE REASONING v2.4"
+                        }
+                    }
+                ]
+            }
+            text = f"**MARIX Marine Intelligence Response** for *\"{query}\"*\n\nAll data adapters synchronized. Regional weather and oceanographic telemetry active across coastal sector."
 
         yield sse_event({"type": "result", "ui_json": ui_json, "text": text})
 
@@ -473,7 +496,6 @@ if (root_dir / "index.html").exists():
     async def serve_index():
         return FileResponse(root_dir / "index.html")
 
-    # Mount static assets
     if (root_dir / "css").exists():
         app.mount("/css", StaticFiles(directory=str(root_dir / "css")), name="css")
     if (root_dir / "js").exists():

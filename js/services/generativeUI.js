@@ -3,20 +3,11 @@
 // This is the core of the Generative UI system. Instead of hardcoded templates,
 // the AI agent emits a stream of *component specifications* (JSON), and this 
 // renderer dynamically instantiates the correct UI components at runtime.
-//
-// GENERATIVE UI FLOW:
-//   Agent → { type: "RiskCard", props: {...} }
-//         → { type: "PFZCard",  props: {...} }
-//         → { type: "WeatherCard", props: {...} }
-//   Renderer → mounts those exact components into the canvas, in that order
-//
-// The frontend is a CANVAS. The AI decides what to paint on it.
 
 import { createRiskCard, createPFZCard, createWeatherCard, createVesselAdvisoryCard, createRoutePreviewCard, createReasoningLogCard } from '../components/cards.js';
+import { findMockResponse } from '../data/mockResponses.js';
 
 // === COMPONENT REGISTRY ===
-// Maps agent-emitted type strings → component factory functions.
-// To add a new component: register it here. The agent can then emit it.
 const COMPONENT_REGISTRY = {
   RiskCard:         (props) => createRiskCard(props),
   PFZCard:          (props) => createPFZCard(props),
@@ -24,7 +15,15 @@ const COMPONENT_REGISTRY = {
   VesselAdvisory:   (props) => createVesselAdvisoryCard(props),
   RoutePreview:     (props) => createRoutePreviewCard(props),
   ReasoningLog:     (props) => createReasoningLogCard(props.steps || []),
-  // Inline components — rendered directly by the renderer
+  // Lowercase keys matching backend SSE contract
+  'risk-card':           (props) => createRiskCard(props),
+  'weather-card':        (props) => createWeatherCard(props),
+  'ocean-card':          (props) => createWeatherCard(props),
+  'pfz-card':            (props) => createPFZCard(props),
+  'alert-card':          (props) => createVesselAdvisoryCard(props),
+  'recommendation-card': (props) => createVesselAdvisoryCard(props),
+  'evidence-panel':      (props) => createReasoningLogCard(props.entries || props.steps || []),
+  // Inline components
   Separator:        ()      => `<hr style="border: none; border-top: 1px solid var(--chart-line); margin: 6px 0;">`,
   AlertBanner:      (props) => `
     <div style="
@@ -55,44 +54,36 @@ const COMPONENT_REGISTRY = {
 };
 
 // === GENERATIVE UI RENDERER ===
-// Accepts a stream of agent events, renders each in real-time into a container.
 export class GenerativeUIRenderer {
   constructor(mountEl) {
     this.mountEl = mountEl;     // The DOM container to render into
-    this.cards = [];             // Track rendered card elements for animation
+    this.cards = [];             // Track rendered card elements
   }
 
-  // Called for each streaming event from the agent
   handleEvent(event) {
     switch (event.type) {
-
-      // Streaming prose text (word by word)
       case 'PROSE_DELTA':
         this._updateProse(event.text);
         break;
 
-      // Agent chain-of-thought step
       case 'STEP':
         this._appendStep(event.step, event.stepIndex);
         break;
 
-      // A complete component spec — THIS is the Generative UI moment
       case 'COMPONENT':
         this._mountComponent(event.componentType, event.props, event.key);
         break;
 
-      // Batch of components (end-of-stream render)
       case 'COMPONENT_BATCH':
         if (Array.isArray(event.components)) {
           event.components.forEach((c, i) => {
             setTimeout(() => {
               this._mountComponent(c.type, c.props, c.key || `batch-${i}`);
-            }, i * 180); // Staggered stream-in animation
+            }, i * 180);
           });
         }
         break;
 
-      // Final signal — clears reasoning trace, finalizes prose
       case 'COMPLETE':
         this._finalize(event);
         break;
@@ -119,11 +110,11 @@ export class GenerativeUIRenderer {
   _mountComponent(type, props, key) {
     const factory = COMPONENT_REGISTRY[type];
     if (!factory) {
-      console.warn(`[ORCA GenUI] Unknown component type: "${type}". Register it in COMPONENT_REGISTRY.`);
+      console.warn(`[ORCA GenUI] Unknown component type: "${type}". Skipping.`);
       return;
     }
 
-    const cardHtml = factory(props);
+    const cardHtml = factory(props || {});
     const cardWrapper = document.createElement('div');
     cardWrapper.className = 'genui-card-mount';
     cardWrapper.setAttribute('data-component', type);
@@ -134,7 +125,6 @@ export class GenerativeUIRenderer {
     const deckEl = this.mountEl.querySelector('.genui-card-deck');
     if (deckEl) {
       deckEl.appendChild(cardWrapper);
-      // Trigger mount animation
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           cardWrapper.style.opacity = '1';
@@ -147,39 +137,34 @@ export class GenerativeUIRenderer {
   }
 
   _finalize(event) {
-    // Update final prose (remove streaming cursor)
     const proseEl = this.mountEl.querySelector('.genui-prose');
     if (proseEl && event.prose) {
       proseEl.innerHTML = _formatMarkdown(event.prose);
     }
 
-    // Fade out reasoning steps
     const stepsEl = this.mountEl.querySelector('.genui-steps');
     if (stepsEl) {
       stepsEl.style.transition = 'opacity 0.5s ease';
-      stepsEl.style.opacity = '0.35';
+      stepsEl.style.opacity = '0.4';
     }
 
-    // Update status badge
     const badgeEl = this.mountEl.querySelector('.genui-status-badge');
     if (badgeEl) {
       badgeEl.textContent = '✓ REASONING COMPLETE';
       badgeEl.className = 'genui-status-badge panel-badge badge-green';
     }
 
-    // Render any final batch of components from COMPLETE payload
     if (event.components && Array.isArray(event.components)) {
       event.components.forEach((c, i) => {
         setTimeout(() => {
           this._mountComponent(c.type, c.props, c.key || `final-${i}`);
-        }, i * 200);
+        }, i * 180);
       });
     }
   }
 }
 
 // === GENERATIVE UI AGENT BRIDGE ===
-// Translates AI agent responses into structured component events
 export class GenerativeAgentBridge {
   constructor() {
     this.mode = localStorage.getItem('orca_agent_mode') || 'SIMULATED';
@@ -187,13 +172,61 @@ export class GenerativeAgentBridge {
     this.apiKey = localStorage.getItem('orca_agent_key') || '';
   }
 
-  // Main entry point — streams events to the renderer
+  // Entry point — streams events to renderer
   async streamTo(promptText, renderer) {
+    // 1. Check Centralized Mock Response System first
+    const mockMatch = findMockResponse(promptText);
+    if (mockMatch) {
+      return this._streamFromMockMatch(mockMatch, renderer);
+    }
+
+    // 2. Fall back to standard live API or simulated engine for unmatched queries
     if (this.mode === 'LIVE_API') {
       return this._streamFromLiveAPI(promptText, renderer);
     } else {
       return this._streamFromSimulatedEngine(promptText, renderer);
     }
+  }
+
+  // Stream deterministic mock response matching exact user query
+  async _streamFromMockMatch(mockMatch, renderer) {
+    // 1. Reasoning steps
+    for (let i = 0; i < mockMatch.steps.length; i++) {
+      await _delay(280);
+      renderer.handleEvent({ type: 'STEP', step: mockMatch.steps[i], stepIndex: i });
+    }
+
+    await _delay(150);
+
+    // 2. Prose word by word
+    const words = mockMatch.prose.split(' ');
+    let partial = '';
+    for (const word of words) {
+      partial += word + ' ';
+      await _delay(28);
+      renderer.handleEvent({ type: 'PROSE_DELTA', text: partial });
+    }
+
+    await _delay(250);
+
+    // 3. Components
+    for (let i = 0; i < mockMatch.components.length; i++) {
+      await _delay(180);
+      renderer.handleEvent({
+        type: 'COMPONENT',
+        componentType: mockMatch.components[i].type,
+        props: mockMatch.components[i].props || mockMatch.components[i].data,
+        key: `${mockMatch.components[i].type}-${i}`
+      });
+    }
+
+    // 4. Signal completion
+    await _delay(100);
+    renderer.handleEvent({
+      type: 'COMPLETE',
+      prose: mockMatch.prose,
+      components: []
+    });
   }
 
   async _streamFromLiveAPI(promptText, renderer) {
@@ -232,12 +265,10 @@ export class GenerativeAgentBridge {
     }
   }
 
-  // High-fidelity simulation of what a real LLM agent would stream
   async _streamFromSimulatedEngine(promptText, renderer) {
     const intent = _detectIntent(promptText);
     const plan = _generateResponsePlan(intent);
 
-    // 1. Stream reasoning steps (chain-of-thought)
     for (let i = 0; i < plan.steps.length; i++) {
       await _delay(380);
       renderer.handleEvent({ type: 'STEP', step: plan.steps[i], stepIndex: i });
@@ -245,7 +276,6 @@ export class GenerativeAgentBridge {
 
     await _delay(200);
 
-    // 2. Stream prose text word by word
     const words = plan.prose.split(' ');
     let partial = '';
     for (const word of words) {
@@ -256,8 +286,6 @@ export class GenerativeAgentBridge {
 
     await _delay(300);
 
-    // 3. Stream each component one at a time (THE GENERATIVE UI MOMENT)
-    // This is where the agent "decides" what UI to show
     for (let i = 0; i < plan.components.length; i++) {
       await _delay(220);
       renderer.handleEvent({
@@ -268,7 +296,6 @@ export class GenerativeAgentBridge {
       });
     }
 
-    // 4. Signal completion
     await _delay(100);
     renderer.handleEvent({
       type: 'COMPLETE',
@@ -277,10 +304,6 @@ export class GenerativeAgentBridge {
     });
   }
 }
-
-// ═══════════════════════════════════════════════════
-// PRIVATE HELPERS
-// ═══════════════════════════════════════════════════
 
 function _delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -302,7 +325,6 @@ function _detectIntent(prompt) {
   return 'GENERAL_STATUS';
 }
 
-// Agent decides WHICH components to render and in WHAT ORDER — this is the heart of Generative UI
 function _generateResponsePlan(intent) {
   const plans = {
     STORM_RISK: {
@@ -313,7 +335,6 @@ function _generateResponsePlan(intent) {
         "Cross-referencing AIS vessel positions against storm core perimeter..."
       ],
       prose: "**Tropical Depression Varuna** is intensifying over the North Arabian Sea, accelerating NE at 14 knots. Central pressure has dropped to **988 hPa** with sustained surface winds of 52 knots and gusts to 65 knots. Significant wave heights of **4.8m–6.1m** are recorded by Buoy 2304. All small craft must immediately abort transit and seek shelter at Ratnagiri or Mumbai.",
-      // THE AGENT DECIDES: show a risk card first, then weather data, then advisory
       components: [
         { type: 'RiskCard', props: { riskScore: 88, status: 'CRITICAL', zoneName: 'ARABIAN SEA NORTH', title: 'Tropical Depression Varuna — Active Gale Warning', description: 'Sustained 52-knot winds with 5.8m significant wave heights. Storm core tracking NE at 14 kts.', coordinates: "20°48'N, 68°30'E", swell: '5.8m Phenomenal', wind: '52 kts NNE (Gale)' }},
         { type: 'WeatherCard', props: { pressure: '988 hPa (Rapid Fall)', sst: '29.4°C (+1.8° Anomaly)', wind: '52 kts NNE', swell: '5.8m @ 14.8s Period', visibility: '1.2 nm (Heavy Squall)' }},
@@ -330,7 +351,6 @@ function _generateResponsePlan(intent) {
         "Generating ranked PFZ advisories with fuel efficiency estimates..."
       ],
       prose: "**Two high-yield PFZ opportunities** detected along the Konkan Shelf. The primary zone (Thermal Front Alpha, 17°25'N, 72°21'E) shows exceptional upwelling conditions with chlorophyll-a at **3.4 mg/m³** — 300% above seasonal baseline. Indian Mackerel, Sardinella, and Yellowfin Tuna are heavily concentrated at the 65m isobath. Secondary zone (Ratnagiri-Devgad Edge) is also active.",
-      // THE AGENT DECIDES: show two PFZ cards + weather context
       components: [
         { type: 'PFZCard', props: { name: 'Konkan Thermal Front Alpha (PRIMARY)', latLonStr: "17°25'N, 72°21'E", sstAnomaly: '-1.4°C (Strong Coastal Upwelling)', chlorophyll: '3.4 mg/m³ (Peak Bloom)', confidence: '96%', targetSpecies: ['Indian Mackerel (Rastrelliger)', 'Sardinella longiceps', 'Yellowfin Tuna'], distanceNm: '25.9', depthM: 65, fuelSavingsEst: '28% vs Blind Trawling', advisory: 'Optimal window 0300Z–1100Z. Deploy purse seine along 65m isobath, heading SW at 4 knots.' }},
         { type: 'PFZCard', props: { name: 'Ratnagiri-Devgad Pelagic Edge (SECONDARY)', latLonStr: "16°33'N, 72°51'E", sstAnomaly: '-0.9°C (Eddy Convergence)', chlorophyll: '2.8 mg/m³ (High)', confidence: '91%', targetSpecies: ['Seer Fish (Surmai)', 'Squid / Cephalopods', 'Horse Mackerel'], distanceNm: '17.3', depthM: 48, fuelSavingsEst: '22% vs Blind Trawling', advisory: 'Favorable current (0.6 kts SE). Strong thermal gradient at 50m isobath.' }},
@@ -346,7 +366,6 @@ function _generateResponsePlan(intent) {
         "Computing waypoint corridor avoiding Malacca Bank shoals..."
       ],
       prose: "Route optimization between **Veraval and Ratnagiri** complete. The direct 312nm course intersects the Cyclone Varuna gale core with an unacceptable risk score of **84/100**. ORCA has computed a coastal waypoint diversion of **348nm** that reduces risk to **19/100** while *saving 530 litres of fuel* by exploiting the southward lee current behind the continental shelf.",
-      // THE AGENT DECIDES: show route preview first, then risk comparison, then advisory
       components: [
         { type: 'RoutePreview', props: { origin: 'Veraval Port, Gujarat', destination: 'Ratnagiri Port, Maharashtra' }},
         { type: 'RiskCard', props: { riskScore: 19, status: 'SAFE PASSAGE', zoneName: 'COASTAL LEE CORRIDOR', title: 'ORCA Recommended Safe Trajectory', description: 'Coastal bathymetric lee shelter via waypoints 20.6°N→18.4°N. Tail current reduces fuel burn.', coordinates: "Via 20.6°N, 71.4°E → 18.4°N, 72.8°E", swell: '1.8m Moderate', wind: '16 kts' }},

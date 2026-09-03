@@ -1,11 +1,10 @@
-// ORCA Marine Bridge Console — Safety & Emergency Operations (/#safety)
-// Regional Risk Gauge bank, real-time alert feed & protocol directives
+// ORCA Marine Bridge Console — Government & Coastal Authority Persona (/#safety)
+// Coastal Risk & Response Center, Risk Gauges, Alert feeds, and Situation Summary
 
 import { MONITORED_ZONES, ACTIVE_ALERTS } from '../data/mockData.js';
 import { createRiskGaugeHTML } from '../components/riskGauge.js';
 
 export function renderSafetyView(container, { i18n, soundEngine }) {
-  // Generate Regional Risk Gauges HTML
   const gaugesHtml = MONITORED_ZONES.map((zone, idx) => {
     const gauge = createRiskGaugeHTML({
       id: `safety-zone-gauge-${idx}`,
@@ -39,7 +38,6 @@ export function renderSafetyView(container, { i18n, soundEngine }) {
     `;
   }).join('');
 
-  // Generate Alert Feed items
   const alertsHtml = ACTIVE_ALERTS.map(alert => `
     <div class="alert-card-item severity-${alert.severity}" data-severity="${alert.severity}">
       <div class="alert-item-header">
@@ -51,147 +49,94 @@ export function renderSafetyView(container, { i18n, soundEngine }) {
         </span>
       </div>
 
-      <div class="alert-item-title">${alert.title}</div>
-      <div class="alert-item-desc">${alert.description}</div>
+      <h4 class="font-display" style="font-size: 1.0rem; font-weight: 700; color: var(--parchment-bright); margin: 6px 0 4px 0;">
+        ${alert.title}
+      </h4>
 
-      <div style="background: rgba(10, 16, 20, 0.6); padding: 8px 10px; border-radius: var(--radius); border-left: 2px solid var(--brass); margin-top: 4px;">
-        <span class="font-data text-brass" style="font-size: 0.68rem; font-weight: 700;">DIRECTIVE: </span>
-        <span style="font-size: 0.78rem; color: var(--parchment-bright);">${alert.actionRequired}</span>
-      </div>
+      <p style="font-size: 0.82rem; color: var(--parchment); line-height: 1.45; margin-bottom: 8px;">
+        ${alert.description}
+      </p>
 
-      <div class="alert-item-meta">
-        <span>📍 COORDS: <strong class="text-parchment">${alert.coordinates}</strong></span>
-        <span>🛰️ SOURCE: <strong>${alert.source}</strong></span>
-        <span>⏱️ <strong>${alert.timestamp}</strong></span>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--chart-line); padding-top: 6px; font-family: var(--font-data); font-size: 0.68rem;">
+        <span class="text-muted">ISSUED: <strong class="text-parchment">${alert.issuedUtc}</strong></span>
+        <span class="text-amber">AREA: ${alert.coordinates}</span>
       </div>
     </div>
   `).join('');
 
   container.innerHTML = `
     <div class="safety-view-container">
-      <!-- Section Header -->
-      <div style="display: flex; justify-content: space-between; align-items: baseline;">
-        <div>
-          <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 2px;">
-            Safety & Marine Hazard Operations
-          </h1>
-          <div class="font-data text-muted" style="font-size: 0.75rem;">
-            CONTINUOUS MULTI-ZONE INSTRUMENT TELEMETRY & EMERGENCY FEEDS
-          </div>
+      
+      <!-- Stakeholder Header & Persona Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--chart-line); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="#/" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; padding: 4px 12px; font-size: 0.78rem;">
+            ← Change Role
+          </a>
+          <span class="panel-badge badge-red" style="font-size: 0.70rem;">🛡️ GOVERNMENT &amp; COASTAL AUTHORITY CENTER</span>
         </div>
 
-        <div style="display: flex; gap: 8px;">
-          <span class="telemetry-status-pill">
-            <span class="beacon-pulse" style="background: var(--radar-red);"></span>
-            1 CRITICAL CYCLONE CORE
-          </span>
-          <span class="telemetry-status-pill">
-            <span class="beacon-pulse"></span>
-            BUOY MESH ONLINE
-          </span>
+        <div class="telemetry-status-pill">
+          <span class="beacon-pulse" style="box-shadow: 0 0 8px var(--radar-red);"></span>
+          COASTAL DEFENSE &amp; EMERGENCY WATCH ACTIVE
         </div>
       </div>
 
-      <!-- Regional Risk Gauge Array -->
-      <div>
-        <div class="font-data text-brass" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 8px;">
-          ▶ MONITORED MARITIME BASINS (ANALOG RISK DIALS)
+      <!-- Hero Header -->
+      <div class="bezel-panel" style="padding: 20px; background: rgba(18,27,34,0.85); margin-bottom: 20px; border-top: 3px solid var(--radar-red);">
+        <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 4px;">
+          Coastal Intelligence Center
+        </h1>
+        <div class="font-data text-muted" style="font-size: 0.78rem; margin-bottom: 14px;">
+          Monitor marine risks, active alerts, coastal weather warnings &amp; situation awareness.
         </div>
-        <div class="safety-top-grid">
+
+        <!-- AI Situation Summary -->
+        <div style="padding: 12px 14px; background: rgba(255,92,92,0.08); border: 1px solid var(--radar-red); border-radius: var(--radius); font-size: 0.85rem; color: var(--parchment); line-height: 1.5; margin-bottom: 14px;">
+          <span class="font-data text-red" style="font-size: 0.70rem; font-weight: 700; letter-spacing: 0.08em; display: block; margin-bottom: 2px;">
+            ⚠️ AI SITUATION SUMMARY
+          </span>
+          Marine risk along Maharashtra coast is currently moderate, primarily driven by strong winds and 2.1–2.8m waves. No active cyclone directly affecting Mumbai, but small craft advisory remains hoisted.
+        </div>
+
+        <!-- Authority Action Quick Queries -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a href="#/chat?q=Is+there+a+cyclone+risk+near+Mumbai%3F" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.75rem;">
+            🚨 "What are today's major marine risks?"
+          </a>
+          <a href="#/chat?q=Summarize+current+coastal+conditions" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
+            📋 "Summarize coastal conditions"
+          </a>
+          <a href="#/chat?q=Which+areas+require+attention%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
+            📍 "Which areas require attention?"
+          </a>
+        </div>
+      </div>
+
+      <!-- Regional Risk Gauges Strip -->
+      <div style="margin-bottom: 24px;">
+        <div class="font-data text-brass" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px; text-transform: uppercase;">
+          REGIONAL HAZARD GAUGES BY SECTOR
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
           ${gaugesHtml}
         </div>
       </div>
 
-      <!-- Live Emergency Alerts Feed & Emergency Action Cards -->
-      <div class="safety-feed-section">
-        <!-- Left: Alert Feed -->
-        <div class="bezel-panel">
-          <div class="panel-header">
-            <span class="panel-title">
-              <span class="icon">🚨</span> ACTIVE MARITIME BROADCASTS
-            </span>
-            
-            <!-- Severity Filter Buttons -->
-            <div style="display: flex; gap: 4px;" id="alert-filters">
-              <button class="btn-tactical btn-tactical-sm active" data-filter="ALL">ALL</button>
-              <button class="btn-tactical btn-tactical-sm text-red" data-filter="CRITICAL">CRITICAL</button>
-              <button class="btn-tactical btn-tactical-sm text-amber" data-filter="HIGH">HIGH</button>
-              <button class="btn-tactical btn-tactical-sm text-green" data-filter="ADVISORY">ADVISORY</button>
-            </div>
-          </div>
-
-          <div class="panel-body">
-            <div class="alert-feed-list" id="alerts-list-container">
-              ${alertsHtml}
-            </div>
-          </div>
+      <!-- Active Alerts Feed -->
+      <div class="safety-feed-section bezel-panel panel-body">
+        <div class="panel-header" style="background: transparent; padding: 0 0 10px 0; border-bottom: 1px solid var(--chart-line); margin-bottom: 14px;">
+          <span class="panel-title">
+            <span class="icon">📢</span> ACTIVE COASTAL HAZARD ALERTS &amp; DIRECTIVES
+          </span>
+          <span class="panel-badge badge-red">${ACTIVE_ALERTS.length} ACTIVE DISPATCHES</span>
         </div>
 
-        <!-- Right: SOS / Rescue Telemetry Directives -->
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="bezel-panel panel-body" style="background: rgba(255, 92, 92, 0.08); border-color: var(--radar-red);">
-            <div class="font-data text-red" style="font-size: 0.78rem; font-weight: 700; margin-bottom: 6px;">
-              ⚠️ MARITIME DISTRESS PROTOCOL
-            </div>
-            <div style="font-size: 0.82rem; color: var(--parchment); line-height: 1.5;">
-              Coast Guard Maritime Rescue Coordination Centre (MRCC Mumbai) is broadcasting on MF DSC 2187.5 kHz and VHF CH 16.
-            </div>
-            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
-              <a href="tel:1554" class="btn-tactical btn-tactical-red" style="width: 100%;">
-                📞 CALL COAST GUARD (1554)
-              </a>
-              <button class="btn-tactical btn-tactical-amber" id="btn-broadcast-ack" style="width: 100%;">
-                📻 ACKNOWLEDGE BROADCAST
-              </button>
-            </div>
-          </div>
-
-          <div class="bezel-panel panel-body">
-            <div class="font-data text-amber" style="font-size: 0.75rem; font-weight: 700; margin-bottom: 6px;">
-              📡 SENSOR ADAPTER HEALTH
-            </div>
-            <div style="font-family: var(--font-data); font-size: 0.72rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;">
-              <div>• INCOIS Coastal Buoys: <span class="text-green">SYNCHRONIZED (99.9%)</span></div>
-              <div>• IMD Doppler Radar: <span class="text-green">ONLINE (68ms)</span></div>
-              <div>• NOAA Satellite SST: <span class="text-green">PASS COMPLETE</span></div>
-              <div>• AIS Vessel Mesh: <span class="text-amber">CONGESTION DETECTED</span></div>
-            </div>
-          </div>
+        <div class="alerts-feed-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;">
+          ${alertsHtml}
         </div>
       </div>
+
     </div>
   `;
-
-  // Severity Filter Logic
-  const filterBtns = container.querySelectorAll('#alert-filters button');
-  const alertCards = container.querySelectorAll('.alert-card-item');
-
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.getAttribute('data-filter');
-
-      if (soundEngine) soundEngine.playMechanicalClick();
-
-      alertCards.forEach(card => {
-        const sev = card.getAttribute('data-severity');
-        if (filter === 'ALL' || sev === filter) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    });
-  });
-
-  const btnAck = container.querySelector('#btn-broadcast-ack');
-  if (btnAck) {
-    btnAck.addEventListener('click', () => {
-      if (soundEngine) soundEngine.playTacticalChirp();
-      btnAck.textContent = '✓ BROADCAST LOGGED';
-      btnAck.classList.remove('btn-tactical-amber');
-      btnAck.classList.add('btn-tactical-green');
-    });
-  }
 }
