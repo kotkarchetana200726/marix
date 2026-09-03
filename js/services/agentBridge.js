@@ -2,7 +2,7 @@
 // Orchestrates multi-agent marine intelligence reasoning with 100% strict multilingual language lock
 
 import { createPFZCard, createWeatherCard, createRiskCard, createRoutePreviewCard, createReasoningLogCard } from '../components/cards.js';
-import { PFZ_ZONES, WEATHER_FORECAST, HAZARDS, ROUTE_PRESETS } from '../data/mockData.js';
+import { PFZ_ZONES, WEATHER_FORECAST, HAZARDS, ROUTE_PRESETS } from '../data/marineData.js';
 import { getGlobalLanguage, t } from '../data/translations.js';
 
 export class AgentBridgeService {

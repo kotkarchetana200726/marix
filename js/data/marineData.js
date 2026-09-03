@@ -1,9 +1,13 @@
-import { PFZ_ZONES as MOCK_PFZ, WEATHER_FORECAST as MOCK_WEATHER, HAZARDS as MOCK_HAZARDS, ROUTE_PRESETS as MOCK_ROUTES } from './mockData.js';
+import { PFZ_ZONES as MOCK_PFZ, HAZARD_ZONES as MOCK_HAZARDS, ROUTE_PRESETS as MOCK_ROUTES } from './mockData.js';
 
 export const PFZ_ZONES = MOCK_PFZ;
-export const WEATHER_FORECAST = MOCK_WEATHER;
+export const HAZARD_ZONES = MOCK_HAZARDS;
 export const HAZARDS = MOCK_HAZARDS;
 export const ROUTE_PRESETS = MOCK_ROUTES;
+export const WEATHER_FORECAST = [
+  { day: 'Today', temp: '28°C', wind: '18 km/h SW', swell: '1.4m', status: 'Moderate' },
+  { day: 'Tomorrow', temp: '29°C', wind: '22 km/h W', swell: '1.8m', status: 'Advisory' }
+];
 
 export const marineData = {
   location: {
