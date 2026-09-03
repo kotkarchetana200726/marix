@@ -48,29 +48,29 @@ export function renderLandingView(container, { i18n, soundEngine }) {
 
         <div class="stakeholder-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
           
-          <!-- CARD 1 — FISHERMAN -->
-          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--phosphor-green); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/chat?role=fisherman'">
+          <!-- CARD 1 — FISHERMAN (FULLY ACTIVE & CLICKABLE) -->
+          <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--phosphor-green); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/fisherman'">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(107,203,119,0.15); border: 1px solid var(--phosphor-green); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--phosphor-green);">
                   🎣
                 </div>
-                <span class="panel-badge badge-green" style="font-size: 0.65rem;">VOICE FIRST</span>
+                <span class="panel-badge badge-green" style="font-size: 0.65rem;">SIMPLE VOICE MODE</span>
               </div>
               <h3 class="font-display" style="font-size: 1.4rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
                 Fisherman
               </h3>
               <p class="font-body text-muted" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 20px;">
-                Simple marine answers, safety guidance and voice assistance in English, Hindi, or Marathi.
+                Simple marine answers, clear decision verdicts, and voice assistance in English, Hindi, or Marathi.
               </p>
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <a href="#/chat?role=fisherman" class="btn-tactical btn-tactical-green" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
-                I'm a Fisherman →
+              <a href="#/fisherman" class="btn-tactical btn-tactical-green" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.92rem; display: block;" onclick="event.stopPropagation();">
+                🎣 Open Fisherman Mode →
               </a>
-              <a href="#/fisherman" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 6px 12px; font-size: 0.75rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
-                🎙️ Simple Voice Mode
+              <a href="#/chat?role=fisherman" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 6px 12px; font-size: 0.75rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
+                💬 Interactive Chat Console
               </a>
             </div>
           </div>
@@ -100,60 +100,47 @@ export function renderLandingView(container, { i18n, soundEngine }) {
           <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--radar-red); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/safety'">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(255,92,92,0.15); border: 1px solid var(--radar-red); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--radar-red);">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(255,107,107,0.15); border: 1px solid var(--radar-red); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--radar-red);">
                   🛡️
                 </div>
-                <span class="panel-badge badge-red" style="font-size: 0.65rem;">COASTAL CONTROL</span>
+                <span class="panel-badge badge-red" style="font-size: 0.65rem;">HIGH PRIORITY</span>
               </div>
               <h3 class="font-display" style="font-size: 1.4rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
-                Government &amp; Authority
+                Coastal Authority
               </h3>
               <p class="font-body text-muted" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 20px;">
-                Monitor risks, alerts and coastal conditions for rapid situation awareness and safety directives.
+                Monitor hazards, issue alerts, and manage maritime risk with situational intelligence.
               </p>
             </div>
-            <a href="#/safety" class="btn-tactical btn-tactical-amber" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
+            <a href="#/safety" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
               I'm an Authority →
             </a>
           </div>
 
-          <!-- CARD 4 — MARINE BUSINESS -->
+          <!-- CARD 4 — MARITIME BUSINESS -->
           <div class="stakeholder-card bezel-panel" style="padding: 24px; background: rgba(18,27,34,0.85); border: 1px solid var(--chart-line); border-top: 4px solid var(--phosphor-amber); border-radius: var(--radius); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.25s ease;" onclick="window.location.hash='#/route'">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(255,180,84,0.15); border: 1px solid var(--phosphor-amber); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--phosphor-amber);">
                   🚢
                 </div>
-                <span class="panel-badge badge-amber" style="font-size: 0.65rem;">OPERATIONS</span>
+                <span class="panel-badge badge-amber" style="font-size: 0.65rem;">OPERATIONAL</span>
               </div>
               <h3 class="font-display" style="font-size: 1.4rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 8px;">
-                Marine Business
+                Maritime Business
               </h3>
               <p class="font-body text-muted" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 20px;">
-                Improve routes, operations and marine decisions using fuel-optimal Pareto intelligence.
+                Optimize vessel routes, reduce operational risk, and save fuel with ocean forecasting.
               </p>
             </div>
-            <a href="#/route" class="btn-tactical btn-tactical-amber" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block;" onclick="event.stopPropagation();">
-              I'm a Marine Operator →
+            <a href="#/route" class="btn-tactical text-brass" style="text-decoration: none; text-align: center; padding: 12px 18px; font-weight: 700; font-size: 0.88rem; display: block; border-color: var(--brass);" onclick="event.stopPropagation();">
+              I'm a Business →
             </a>
           </div>
 
         </div>
       </div>
 
-      <!-- Operational System Footer -->
-      <div style="border-top: 1px solid var(--chart-line); padding-top: 20px; text-align: center; font-family: var(--font-data); font-size: 0.75rem; color: var(--muted);">
-        ORCA REASONING CORE v2.4 • MULTI-AGENT ADAPTIVE PRESENTATION LAYER
-      </div>
-
     </div>
   `;
-
-  // Attach interactive hover sounds if sound engine available
-  if (soundEngine) {
-    container.querySelectorAll('.stakeholder-card').forEach(card => {
-      card.addEventListener('mouseenter', () => soundEngine.playMechanicalClick());
-      card.addEventListener('click', () => soundEngine.playTacticalChirp());
-    });
-  }
 }

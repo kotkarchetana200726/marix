@@ -3,7 +3,7 @@
 
 import { GenerativeAgentBridge, GenerativeUIRenderer } from '../services/generativeUI.js';
 import { SpringBootBridge, CanvasRenderer } from '../services/renderer.js';
-import { voiceService, FISHERMAN_I18N } from '../services/voiceService.js';
+import { voiceService, FISHERMAN_I18N, prepareSpeechText } from '../services/voiceService.js';
 import { detectOrResolveLanguage } from '../data/mockResponses.js';
 
 export function renderChatView(container, { i18n, soundEngine, persona = 'fisherman', initialQuery = '' }) {
@@ -37,7 +37,6 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
           <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">${roleInfo.title}</strong>
           <span class="panel-badge ${roleInfo.badge}" style="font-size: 0.65rem;">${activeRole.toUpperCase()}</span>
           
-          <!-- DEMO MODE DISCLAIMER BADGE -->
           <span class="font-data text-brass" style="font-size: 0.68rem; opacity: 0.85; border: 1px solid var(--brass); padding: 2px 8px; border-radius: 12px;">
             Demo Mode • Simulated Marine Data
           </span>
@@ -286,21 +285,24 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     `;
     thread.appendChild(userBubble);
 
+    const isFisherman = activeRole === 'fisherman';
+
     // 2. Agent Response Shell
     const agentBubble = document.createElement('div');
     agentBubble.className = 'chat-msg agent';
     agentBubble.innerHTML = `
       <div class="msg-header">
         <span class="beacon-pulse" style="width: 5px; height: 5px;"></span>
-        <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem;">ORCA REASONING AGENT [${resolvedLang.toUpperCase()}]</span>
+        <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem;">${isFisherman ? 'ORCA MARINE ASSISTANT' : 'ORCA REASONING AGENT'} [${resolvedLang.toUpperCase()}]</span>
         <span class="text-muted">•</span>
         <span class="font-data text-muted" style="font-size: 0.68rem;">${timestamp}</span>
-        <span class="genui-status-badge panel-badge badge-amber" style="margin-left: 6px;">⚙ SYNTHESIZING...</span>
+        <span class="genui-status-badge panel-badge badge-amber" style="margin-left: 6px;">⚙ ${resolvedLang === 'mr' ? 'उत्तर तयार होत आहे...' : resolvedLang === 'hi' ? 'उत्तर तैयार हो रहा है...' : 'SYNTHESIZING...'}</span>
       </div>
       <div class="msg-content-agent bezel-panel">
-        <div class="genui-steps font-data" style="font-size: 0.72rem; color: var(--brass); display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; padding: 10px 12px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);"></div>
+        <!-- HIDE TECHNICAL STEPS LOGS FOR FISHERMAN -->
+        <div class="genui-steps font-data" style="${isFisherman ? 'display: none;' : 'font-size: 0.72rem; color: var(--brass); display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; padding: 10px 12px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);'}"></div>
         <div class="genui-prose agent-prose-text" style="margin-bottom: 14px;">
-          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">${resolvedLang === 'mr' ? 'सागरी बुद्धिमत्ता प्रणाली कार्य करत आहे...' : resolvedLang === 'hi' ? 'समुद्री बुद्धिमत्ता प्रणाली कार्य कर रही है...' : 'Initializing marine reasoning engine...'}</span>
+          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">${resolvedLang === 'mr' ? 'सागरी माहिती तपासत आहे...' : resolvedLang === 'hi' ? 'समुद्री जानकारी जाँच रहे हैं...' : 'Initializing marine response...'}</span>
         </div>
         <div class="genui-card-deck" style="display: flex; flex-direction: column; gap: 12px;"></div>
       </div>
@@ -351,9 +353,6 @@ function _renderPersonaPresetChips(role, lang, fDict) {
         <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
           <span>🧭</span><span>"सुरक्षित मार्ग कोणता आहे?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
-          <span>🚧</span><span>"काही प्रतिबंधित क्षेत्र जवळ आहे का?"</span>
-        </button>
       `;
     }
     if (lang === 'hi') {
@@ -373,9 +372,6 @@ function _renderPersonaPresetChips(role, lang, fDict) {
         <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
           <span>🧭</span><span>"सबसे सुरक्षित रास्ता कौन सा है?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
-          <span>🚧</span><span>"क्या कोई प्रतिबंधित क्षेत्र पास में है?"</span>
-        </button>
       `;
     }
     return `
@@ -393,9 +389,6 @@ function _renderPersonaPresetChips(role, lang, fDict) {
       </button>
       <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
         <span>🧭</span><span>"What is the safest route to the fishing zone?"</span>
-      </button>
-      <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
-        <span>🚧</span><span>"Am I approaching any restricted area?"</span>
       </button>
     `;
   }
@@ -422,19 +415,12 @@ function _renderPersonaPresetChips(role, lang, fDict) {
       <button class="preset-chip-btn" data-query="Are there any active marine hazards?">
         <span>🚨</span><span>"Are there any active marine hazards?"</span>
       </button>
-      <button class="preset-chip-btn" data-query="Which areas should be avoided?">
-        <span>🚧</span><span>"Which areas should be avoided?"</span>
-      </button>
     `;
   }
 
-  // business
   return `
     <button class="preset-chip-btn" data-query="What is the safest route for my vessel considering current sea conditions?">
       <span>🧭</span><span>"What is the safest route for my vessel considering current sea conditions?"</span>
-    </button>
-    <button class="preset-chip-btn" data-query="How will the current marine conditions affect vessel operations?">
-      <span>🚢</span><span>"How will current marine conditions affect vessel operations?"</span>
     </button>
   `;
 }

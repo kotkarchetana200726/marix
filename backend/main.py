@@ -1,5 +1,5 @@
 # ORCA Backend — Marine Intelligence API Server
-# Provides live SSE endpoints for ORCA Bridge Console with strict 100% multilingual response lock
+# Provides live SSE endpoints for ORCA Bridge Console with simple verdict responses for fishermen
 
 import json
 import asyncio
@@ -105,45 +105,42 @@ async def chat_sse(req: ChatRequest):
         
         status_steps = {
             "mr": [
-                "[01] सर्व सागरी डेटा स्रोत तपासले जात आहेत...",
-                "[02] संभाव्य मासेमारी क्षेत्रांचे विश्लेषण केले जात आहे...",
-                "[03] हवामान आणि समुद्राच्या परिस्थितीचे मूल्यांकन केले जात आहे...",
-                "[04] सर्वोत्तम क्षेत्र ओळखले जात आहे..."
+                "[01] सागरी माहिती तपासत आहे...",
+                "[02] हवामानाची खात्री करत आहे...",
+                "[03] निर्णय तयार करत आहे..."
             ],
             "hi": [
-                "[01] सभी समुद्री डेटा स्रोतों की जाँच की जा रही है...",
-                "[02] संभावित मछली पकड़ने वाले क्षेत्रों का विश्लेषण किया जा रहा है...",
-                "[03] मौसम और समुद्री परिस्थितियों का मूल्यांकन किया जा रहा है...",
-                "[04] सर्वोत्तम क्षेत्र की पहचान की जा रही है..."
+                "[01] समुद्री जानकारी जाँच रहे हैं...",
+                "[02] मौसम की पुष्टि कर रहे हैं...",
+                "[03] निर्णय तैयार कर रहे हैं..."
             ],
             "en": [
-                "[01] Querying all marine data sources...",
-                "[02] Analyzing potential fishing zones...",
-                "[03] Evaluating weather & sea state...",
-                "[04] Generating optimal recommendation..."
+                "[01] Checking marine data...",
+                "[02] Verifying weather...",
+                "[03] Preparing decision..."
             ]
         }
 
         steps = status_steps.get(target_lang, status_steps["en"])
         for s in steps:
             yield sse_event({"type": "status", "message": s})
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.18)
 
         # 1. PFZ QUERY (English, Hindi, Marathi)
         if "fish" in p or "pfz" in p or "मासेमारी" in p or "मछली" in p or "जगह" in p or "जागा" in p:
             if target_lang == "mr":
-                text = "आज मासेमारीसाठी सर्वात चांगला परिसर तुमच्या सध्याच्या ठिकाणापासून **सुमारे 18 किमी नैऋत्य दिशेला (Southwest)** असलेला PFZ-01 आहे.\n\nया भागात क्लोरोफिलचे प्रमाण जास्त असून समुद्राचे तापमान मासेमारीसाठी अत्यंत अनुकूल आहे.\n\n### 📋 मुख्य माहिती आणि शिफारस\n- 🎣 **मासेमारीची शक्यता**: **उच्च (87%)**\n- 📍 **अंतर**: **18 किमी**\n- 🧭 **दिशा**: **नैऋत्य (Southwest)**\n- 🌿 **क्लोरोफिलचे प्रमाण**: **4.7 mg/m³**\n- 🌡️ **समुद्राच्या पृष्ठभागाचे तापमान (SST)**: **27.9°C**\n- 🌊 **समुद्राची स्थिती**: **मध्यम (लाटा 1.4m)**\n\nसमुद्रात जाण्यापूर्वी ताजे हवामान आणि समुद्री इशारे तपासा."
-                title = "🎣 संभाव्य मासेमारी क्षेत्र (PFZ-01)"
+                text = "## 🟢 आज मासेमारीसाठी जाऊ शकता\n\n**PFZ-01** ही मासे पकडण्यासाठी उत्तम जागा आहे. ही जागा तुमच्या ठिकाणापासून **सुमारे १८ किमी नैऋत्य दिशेला** आहे.\n\n- 📍 **अंतर**: १८ किमी नैऋत्य\n- 🐟 **मासे मिळण्याची शक्यता**: उत्तम (87%)\n- 🌊 **समुद्र**: मध्यम शांत (१.४ मीटर लाटा)\n\n💡 *निघण्यापूर्वी हवामानाची ताजी माहिती जरूर तपासा.*"
+                title = "🟢 आज मासेमारीसाठी जाऊ शकता"
                 name_val = "रत्नागिरी नैऋत्य PFZ-01"
                 dist_val = "18 किमी नैऋत्य"
             elif target_lang == "hi":
-                text = "आज मछली पकड़ने के लिए सबसे अच्छा क्षेत्र आपके वर्तमान स्थान से **लगभग 18 किलोमीटर दक्षिण-पश्चिम (Southwest)** दिशा में स्थित PFZ-01 है।\n\nइस क्षेत्र में क्लोरोफिल का स्तर अधिक है और समुद्र का तापमान मछली पकड़ने के लिए अत्यधिक अनुकूल है।\n\n### 📋 मुख्य जानकारी और सिफारिश\n- 🎣 **मछली पकड़ने की संभावना**: **उच्च (87%)**\n- 📍 **दूरी**: **18 किमी**\n- 🧭 **दिशा**: **दक्षिण-पश्चिम (Southwest)**\n- 🌿 **क्लोरोफिल का स्तर**: **4.7 mg/m³**\n- 🌡️ **समुद्र की सतह का तापमान (SST)**: **27.9°C**\n- 🌊 **समुद्र की स्थिति**: **मध्यम (लहरें 1.4m)**\n\nसमुद्र में जाने से पहले नवीनतम मौसम और समुद्री चेतावनियों की जाँच करें।"
-                title = "🎣 संभावित मत्स्य पालन क्षेत्र (PFZ-01)"
+                text = "## 🟢 आज मछली पकड़ने जा सकते हैं\n\n**PFZ-01** मछली पकड़ने के लिए सबसे अच्छी जगह है। यह जगह आपके स्थान से **लगभग 18 किमी दक्षिण-पश्चिम** में है।\n\n- 📍 **दूरी**: 18 किमी दक्षिण-पश्चिम\n- 🐟 **मछली मिलने की संभावना**: अच्छी (87%)\n- 🌊 **समुद्र**: मध्यम शांत (1.4 मीटर लहरें)\n\n💡 *निकलने से पहले मौसम की ताजा जानकारी जरूर देखें।*"
+                title = "🟢 आज मछली पकड़ने जा सकते हैं"
                 name_val = "रत्नागिरी दक्षिण-पश्चिम PFZ-01"
                 dist_val = "18 किमी दक्षिण-पश्चिम"
             else:
-                text = "The best place to fish today is **PFZ-01**, located **18 km southwest** of your current location.\n\nSatellite telemetry indicates high chlorophyll concentration (4.7 mg/m³) and optimal Sea Surface Temperature (27.9°C).\n\n### 📋 KEY DECISION BULLETINS\n- 🎣 **Fishing Potential**: **HIGH (87%)**\n- 📍 **Distance**: **18 km**\n- 🧭 **Direction**: **Southwest**\n- 🌿 **Chlorophyll-a**: **4.7 mg/m³**\n- 🌡️ **SST**: **27.9°C**\n- 🌊 **Sea State**: **Moderate (1.4m waves)**\n\nCheck weather and local advisories before departure."
-                title = "🎣 Potential Fishing Zone (PFZ-01)"
+                text = "## 🟢 SAFE TO GO FISHING TODAY\n\n**PFZ-01** is the best place to fish today. It is located **18 km southwest** of your current location.\n\n- 📍 **Distance**: 18 km Southwest\n- 🐟 **Fishing Chance**: Good (87%)\n- 🌊 **Sea**: Moderate (1.4 m waves)\n\n💡 *Check weather forecast before departure.*"
+                title = "🟢 SAFE TO GO FISHING TODAY"
                 name_val = "Ratnagiri Southwest PFZ-01"
                 dist_val = "18 km SW"
 
@@ -164,17 +161,17 @@ async def chat_sse(req: ChatRequest):
                 ]
             }
 
-        # DEFAULT FALLBACK (100% Pure Target Language)
+        # DEFAULT FALLBACK (Simple Human Verdict)
         else:
             if target_lang == "mr":
-                text = f"**ORCA सागरी माहिती उत्तर** (\"{query}\" साठी)\n\nरत्नागिरी आणि कोकण किनारी भागातील समुद्राची स्थिती मध्यम आहे. समुद्राच्या पृष्ठभागाचे तापमान **28.4°C** आणि लाटांची उंची **1.4 मीटर** आहे.\n\n### 📋 मुख्य माहिती\n- 🎣 **मासेमारीची शक्यता**: **उच्च (87%)**\n- 📍 **अंतर**: **18 किमी**\n- 🧭 **दिशा**: **नैऋत्य (Southwest)**\n- 🌡️ **समुद्र तापमान (SST)**: **28.4°C**\n- 🌊 **समुद्रस्थिती**: **1.4m लाटा**"
-                title = "ORCA सागरी माहिती"
+                text = "## 🟢 आज मासेमारीसाठी जाऊ शकता\n\nरत्नागिरी किनाऱ्याजवळ समुद्राची स्थिती सामान्य आहे. प्रवास सुरक्षित आहे.\n\n- 📍 **अंतर**: १८ किमी\n- 🌊 **समुद्र**: मध्यम शांत (१.४ मीटर लाटा)\n- 🌬️ **वारा**: १८ किमी/तास"
+                title = "🟢 आज मासेमारीसाठी जाऊ शकता"
             elif target_lang == "hi":
-                text = f"**ORCA समुद्री जानकारी उत्तर** (\"{query}\" के लिए)\n\nरत्नागिरी और कोंकण तटीय क्षेत्र में समुद्र की स्थिति मध्यम है। समुद्र की सतह का तापमान **28.4°C** और लहरों की ऊँचाई **1.4 मीटर** है।\n\n### 📋 मुख्य जानकारी\n- 🎣 **मछली पकड़ने की संभावना**: **उच्च (87%)**\n- 📍 **दूरी**: **18 किमी**\n- 🧭 **दिशा**: **दक्षिण-पश्चिम (Southwest)**\n- 🌡️ **समुद्र का तापमान (SST)**: **28.4°C**\n- 🌊 **समुद्र की स्थिति**: **1.4m लहरें**"
-                title = "ORCA समुद्री जानकारी"
+                text = "## 🟢 आज मछली पकड़ने जा सकते हैं\n\nरत्नागिरी तट के पास समुद्र की स्थिति सामान्य है। यात्रा सुरक्षित है।\n\n- 📍 **दूरी**: 18 किमी\n- 🌊 **समुद्र**: मध्यम शांत (1.4 मीटर लहरें)\n- 🌬️ **हवा**: 18 किमी/घंटा"
+                title = "🟢 आज मछली पकड़ने जा सकते हैं"
             else:
-                text = f"**ORCA Marine Intelligence Response** for *\"{query}\"*\n\nSea conditions across Ratnagiri sector are moderate. Sea Surface Temp is **28.4°C** with **1.4 m** wave height.\n\n### 📋 KEY DECISION BULLETINS\n- 🎣 **Fishing Potential**: **HIGH (87%)**\n- 📍 **Distance**: **18 km**\n- 🧭 **Direction**: **Southwest**\n- 🌡️ **SST**: **28.4°C**\n- 🌊 **Sea State**: **1.4m waves**"
-                title = "ORCA Marine Intelligence"
+                text = "## 🟢 SAFE TO GO FISHING TODAY\n\nSea conditions across Ratnagiri coast are normal. Coastal travel is safe.\n\n- 📍 **Distance**: 18 km\n- 🌊 **Sea**: Moderate (1.4 m waves)\n- 🌬️ **Wind**: 18 km/h"
+                title = "🟢 SAFE TO GO FISHING TODAY"
 
             ui_json = {"title": title, "components": []}
 
