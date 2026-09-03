@@ -1,246 +1,179 @@
-// ORCA Agent Bridge Service
-// Coordinates multimodal reasoning with AI Agents (Mock SSE Streamer + Live API Adapter)
+// ORCA Marine AI — Agent Bridge Service
+// Orchestrates multi-agent marine intelligence reasoning with 100% strict multilingual language lock
 
-import { PFZ_ZONES, MONITORED_ZONES, ACTIVE_ALERTS, ROUTE_PRESETS } from '../data/mockData.js';
-import { 
-  createRiskCard, 
-  createPFZCard, 
-  createWeatherCard, 
-  createVesselAdvisoryCard, 
-  createRoutePreviewCard, 
-  createReasoningLogCard 
-} from '../components/cards.js';
+import { createPFZCard, createWeatherCard, createRiskCard, createRoutePreviewCard, createReasoningLogCard } from '../components/cards.js';
+import { PFZ_ZONES, WEATHER_FORECAST, HAZARDS, ROUTE_PRESETS } from '../data/marineData.js';
+import { getGlobalLanguage, t } from '../data/translations.js';
 
 export class AgentBridgeService {
-  constructor() {
-    this.mode = localStorage.getItem('orca_agent_mode') || 'SIMULATED'; // 'SIMULATED' or 'LIVE_API'
-    this.endpointUrl = localStorage.getItem('orca_agent_endpoint') || 'http://localhost:8000/api/orca/reason';
-    this.apiKey = localStorage.getItem('orca_agent_key') || '';
+  constructor(options = {}) {
+    this.mode = options.mode || 'SIMULATED'; 
+    this.endpointUrl = options.endpointUrl || '/api/orca/reason';
+    this.apiKey = options.apiKey || '';
   }
 
-  setMode(mode) {
-    this.mode = mode;
-    localStorage.setItem('orca_agent_mode', mode);
-  }
+  async runPipeline(userPrompt, options = {}) {
+    const lang = options.lang || getGlobalLanguage();
+    const intent = this.detectIntent(userPrompt);
+    const plan = this.generatePlanForIntent(intent, userPrompt, lang);
 
-  setEndpoint(url, key = '') {
-    this.endpointUrl = url;
-    this.apiKey = key;
-    localStorage.setItem('orca_agent_endpoint', url);
-    localStorage.setItem('orca_agent_key', key);
-  }
-
-  // Stream generator that yields reasoning chunks and UI component cards
-  async *streamQuery(promptText, onChunk) {
-    if (this.mode === 'LIVE_API') {
-      try {
-        const response = await fetch(this.endpointUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(this.apiKey ? { 'Authorization': `Bearer ${this.apiKey}` } : {})
-          },
-          body: JSON.stringify({ prompt: promptText })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Agent API returned status ${response.status}`);
-        }
-
-        const data = await response.json();
-        yield data;
-        return;
-      } catch (err) {
-        console.warn('Live API connection failed, falling back to simulated bridge:', err);
+    if (options.onStep) {
+      for (let i = 0; i < plan.steps.length; i++) {
+        options.onStep(plan.steps[i], i + 1, plan.steps.length);
+        await this.delay(220);
       }
     }
 
-    // Simulated Reasoning Engine matching the prompt intent
-    const intent = this.detectIntent(promptText);
-    const mockPlan = this.generatePlanForIntent(intent, promptText);
+    await this.delay(150);
 
-    // 1. Stream Chain of Thought step by step
-    for (let i = 0; i < mockPlan.steps.length; i++) {
-      await this.delay(350);
-      if (onChunk) {
-        onChunk({ type: 'STEP', step: mockPlan.steps[i], stepIndex: i });
-      }
-    }
-
-    // 2. Stream Agent Prose Text
-    const words = mockPlan.prose.split(' ');
-    let currentProse = '';
-    for (let word of words) {
-      currentProse += word + ' ';
-      await this.delay(40);
-      if (onChunk) {
-        onChunk({ type: 'PROSE_DELTA', text: currentProse });
-      }
-    }
-
-    // 3. Emit rendered component cards
-    await this.delay(200);
-    yield {
-      type: 'COMPLETE',
-      prose: mockPlan.prose,
-      steps: mockPlan.steps,
-      cardsHtml: mockPlan.cardsHtml
+    return {
+      intent,
+      lang,
+      prose: plan.prose,
+      cardsHtml: plan.cardsHtml,
+      timestamp: new Date().toISOString()
     };
   }
 
   detectIntent(prompt) {
     const p = prompt.toLowerCase();
-    if (p.includes('cyclone') || p.includes('storm') || p.includes('wave') || p.includes('mumbai') || p.includes('risk')) {
-      return 'STORM_RISK';
-    } else if (p.includes('fish') || p.includes('pfz') || p.includes('catch') || p.includes('konkan') || p.includes('yield')) {
-      return 'PFZ_SEARCH';
-    } else if (p.includes('route') || p.includes('veraval') || p.includes('ratnagiri') || p.includes('navigation') || p.includes('port')) {
-      return 'ROUTE_OPTIMIZE';
-    } else if (p.includes('sst') || p.includes('chlorophyll') || p.includes('upwelling') || p.includes('temperature') || p.includes('research')) {
-      return 'RESEARCH_SST';
-    }
-    return 'GENERAL_MARITIME';
+    if (p.includes('pfz') || p.includes('fish') || p.includes('मासेमारी') || p.includes('मछली')) return 'PFZ_QUERY';
+    if (p.includes('route') || p.includes('veraval') || p.includes('मार्ग') || p.includes('रास्ता')) return 'ROUTE_OPTIMIZE';
+    if (p.includes('sst') || p.includes('chlorophyll') || p.includes('तापमान')) return 'RESEARCH_SST';
+    return 'GENERAL_SAFETY';
   }
 
-  generatePlanForIntent(intent, originalPrompt) {
+  generatePlanForIntent(intent, promptText, lang = 'en') {
     switch (intent) {
-      case 'STORM_RISK': {
-        const zone = MONITORED_ZONES[0]; // Arabian Sea North
-        const alert = ACTIVE_ALERTS[0];
-        return {
-          steps: [
-            "Querying Doppler Weather Radar feed & INCOIS Ocean Wave buoy network...",
-            "Computing barometric gradient and squall propagation vectors...",
-            "Evaluating cyclone risk coefficient for North Arabian Sea sector..."
-          ],
-          prose: `ORCA Bridge Reasoning Engine has completed real-time assessment for **${originalPrompt}**. Doppler radar reflects Tropical Depression Varuna escalating at 14 knots with central pressure dropping to 988 hPa. Significant wave heights exceed 4.8m in Sector 2A with peak gusts to 65 knots. Small craft and non-ice-class vessels must immediately abort open transit and seek shelter in Ratnagiri or Mumbai inner anchorage.`,
-          cardsHtml: [
-            createRiskCard({
-              riskScore: 84,
-              status: "CRITICAL ALERT",
-              zoneName: "NORTH ARABIAN SEA",
-              title: "Tropical Depression Varuna (Hazard Index 84/100)",
-              description: "Severe sea-state escalation with breaking swells. Gale warning active.",
-              coordinates: "20°48'N, 68°30'E",
-              swell: "4.8m - 6.1m Violent",
-              wind: "52 kts (Gale Force)"
-            }),
-            createWeatherCard({
-              pressure: "988.4 hPa (Rapid Fall)",
-              sst: "29.4°C (+1.8° Anomaly)",
-              wind: "52 kts WNW",
-              swell: "5.4m @ 14.8s",
-              visibility: "1.2 nm (Heavy Squalls)"
-            }),
-            createVesselAdvisoryCard({
-              priority: "CRITICAL",
-              heading: "Emergency Harbor Divert Order",
-              text: "Suspend all fishing and towing operations. Plot course 120° towards Ratnagiri Port approaches. Maintain continuous watch on VHF CH 16.",
-              safeHarbor: "Ratnagiri Anchorage (Safe Water Mark)",
-              vhf: "VHF CH 16 / DSC MF 2187.5 kHz"
-            })
-          ].join('')
-        };
-      }
+      case 'PFZ_QUERY': {
+        const pfz = PFZ_ZONES[0];
+        
+        if (lang === 'mr') {
+          return {
+            steps: [
+              "[01] उपग्रह क्लोरोफिल चित्रांचे विश्लेषण करत आहे...",
+              "[02] समुद्राच्या तापमानाचा अंदाज घेत आहे...",
+              "[03] मासेमारीच्या संभाव्य क्षेत्राची निश्चिती करत आहे..."
+            ],
+            prose: `रत्नागिरी नैऋत्य भागात **PFZ-01** मासेमारी क्षेत्र आढळले आहे. या ठिकाणी क्लोरोफिलचे प्रमाण **4.7 mg/m³** असून समुद्राचे तापमान **27.9°C** आहे. बांगडा आणि सुरमई माशांचे प्रमाण जास्त आहे.`,
+            cardsHtml: [
+              createPFZCard({ ...pfz, name: "रत्नागिरी नैऋत्य PFZ-01", advisory: "मासेमारीसाठी उत्तम परिस्थिती." }),
+              createWeatherCard({
+                pressure: "1011.2 hPa",
+                sst: "27.9°C",
+                wind: "18 किमी/तास नैऋत्य",
+                swell: "1.4m",
+                visibility: "7.2 km"
+              })
+            ].join('')
+          };
+        }
 
-      case 'PFZ_SEARCH': {
-        const pfz = PFZ_ZONES[0]; // Konkan Thermal Front
+        if (lang === 'hi') {
+          return {
+            steps: [
+              "[01] उपग्रह क्लोरोफिल छवियों का विश्लेषण किया जा रहा है...",
+              "[02] समुद्र के तापमान का आकलन किया जा रहा है...",
+              "[03] संभावित मछली पकड़ने के क्षेत्र की पुष्टि की जा रही है..."
+            ],
+            prose: `रत्नागिरी दक्षिण-पश्चिम क्षेत्र में **PFZ-01** मत्स्य क्षेत्र की पहचान की गई है। यहाँ क्लोरोफिल का स्तर **4.7 mg/m³** और समुद्र का तापमान **27.9°C** है।`,
+            cardsHtml: [
+              createPFZCard({ ...pfz, name: "रत्नागिरी दक्षिण-पश्चिम PFZ-01", advisory: "मछली पकड़ने के लिए उत्कृष्ट स्थिति।" }),
+              createWeatherCard({
+                pressure: "1011.2 hPa",
+                sst: "27.9°C",
+                wind: "18 किमी/घंटा दक्षिण-पश्चिम",
+                swell: "1.4m",
+                visibility: "7.2 km"
+              })
+            ].join('')
+          };
+        }
+
         return {
           steps: [
-            "Filtering Copernicus Sentinel-3 OLCI multispectral chlorophyll imagery...",
-            "Correlating thermal fronts with sea surface temperature gradient...",
-            "Generating fish biomass concentration and species yield probabilities..."
+            "[01] Filtering satellite multispectral chlorophyll imagery...",
+            "[02] Correlating sea surface temperature gradients...",
+            "[03] Identifying high-yield fishing zones..."
           ],
-          prose: `High-yield Potential Fishing Zone (PFZ) isolated along the **Konkan Shelf (Thermal Front Alpha)**. A strong upwelling front with negative SST anomaly (-1.4°C) is generating peak chlorophyll-a concentrations of 3.4 mg/m³. Pelagic fish schools (Indian Mackerel, Sardinella, and Yellowfin Tuna) are heavily concentrated along the 65-meter isobath. Projected fuel savings are 28% compared to unguided trawling.`,
+          prose: `High-yield Potential Fishing Zone (PFZ-01) isolated off Ratnagiri southwest coast. Chlorophyll-a peak concentration at 4.7 mg/m³ with optimal SST of 27.9°C.`,
           cardsHtml: [
             createPFZCard(pfz),
             createWeatherCard({
               pressure: "1011.2 hPa",
-              sst: "26.8°C (Upwelling Front)",
-              wind: "12 kts NW (Favorable)",
-              swell: "1.2m Slight",
-              visibility: "8.0 nm (Clear)"
-            }),
-            createRiskCard({
-              riskScore: 21,
-              status: "SAFE FOR FISHING",
-              zoneName: "KONKAN SHELF",
-              title: "Konkan Alpha Fishing Perimeter",
-              description: "Calm sea state with slight swell. Excellent operational conditions for purse seiners and trawlers.",
-              coordinates: "17°25'N, 72°21'E",
-              swell: "1.2m",
-              wind: "12 kts"
+              sst: "27.9°C",
+              wind: "18 km/h SW",
+              swell: "1.4m",
+              visibility: "7.2 km"
             })
-          ].join('')
-        };
-      }
-
-      case 'ROUTE_OPTIMIZE': {
-        const route = ROUTE_PRESETS[0];
-        return {
-          steps: [
-            "Extracting bathymetric contours & restricted naval exercise sectors...",
-            "Simulating multi-objective Pareto front (Minimum Risk vs Fuel vs Time)...",
-            "Plotting safe waypoint corridor around gale perimeter..."
-          ],
-          prose: `Route optimization complete between **${route.origin.name}** and **${route.destination.name}**. The direct shortest course directly crosses a gale-force storm cell with 5.5m rogue swells and an unacceptable risk score of **84/100**. ORCA has generated a safe coastal waypoint diversion that reduces risk to **19/100** while saving approximately 530 Liters of fuel by exploiting coastal lee currents.`,
-          cardsHtml: [
-            createRoutePreviewCard({
-              origin: "Veraval Port",
-              destination: "Ratnagiri Port"
-            }),
-            createRiskCard({
-              riskScore: 19,
-              status: "SAFE PASSAGE",
-              zoneName: "COASTAL CORRIDOR",
-              title: "ORCA Recommended Safe Route",
-              description: "Leverages bathymetric lee shelter. Skirts fishing zone Alpha for opportunistic catch.",
-              coordinates: "Via Waypoints 20.6°N, 71.4°E → 18.4°N, 72.8°E",
-              swell: "1.8m Moderate",
-              wind: "16 kts"
-            })
-          ].join('')
-        };
-      }
-
-      case 'RESEARCH_SST': {
-        return {
-          steps: [
-            "Querying NOAA Geo-Polar 5km Blended SST archive...",
-            "Computing 30-day thermal anomaly moving averages...",
-            "Evaluating thermocline displacement and chlorophyll-a coupling..."
-          ],
-          prose: `Oceanographic analysis indicates an intensified coastal upwelling cycle along the West Coast of India. The thermal anomaly has shifted to -1.5°C over the past 10 days, displacing the thermocline to 18m below surface level. This has triggered a 300% increase in primary biomass synthesis, making this the most productive biological window of the current monsoon transition.`,
-          cardsHtml: [
-            createReasoningLogCard([
-              "NOAA Geo-Polar SST: 26.5°C recorded at Buoy CB-02 (-1.8°C deviation from 10yr baseline)",
-              "Sentinel-3 OLCI: Chlorophyll-a index peaked at 4.2 mg/m³",
-              "Biomass Yield Model: Positive correlation with Pelagic catch volume (R² = 0.92)",
-              "Recommendation: Deploy acoustic fish finders along 50m bathymetric contour"
-            ]),
-            createPFZCard(PFZ_ZONES[1])
           ].join('')
         };
       }
 
       default: {
+        if (lang === 'mr') {
+          return {
+            steps: [
+              "[01] सर्व सागरी डेटा स्रोत तपासले जात आहेत...",
+              "[02] हवामान आणि समुद्राच्या परिस्थितीचे मूल्यांकन केले जात आहे...",
+              "[03] शिफारस तयार केली जात आहे..."
+            ],
+            prose: `**ORCA सागरी माहिती प्रणाली** ("${promptText}" साठी)\n\nरत्नागिरी किनाऱ्याजवळ समुद्राची स्थिती मध्यम आहे. समुद्राच्या पृष्ठभागाचे तापमान **28.4°C** आणि लाटांची उंची **1.4 मीटर** आहे.`,
+            cardsHtml: [
+              createRiskCard({
+                riskScore: 21,
+                status: "सुरक्षित",
+                zoneName: "रत्नागिरी किनारा",
+                title: "सागरी स्थिती सामान्य",
+                description: "लाटांची उंची 1.4 मीटर. किनाऱ्याजवळ प्रवास सुरक्षित आहे.",
+                coordinates: "16.99° N 73.31° E",
+                swell: "1.4m",
+                wind: "18 किमी/तास"
+              })
+            ].join('')
+          };
+        }
+
+        if (lang === 'hi') {
+          return {
+            steps: [
+              "[01] सभी समुद्री डेटा स्रोतों की जाँच की जा रही है...",
+              "[02] मौसम और समुद्री परिस्थितियों का मूल्यांकन किया जा रहा है...",
+              "[03] सिफारिश तैयार की जा रही है..."
+            ],
+            prose: `**ORCA समुद्री जानकारी प्रणाली** ("${promptText}" के लिए)\n\nरत्नागिरी तट के पास समुद्र की स्थिति मध्यम है। समुद्र की सतह का तापमान **28.4°C** और लहरों की ऊँचाई **1.4 मीटर** है।`,
+            cardsHtml: [
+              createRiskCard({
+                riskScore: 21,
+                status: "सुरक्षित",
+                zoneName: "रत्नागिरी तट",
+                title: "समुद्री स्थिति सामान्य",
+                description: "लहरों की ऊँचाई 1.4 मीटर। तट के पास यात्रा सुरक्षित है।",
+                coordinates: "16.99° N 73.31° E",
+                swell: "1.4m",
+                wind: "18 किमी/घंटा"
+              })
+            ].join('')
+          };
+        }
+
         return {
           steps: [
-            "Parsing maritime operational command...",
-            "Querying real-time coastal telemetry and AIS vessel positions...",
-            "Synthesizing navigational advisory..."
+            "[01] Querying real-time coastal telemetry...",
+            "[02] Evaluating sea state and risk scores...",
+            "[03] Synthesizing operational advisory..."
           ],
-          prose: `ORCA Bridge Console is actively monitoring maritime space. All sensor adapters (INCOIS, NOAA, Sentinel-3, IMD Radar, and AIS) are synchronized with sub-second latency. No anomalous distress transmissions detected in your immediate quadrant. Select a tactical preset or input specific coordinate queries below.`,
+          prose: `**ORCA Marine Intelligence System** for *"${promptText}"*\n\nSea conditions across Ratnagiri sector are moderate. Sea Surface Temp is **28.4°C** with **1.4 m** wave height.`,
           cardsHtml: [
             createRiskCard({
-              riskScore: 28,
+              riskScore: 21,
               status: "SYSTEM READY",
-              zoneName: "LOCAL QUADRANT",
+              zoneName: "RATNAGIRI COAST",
               title: "Operational Status Nominal",
-              description: "All automated vessel monitoring sensors reporting nominal telemetry.",
-              coordinates: "18°58'N, 72°49'E",
-              swell: "1.6m",
-              wind: "15 kts"
+              description: "Calm to moderate sea state. Safe for coastal operations.",
+              coordinates: "16.99° N 73.31° E",
+              swell: "1.4m",
+              wind: "18 km/h"
             })
           ].join('')
         };
