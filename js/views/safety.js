@@ -1,5 +1,5 @@
 // ORCA Marine Bridge Console — Government & Coastal Authority Persona (/#safety)
-// Coastal Risk & Response Center, Risk Gauges, Alert feeds, and Situation Summary
+// Coastal Intelligence Center, Risk Gauges, Alert feeds, and Situation Summary
 
 import { MONITORED_ZONES, ACTIVE_ALERTS } from '../data/mockData.js';
 import { createRiskGaugeHTML } from '../components/riskGauge.js';
@@ -73,7 +73,7 @@ export function renderSafetyView(container, { i18n, soundEngine }) {
           <a href="#/" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; padding: 4px 12px; font-size: 0.78rem;">
             ← Change Role
           </a>
-          <span class="panel-badge badge-red" style="font-size: 0.70rem;">🛡️ GOVERNMENT &amp; COASTAL AUTHORITY CENTER</span>
+          <span class="panel-badge badge-red" style="font-size: 0.70rem;">🛡️ GOVERNMENT &amp; COASTAL AUTHORITY</span>
         </div>
 
         <div class="telemetry-status-pill">
@@ -83,32 +83,41 @@ export function renderSafetyView(container, { i18n, soundEngine }) {
       </div>
 
       <!-- Hero Header -->
-      <div class="bezel-panel" style="padding: 20px; background: rgba(18,27,34,0.85); margin-bottom: 20px; border-top: 3px solid var(--radar-red);">
-        <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 4px;">
-          Coastal Intelligence Center
+      <div class="bezel-panel" style="padding: 24px 20px; background: rgba(18,27,34,0.85); margin-bottom: 20px; border-top: 3px solid var(--radar-red);">
+        <h1 class="font-display text-parchment-bright" style="font-size: 1.9rem; font-weight: 700; margin-bottom: 4px;">
+          COASTAL INTELLIGENCE CENTER
         </h1>
-        <div class="font-data text-muted" style="font-size: 0.78rem; margin-bottom: 14px;">
-          Monitor marine risks, active alerts, coastal weather warnings &amp; situation awareness.
+        <div class="font-body text-parchment" style="font-size: 0.95rem; margin-bottom: 16px;">
+          Monitor marine risks, alerts and coastal conditions.
         </div>
 
         <!-- AI Situation Summary -->
-        <div style="padding: 12px 14px; background: rgba(255,92,92,0.08); border: 1px solid var(--radar-red); border-radius: var(--radius); font-size: 0.85rem; color: var(--parchment); line-height: 1.5; margin-bottom: 14px;">
-          <span class="font-data text-red" style="font-size: 0.70rem; font-weight: 700; letter-spacing: 0.08em; display: block; margin-bottom: 2px;">
-            ⚠️ AI SITUATION SUMMARY
+        <div style="padding: 14px 16px; background: rgba(255,92,92,0.08); border: 1px solid var(--radar-red); border-radius: var(--radius); font-size: 0.88rem; color: var(--parchment); line-height: 1.5; margin-bottom: 16px;">
+          <span class="font-data text-red" style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; display: block; margin-bottom: 4px;">
+            ⚠️ AI SITUATION SUMMARY (SITUATION → RISK → EVIDENCE → ATTENTION)
           </span>
-          Marine risk along Maharashtra coast is currently moderate, primarily driven by strong winds and 2.1–2.8m waves. No active cyclone directly affecting Mumbai, but small craft advisory remains hoisted.
+          Marine risk along the Maharashtra coast is currently moderate, primarily driven by strong winds and increasing wave height. No active cyclone directly affecting Mumbai, but small craft advisory remains hoisted.
         </div>
 
         <!-- Authority Action Quick Queries -->
+        <div class="font-data text-brass" style="font-size: 0.70rem; letter-spacing: 0.10em; margin-bottom: 10px; font-weight: 700; text-transform: uppercase;">
+          ▶ AUTHORITY DECISION PROMPTS — CLICK TO TRANSMIT
+        </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a href="#/chat?q=Is+there+a+cyclone+risk+near+Mumbai%3F" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.75rem;">
+          <a href="#/chat?role=government&q=What+are+today%27s+major+marine+risks%3F" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.76rem;">
             🚨 "What are today's major marine risks?"
           </a>
-          <a href="#/chat?q=Summarize+current+coastal+conditions" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
+          <a href="#/chat?role=government&q=Which+areas+need+attention%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
+            📍 "Which areas need attention?"
+          </a>
+          <a href="#/chat?role=government&q=Are+there+any+active+hazards%3F" class="btn-tactical btn-tactical-red" style="text-decoration: none; font-size: 0.76rem;">
+            ⚠️ "Are there any active hazards?"
+          </a>
+          <a href="#/chat?role=government&q=Summarize+current+coastal+conditions" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
             📋 "Summarize coastal conditions"
           </a>
-          <a href="#/chat?q=Which+areas+require+attention%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
-            📍 "Which areas require attention?"
+          <a href="#/chat?role=government&q=What+is+driving+the+current+risk%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
+            🌪️ "What is driving the current risk?"
           </a>
         </div>
       </div>
@@ -116,7 +125,7 @@ export function renderSafetyView(container, { i18n, soundEngine }) {
       <!-- Regional Risk Gauges Strip -->
       <div style="margin-bottom: 24px;">
         <div class="font-data text-brass" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px; text-transform: uppercase;">
-          REGIONAL HAZARD GAUGES BY SECTOR
+          CURRENT MARINE RISK GAUGES BY SECTOR
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
           ${gaugesHtml}

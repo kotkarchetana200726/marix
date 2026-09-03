@@ -23,24 +23,33 @@ export function renderResearchView(container, { i18n, soundEngine }) {
       </div>
 
       <!-- Hero Header -->
-      <div class="bezel-panel" style="padding: 20px; background: rgba(18,27,34,0.8); margin-bottom: 20px; border-top: 3px solid var(--brass);">
-        <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 4px;">
-          Marine Research Workspace
+      <div class="bezel-panel" style="padding: 24px 20px; background: rgba(18,27,34,0.85); margin-bottom: 20px; border-top: 3px solid var(--brass);">
+        <h1 class="font-display text-parchment-bright" style="font-size: 1.9rem; font-weight: 700; margin-bottom: 4px;">
+          MARINE RESEARCH WORKSPACE
         </h1>
-        <div class="font-data text-muted" style="font-size: 0.78rem; margin-bottom: 14px;">
-          Explore oceanographic patterns, satellite thermal coupling, upwelling correlations &amp; AI-generated evidence.
+        <div class="font-body text-parchment" style="font-size: 0.95rem; margin-bottom: 16px;">
+          Explore marine intelligence, evidence and environmental patterns with ORCA.
         </div>
 
         <!-- Research Quick Query Bar -->
+        <div class="font-data text-brass" style="font-size: 0.70rem; letter-spacing: 0.10em; margin-bottom: 10px; font-weight: 700; text-transform: uppercase;">
+          ▶ RESEARCH QUICK PROMPTS — CLICK TO ANALYZE
+        </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a href="#/chat?q=Analyze+current+ocean+conditions+and+SST+anomaly" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.75rem;">
-            🔍 "Analyze current ocean conditions"
+          <a href="#/chat?role=researcher&q=Analyze+today%27s+marine+conditions" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.76rem;">
+            🔬 "Analyze today's marine conditions"
           </a>
-          <a href="#/chat?q=How+have+wave+conditions+changed+in+this+region%3F" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.75rem;">
-            📈 "How have wave conditions changed?"
+          <a href="#/chat?role=researcher&q=Explain+the+current+marine+risk" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.76rem;">
+            🧠 "Explain current marine risk"
           </a>
-          <a href="#/chat?q=What+factors+are+contributing+to+today%27s+marine+risk%3F" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.75rem;">
-            🧠 "What factors contribute to marine risk?"
+          <a href="#/chat?role=researcher&q=Compare+wind+and+wave+conditions" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.76rem;">
+            🌊 "Compare wind and wave conditions"
+          </a>
+          <a href="#/chat?role=researcher&q=Identify+important+environmental+patterns" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.76rem;">
+            📊 "Identify environmental patterns"
+          </a>
+          <a href="#/chat?role=researcher&q=What+factors+are+driving+marine+risk%3F" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; font-size: 0.76rem;">
+            ⚠️ "What factors drive risk?"
           </a>
         </div>
       </div>
@@ -78,35 +87,35 @@ export function renderResearchView(container, { i18n, soundEngine }) {
       <div class="bezel-panel panel-body" style="margin-top: 20px;">
         <div class="panel-header" style="background: transparent; padding: 0 0 10px 0; border-bottom: 1px solid var(--chart-line); margin-bottom: 12px;">
           <span class="panel-title">
-            <span class="icon">🧠</span> ECOSYSTEM "WHY?" REASONING ENGINE
+            <span class="icon">🧠</span> ECOSYSTEM "WHY?" REASONING ENGINE &amp; AI ANALYSIS
           </span>
           <span class="panel-badge badge-amber">MULTIMODAL SYNTHESIS</span>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
-          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 12px;">
+          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 14px;">
             <div class="font-data text-brass" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
               01 // MONSOON THERMOCLINE DISPLACEMENT
             </div>
-            <div style="font-size: 0.82rem; color: var(--parchment); line-height: 1.5;">
+            <div style="font-size: 0.85rem; color: var(--parchment); line-height: 1.5;">
               Ekman transport driven by south-westerly monsoon winds produces offshore surface divergence along the Konkan coast. Cold, nutrient-dense sub-surface water (26.5°C) is elevated into the photic zone.
             </div>
           </div>
 
-          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 12px;">
+          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 14px;">
             <div class="font-data text-green" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
               02 // DIATOM BLOOM &amp; TROPHIC AGGREGATION
             </div>
-            <div style="font-size: 0.82rem; color: var(--parchment); line-height: 1.5;">
+            <div style="font-size: 0.85rem; color: var(--parchment); line-height: 1.5;">
               Upwelled nitrates fuel rapid diatom proliferation, driving chlorophyll-a to 4.2 mg/m³. Herbivorous pelagics (Sardinella longiceps) aggregate within 48 hours of peak bloom.
             </div>
           </div>
 
-          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 12px;">
+          <div style="background: rgba(10, 16, 20, 0.6); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 14px;">
             <div class="font-data text-amber" style="font-size: 0.72rem; font-weight: 700; margin-bottom: 4px;">
               03 // PREDICTIVE HARVEST ADVISORY
             </div>
-            <div style="font-size: 0.82rem; color: var(--parchment); line-height: 1.5;">
+            <div style="font-size: 0.85rem; color: var(--parchment); line-height: 1.5;">
               The thermal gradient edge at 50-70m depth contours represents an optimal target for purse-seine operations with a 96% catch success probability over the next 36 hours.
             </div>
           </div>

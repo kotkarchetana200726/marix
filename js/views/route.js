@@ -2,7 +2,6 @@
 // Marine Operations Intelligence, Pareto Route Planner & Operational Risk Decision Support
 
 import { ROUTE_PRESETS } from '../data/mockData.js';
-import { createRiskGaugeHTML, updateRiskGauge } from '../components/riskGauge.js';
 
 export function renderRouteView(container, { i18n, soundEngine }) {
   let activePreset = ROUTE_PRESETS[0];
@@ -26,37 +25,50 @@ export function renderRouteView(container, { i18n, soundEngine }) {
       </div>
 
       <!-- Business Hero Header -->
-      <div class="bezel-panel" style="padding: 20px; background: rgba(18,27,34,0.85); border-top: 3px solid var(--phosphor-amber);">
-        <h1 class="font-display text-parchment-bright" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 4px;">
-          Marine Operations Intelligence
+      <div class="bezel-panel" style="padding: 24px 20px; background: rgba(18,27,34,0.85); border-top: 3px solid var(--phosphor-amber);">
+        <h1 class="font-display text-parchment-bright" style="font-size: 1.9rem; font-weight: 700; margin-bottom: 4px;">
+          MARINE OPERATIONS INTELLIGENCE
         </h1>
-        <div class="font-data text-muted" style="font-size: 0.78rem; margin-bottom: 14px;">
-          Make smarter operational, route and risk decisions using Pareto-optimal marine intelligence.
+        <div class="font-body text-parchment" style="font-size: 0.95rem; margin-bottom: 16px;">
+          Make safer and smarter operational decisions.
         </div>
 
         <!-- Operational Decision Summary -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 14px;">
-          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px;">
+          <div style="padding: 12px 14px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
             <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">OPERATIONAL RISK</span>
             <strong class="font-data text-amber" style="font-size: 1.05rem;">MODERATE (19 vs 84)</strong>
           </div>
-          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">KEY FACTORS</span>
-            <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">24kt Wind, 2.4m Swell</strong>
+          <div style="padding: 12px 14px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">ROUTE CONDITIONS</span>
+            <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">24kt Wind, 2.4m Swell, Good Vis</strong>
           </div>
-          <div style="padding: 10px 12px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">ESTIMATED IMPACT</span>
-            <strong class="font-data text-green" style="font-size: 0.88rem;">Saves 530L Fuel (-28%)</strong>
+          <div style="padding: 12px 14px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">OPERATIONAL IMPACT</span>
+            <strong class="font-data text-amber" style="font-size: 0.88rem;">Potential Delay / Caution Required</strong>
+          </div>
+          <div style="padding: 12px 14px; background: rgba(10,16,20,0.6); border: 1px solid var(--chart-line); border-radius: var(--radius);">
+            <span class="font-data text-muted" style="font-size: 0.68rem; display: block;">ORCA RECOMMENDATION</span>
+            <strong class="font-data text-green" style="font-size: 0.85rem;">Monitor conditions before committing to route</strong>
           </div>
         </div>
 
         <!-- Business Quick Questions -->
+        <div class="font-data text-brass" style="font-size: 0.70rem; letter-spacing: 0.10em; margin-bottom: 10px; font-weight: 700; text-transform: uppercase;">
+          ▶ BUSINESS DECISION PROMPTS — CLICK TO TRANSMIT
+        </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a href="#/chat?q=Safe+route+vs+shortest+route+from+Veraval+to+Ratnagiri" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.75rem;">
-            🧭 "Is this route operationally safe?"
+          <a href="#/chat?role=business&q=Is+this+route+safe+today%3F" class="btn-tactical btn-tactical-amber" style="text-decoration: none; font-size: 0.76rem;">
+            🧭 Route Risk: "Is this route safe today?"
           </a>
-          <a href="#/chat?q=What+weather+could+affect+shipping+operations%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.75rem; border-color: var(--brass);">
-            🌊 "What weather affects operations?"
+          <a href="#/chat?role=business&q=Could+weather+affect+operations%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
+            🌦️ Weather Impact: "Could weather affect operations?"
+          </a>
+          <a href="#/chat?role=business&q=How+are+the+sea+conditions%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
+            🌊 Sea Conditions: "How are the sea conditions?"
+          </a>
+          <a href="#/chat?role=business&q=What+risks+should+we+prepare+for%3F" class="btn-tactical text-brass" style="text-decoration: none; font-size: 0.76rem; border-color: var(--brass);">
+            ⚠️ Operational Risk: "What risks should we prepare for?"
           </a>
         </div>
       </div>
