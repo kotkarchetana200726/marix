@@ -1,6 +1,31 @@
 // ORCA Marine AI — Voice Speech Recognition (STT) & Text-to-Speech (TTS) Service
 // Multilingual Speech Synthesis and Natural Language Processing for Mariners
 
+export function prepareSpeechText(text, lang = 'en') {
+  if (!text) return '';
+
+  // 1. Strip markdown code/headers/bullet symbols/emojis
+  let clean = text
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,6}\s?/g, '')
+    .replace(/- /g, ' ')
+    .replace(/•/g, ' ')
+    .replace(/🟢|🟡|🔴|🎣|📍|🧭|🌊|🌡️|🌿|🌬️|🌀|⚡|⛈️|🛡️|💡|📋|✓|⚙/g, '')
+    .replace(/\n+/g, '. ')
+    .trim();
+
+  // 2. Ensure natural speech transitions
+  if (lang === 'mr') {
+    clean = clean.replace(/SST/g, 'समुद्राचे तापमान').replace(/PFZ-01/g, 'पी एफ झेड एक');
+  } else if (lang === 'hi') {
+    clean = clean.replace(/SST/g, 'समुद्र का तापमान').replace(/PFZ-01/g, 'पी एफ जेट एक');
+  }
+
+  return clean;
+}
+
 export class VoiceService {
   constructor() {
     this.synth = window.speechSynthesis || null;
@@ -29,13 +54,13 @@ export class VoiceService {
       this.stopListening();
     }
 
-    const langMap = {
+    const ttsLanguageMap = {
       en: 'en-IN',
       hi: 'hi-IN',
       mr: 'mr-IN'
     };
 
-    this.recognition.lang = langMap[lang] || 'en-IN';
+    this.recognition.lang = ttsLanguageMap[lang] || 'en-IN';
 
     this.recognition.onstart = () => {
       this.isListening = true;
@@ -80,24 +105,27 @@ export class VoiceService {
     // Cancel any ongoing speech
     this.synth.cancel();
 
-    // Strip markdown formatting for speech
-    const cleanText = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/#/g, '');
-
+    const cleanText = prepareSpeechText(text, lang);
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
-    const langMap = {
+    const ttsLanguageMap = {
       en: 'en-IN',
       hi: 'hi-IN',
-      mr: 'hi-IN' // Fallback to hi-IN if mr-IN voice is unavailable on client
+      mr: 'mr-IN'
     };
 
-    utterance.lang = langMap[lang] || 'en-IN';
-    utterance.rate = 0.95; // Slightly slower for clarity
+    const targetLocale = ttsLanguageMap[lang] || 'en-IN';
+    utterance.lang = targetLocale;
+    utterance.rate = 0.92;
     utterance.pitch = 1.0;
 
-    // Try finding matching voice
     const voices = this.synth.getVoices();
-    const voice = voices.find(v => v.lang.startsWith(langMap[lang])) || voices.find(v => v.lang.startsWith('en'));
+    const primaryLangPrefix = targetLocale.substring(0, 2);
+    const voice = voices.find(v => v.lang.startsWith(targetLocale)) || 
+                  voices.find(v => v.lang.startsWith(primaryLangPrefix)) || 
+                  voices.find(v => v.lang.startsWith('hi')) || 
+                  voices.find(v => v.lang.startsWith('en'));
+                  
     if (voice) utterance.voice = voice;
 
     this.synth.speak(utterance);
@@ -128,7 +156,7 @@ export const FISHERMAN_I18N = {
     send_btn: "Ask ORCA",
     quick_title: "QUICK QUESTIONS — TAP TO ASK",
     location_label: "📍 Your Current Location:",
-    location_val: "Arabian Sea — Maharashtra Coast (16.7° N 73.7° E)",
+    location_val: "Arabian Sea — Ratnagiri Coast (16.99° N 73.31° E)",
     
     // Quick Questions
     q_weather: "Will the weather be safe today?",
@@ -139,185 +167,146 @@ export const FISHERMAN_I18N = {
 
     // Preset Responses
     resp_weather: {
-      status: "SAFE FOR COASTAL TRAVEL",
+      status: "SAFE",
       badge: "badge-green",
-      seaState: "Moderate (1.2m Swell)",
-      wind: "14 km/h WNW",
-      visibility: "Good (8.5 nm)",
-      advice: "Weather is safe for coastal fishing today. Winds are moderate. Small boats should remain within 35 km of coast.",
-      audio: "Weather is safe for coastal fishing today. Winds are moderate at 14 kilometers per hour."
+      advice: "Weather is normal near Ratnagiri. Winds are 18 km/h SW with 1.4 m waves. Safe for coastal travel.",
+      seaState: "1.4 m Swell",
+      wind: "18 km/h SW",
+      audio: "Weather is normal near Ratnagiri. Winds are 18 km per hour. Waves are 1.4 metres. Safe for coastal travel."
     },
     resp_sea: {
-      status: "MODERATE SEA STATE",
+      status: "NOMINAL",
       badge: "badge-green",
-      seaState: "1.8 m Wave Swell",
-      wind: "18 km/h NW",
-      visibility: "Good (7.8 nm)",
-      advice: "Waves are moderate at 1.8 meters. Sea conditions are safe for normal transit.",
-      audio: "Waves are moderate at 1.8 meters. Sea conditions are safe for normal transit."
+      advice: "Sea is moderately calm with 1.4 metre swells. Next high tide is expected at 2:35 PM.",
+      seaState: "1.4 m Swell",
+      wind: "18 km/h SW",
+      audio: "Sea is moderately calm with 1.4 metre swells. Next high tide is expected at 2:35 PM."
     },
     resp_fishing: {
-      status: "HIGH FISHING POTENTIAL",
+      status: "HIGH YIELD",
       badge: "badge-green",
-      seaState: "Good (1.2m Swell)",
-      wind: "14 km/h",
-      visibility: "Clear",
-      advice: "Excellent time for fishing! High plankton bloom detected 35 to 55 kilometers off Mumbai coast. Target Mackerel and Sardines.",
-      audio: "Excellent time for fishing! High plankton bloom detected 35 to 55 kilometers off Mumbai coast."
+      advice: "Good fishing conditions expected 18 km southwest of Ratnagiri. Chlorophyll is high at 4.7 mg/m³.",
+      seaState: "1.4 m Swell",
+      wind: "18 km/h SW",
+      audio: "Good fishing conditions expected 18 kilometres southwest of Ratnagiri."
     },
     resp_safety: {
-      status: "NO ACTIVE DANGER NEARBY",
-      badge: "badge-green",
-      seaState: "Moderate",
-      wind: "16 km/h",
-      visibility: "Clear",
-      advice: "No cyclone or storm warnings near your area today. Coastal waters are clear.",
-      audio: "No cyclone or storm warnings near your area today. Coastal waters are clear."
-    },
-    resp_route: {
-      status: "COASTAL ROUTE SAFE",
-      badge: "badge-green",
-      seaState: "1.5m Swell",
-      wind: "16 km/h",
-      visibility: "Good",
-      advice: "Coastal route following the 50m depth line is safe and saves fuel today.",
-      audio: "Coastal route following the 50m depth line is safe and saves fuel today."
+      status: "MODERATE SAFETY",
+      badge: "badge-amber",
+      advice: "No active cyclone alert. Isolated thunderstorms possible late afternoon. Monitor advisories before departure.",
+      seaState: "1.4 m Swell",
+      wind: "18 km/h SW",
+      audio: "No active cyclone alert. Isolated thunderstorms possible late afternoon."
     }
   },
 
   hi: {
-    app_title: "ओर्का (ORCA)",
-    app_sub: "आपका समुद्री सुरक्षा साथी",
-    role_tag: "मछुआरा मोड (FISHERMAN)",
+    app_title: "ORCA",
+    app_sub: "समुद्री सुरक्षा साथी",
+    role_tag: "मछुआरा मोड",
     change_role: "← भूमिका बदलें",
-    prompt_heading: "आज आप क्या जानना चाहते हैं?",
-    mic_btn_idle: "माइक दबाएं और बोलें",
-    mic_btn_listening: "सुन रहे हैं... अब बोलिए",
-    mic_sub: "समुद्र के बारे में हिंदी, मराठी या अंग्रेजी में कुछ भी पूछें।",
-    input_placeholder: "या अपना सवाल यहां टाइप करें...",
-    send_btn: "पूछें",
-    quick_title: "त्वरित प्रश्न — उत्तर पाने के लिए दबाएं",
-    location_label: "📍 आपका स्थान:",
-    location_val: "अरब सागर — महाराष्ट्र तट (16.7° N 73.7° E)",
+    prompt_heading: "आप क्या जानना चाहते हैं?",
+    mic_btn_idle: "दबाएं और बोलें",
+    mic_btn_listening: "सुन रहे हैं... अब बोलें",
+    mic_sub: "अंग्रेजी, हिंदी या मराठी में समुद्र के बारे में कुछ भी पूछें।",
+    input_placeholder: "या अपना प्रश्न यहाँ लिखें...",
+    send_btn: "ORCA से पूछें",
+    quick_title: "त्वरित प्रश्न — पूछने के लिए दबाएं",
+    location_label: "📍 आपकी वर्तमान स्थिति:",
+    location_val: "अरब सागर — रत्नागिरी तट (16.99° N 73.31° E)",
 
     q_weather: "क्या आज मौसम सुरक्षित रहेगा?",
-    q_sea: "समुद्र में लहरें कैसी हैं?",
-    q_fishing: "क्या आज मछली पकड़ने का अच्छा समय है?",
-    q_safety: "क्या मेरे पास कोई खतरा या तूफान है?",
+    q_sea: "लहरें कैसी हैं?",
+    q_fishing: "क्या मछली पकड़ने का अच्छा समय है?",
+    q_safety: "क्या पास में कोई खतरा है?",
     q_route: "कौन सा रास्ता सुरक्षित है?",
 
     resp_weather: {
-      status: "तटीय यात्रा के लिए सुरक्षित",
+      status: "सुरक्षित",
       badge: "badge-green",
-      seaState: "सामान्य (1.2 मीटर लहरें)",
-      wind: "14 किमी/घंटा",
-      visibility: "उत्तम (8.5 किमी)",
-      advice: "आज तटीय मछली पकड़ने के लिए मौसम सुरक्षित है। हवाएं सामान्य हैं। छोटी नावें तट से 35 किमी के भीतर रहें।",
-      audio: "आज तटीय मछली पकड़ने के लिए मौसम सुरक्षित है। हवाएं सामान्य हैं।"
+      advice: "रत्नागिरी के पास मौसम सामान्य है। हवा 18 किमी/घंटा और लहरें 1.4 मीटर हैं। तटीय यात्रा सुरक्षित है।",
+      seaState: "1.4 मीटर लहरें",
+      wind: "18 किमी/घंटा दक्षिण-पश्चिम",
+      audio: "रत्नागिरी के पास मौसम सामान्य है। हवा 18 किलोमीटर प्रति घंटा है। लहरें 1.4 मीटर हैं।"
     },
     resp_sea: {
-      status: "सामान्य समुद्र स्थिति",
+      status: "सामान्य",
       badge: "badge-green",
-      seaState: "1.8 मीटर लहरें",
-      wind: "18 किमी/घंटा",
-      visibility: "अच्छी",
-      advice: "समुद्र में लहरें 1.8 मीटर हैं। सामान्य यात्रा के लिए समुद्र सुरक्षित है।",
-      audio: "समुद्र में लहरें 1.8 मीटर हैं। सामान्य यात्रा के लिए समुद्र सुरक्षित है।"
+      advice: "समुद्र 1.4 मीटर लहरों के साथ मध्यम शांत है। अगला उच्च ज्वार दोपहर 2:35 बजे आने की उम्मीद है।",
+      seaState: "1.4 मीटर लहरें",
+      wind: "18 किमी/घंटा दक्षिण-पश्चिम",
+      audio: "समुद्र 1.4 मीटर लहरों के साथ मध्यम शांत है। अगला उच्च ज्वार दोपहर 2:35 बजे आने की उम्मीद है।"
     },
     resp_fishing: {
-      status: "मछली पकड़ने के लिए उत्तम समय",
+      status: "उच्च संभावना",
       badge: "badge-green",
-      seaState: "अनुकूल",
-      wind: "14 किमी/घंटा",
-      visibility: "साफ",
-      advice: "मछली पकड़ने का बहुत अच्छा समय है! मुंबई तट से 35 से 55 किमी दूर प्रचुर मात्रा में मछलियां मौजूद हैं।",
-      audio: "मछली पकड़ने का बहुत अच्छा समय है! मुंबई तट से 35 से 55 किमी दूर प्रचुर मछलियां मौजूद हैं।"
+      advice: "रत्नागिरी के 18 किमी दक्षिण-पश्चिम में अच्छी मछली पकड़ने की संभावना है।",
+      seaState: "1.4 मीटर लहरें",
+      wind: "18 किमी/घंटा दक्षिण-पश्चिम",
+      audio: "रत्नागिरी के 18 किलोमीटर दक्षिण-पश्चिम में अच्छी मछली पकड़ने की संभावना है।"
     },
     resp_safety: {
-      status: "पास में कोई खतरा नहीं है",
-      badge: "badge-green",
-      seaState: "सामान्य",
-      wind: "16 किमी/घंटा",
-      visibility: "साफ",
-      advice: "आज आपके क्षेत्र के पास कोई चक्रवात या तूफान की चेतावनी नहीं है। समुद्र शांत है।",
-      audio: "आज आपके क्षेत्र के पास कोई चक्रवात या तूफान की चेतावनी नहीं है। समुद्र शांत है।"
-    },
-    resp_route: {
-      status: "तटीय मार्ग सुरक्षित है",
-      badge: "badge-green",
-      seaState: "1.5 मीटर",
-      wind: "16 किमी/घंटा",
-      visibility: "अच्छी",
-      advice: "तट के साथ 50 मीटर गहराई वाला मार्ग आज सुरक्षित है और ईंधन बचाता है।",
-      audio: "तट के साथ 50 मीटर गहराई वाला मार्ग आज सुरक्षित है और ईंधन बचाता है।"
+      status: "मध्यम सुरक्षा",
+      badge: "badge-amber",
+      advice: "कोई चक्रवात अलर्ट नहीं। शाम को गरज के साथ बारिश संभव। प्रस्थान से पहले जांच करें।",
+      seaState: "1.4 मीटर लहरें",
+      wind: "18 किमी/घंटा दक्षिण-पश्चिम",
+      audio: "कोई चक्रवात अलर्ट नहीं है। शाम को बारिश संभव है।"
     }
   },
 
   mr: {
-    app_title: "ओर्का (ORCA)",
-    app_sub: "तुमचा सागरी सुरक्षा सोबती",
-    role_tag: "मासेमार मोड (FISHERMAN)",
+    app_title: "ORCA",
+    app_sub: "सागरी सुरक्षितता सहाय्यक",
+    role_tag: "मासेमारी मोड",
     change_role: "← भूमिका बदला",
-    prompt_heading: "आज तुम्हाला काय जाणून घ्यायचे आहे?",
-    mic_btn_idle: "माईक दाबा आणि बोला",
+    prompt_heading: "तुम्हाला काय जाणून घ्यायचे आहे?",
+    mic_btn_idle: "दबा आणि बोला",
     mic_btn_listening: "ऐकत आहे... आता बोला",
-    mic_sub: "समुद्राबद्दल मराठी, हिंदी किंवा इंग्रजीत काहीही विचारा.",
-    input_placeholder: "किंवा तुमचा प्रश्न येथे टाईप करा...",
-    send_btn: "विचारा",
-    quick_title: "त्वरित प्रश्न — उत्तर मिळवण्यासाठी दाबा",
-    location_label: "📍 तुमचे स्थान:",
-    location_val: "अरबी समुद्र — महाराष्ट्र किनारपट्टी (16.7° N 73.7° E)",
+    mic_sub: "इंग्रजी, हिंदी किंवा मराठीमध्ये समुद्राबद्दल काहीही विचारा.",
+    input_placeholder: "किंवा आपला प्रश्न येथे लिहा...",
+    send_btn: "ORCA ला विचारा",
+    quick_title: "त्वरित प्रश्न — विचारण्यासाठी दाबा",
+    location_label: "📍 तुमचे सध्याचे ठिकाण:",
+    location_val: "अरबी समुद्र — रत्नागिरी किनारा (16.99° N 73.31° E)",
 
-    q_weather: "आज हवामान सुरक्षित राहील का?",
-    q_sea: "समुद्रात लाटा कशा आहेत?",
-    q_fishing: "आज मासेमारीसाठी चांगली वेळ आहे का?",
-    q_safety: "माझ्या जवळ काही धोका किंवा वादळ आहे का?",
+    q_weather: "आज हवामान सुरक्षित असेल का?",
+    q_sea: "लाटा कशा आहेत?",
+    q_fishing: "मासेमारीसाठी ही योग्य वेळ आहे का?",
+    q_safety: "काही धोका आहे का?",
     q_route: "कोणता मार्ग सुरक्षित आहे?",
 
     resp_weather: {
-      status: "किनारपट्टी प्रवासासाठी सुरक्षित",
+      status: "सुरक्षित",
       badge: "badge-green",
-      seaState: "मध्यम (1.2 मीटर लाटा)",
-      wind: "14 किमी/तास",
-      visibility: "उत्तम",
-      advice: "आज किनारपट्टीवर मासेमारीसाठी हवामान सुरक्षित आहे. लहान बोटींनी किनार्यापासून 35 किमीच्या आत राहावे.",
-      audio: "आज किनारपट्टीवर मासेमारीसाठी हवामान सुरक्षित आहे. लहान बोटींनी किनार्यापासून 35 किमीच्या आत राहावे."
+      advice: "रत्नागिरी जवळ हवामान सामान्य आहे. वारा 18 किमी/तास आणि लाटा 1.4 मीटर आहेत. प्रवास सुरक्षित आहे.",
+      seaState: "1.4 मीटर लाटा",
+      wind: "18 किमी/तास नैऋत्य",
+      audio: "रत्नागिरी जवळ हवामान सामान्य आहे. वारा 18 किलोमीटर प्रति तास आहे. लाटा 1.4 मीटर आहेत."
     },
     resp_sea: {
-      status: "मध्यम समुद्र स्थिती",
+      status: "सामान्य",
       badge: "badge-green",
-      seaState: "1.8 मीटर लाटा",
-      wind: "18 किमी/तास",
-      visibility: "छाण",
-      advice: "समुद्रात लाटा 1.8 मीटर आहेत. प्रवास सुरक्षित आहे.",
-      audio: "समुद्रात लाटा 1.8 मीटर आहेत. प्रवास सुरक्षित आहे."
+      advice: "समुद्र 1.4 मीटर लाटांसह मध्यम शांत आहे. पुढील मोठी भरती दुपारी 2:35 वाजता अपेक्षित आहे.",
+      seaState: "1.4 मीटर लाटा",
+      wind: "18 किमी/तास नैऋत्य",
+      audio: "समुद्र 1.4 मीटर लाटांसह मध्यम शांत आहे. पुढील मोठी भरती दुपारी 2:35 वाजता अपेक्षित आहे."
     },
     resp_fishing: {
-      status: "मासेमारीसाठी उत्तम वेळ",
+      status: "उच्च शक्यता",
       badge: "badge-green",
-      seaState: "अनुकूल",
-      wind: "14 किमी/तास",
-      visibility: "स्पष्ट",
-      advice: "मासेमारीसाठी उत्तम वेळ! मुंबई किनारपट्टीपासून 35 ते 55 किमी अंतरावर मुबलक मासे आढळले आहेत.",
-      audio: "मासेमारीसाठी उत्तम वेळ! मुंबई किनारपट्टीपासून 35 ते 55 किमी अंतरावर मुबलक मासे आढळले आहेत."
+      advice: "रत्नागिरीच्या 18 किमी नैऋत्येला मासेमारीसाठी उत्तम परिस्थिती आहे.",
+      seaState: "1.4 मीटर लाटा",
+      wind: "18 किमी/तास नैऋत्य",
+      audio: "रत्नागिरीच्या 18 किलोमीटर नैऋत्येला मासेमारीसाठी उत्तम परिस्थिती आहे."
     },
     resp_safety: {
-      status: "जवळ कोणताही धोका नाही",
-      badge: "badge-green",
-      seaState: "सामान्य",
-      wind: "16 किमी/तास",
-      visibility: "स्पष्ट",
-      advice: "आज तुमच्या परिसरात चक्रीवादळाचा कोणताही इशारा नाही. समुद्र शांत आहे.",
-      audio: "आज तुमच्या परिसरात चक्रीवादळाचा कोणताही इशारा नाही. समुद्र शांत आहे."
-    },
-    resp_route: {
-      status: "किनारपट्टी मार्ग सुरक्षित आहे",
-      badge: "badge-green",
-      seaState: "1.5 मीटर",
-      wind: "16 किमी/तास",
-      visibility: "उत्तम",
-      advice: "किनारपट्टीला लागून असलेला 50 मीटर खोलीचा मार्ग सुरक्षित आहे आणि इंधन वाचवतो.",
-      audio: "किनारपट्टीला लागून असलेला 50 मीटर खोलीचा मार्ग सुरक्षित आहे आणि इंधन वाचवतो."
+      status: "मध्यम सुरक्षितता",
+      badge: "badge-amber",
+      advice: "चक्रीवादळाचा इशारा नाही. संध्याकाळी पावसाची शक्यता आहे. निघण्यापूर्वी तपासणी करा.",
+      seaState: "1.4 मीटर लाटा",
+      wind: "18 किमी/तास नैऋत्य",
+      audio: "चक्रीवादळाचा इशारा नाही. संध्याकाळी पावसाची शक्यता आहे."
     }
   }
 };
