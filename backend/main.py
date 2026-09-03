@@ -183,6 +183,7 @@ async def chat_sse(req: ChatRequest):
 root_dir = Path(__file__).resolve().parent.parent
 if (root_dir / "index.html").exists():
     @app.get("/")
+    @app.get("/index.html")
     async def serve_index():
         return FileResponse(root_dir / "index.html")
 
