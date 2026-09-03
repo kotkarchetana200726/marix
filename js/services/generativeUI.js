@@ -157,6 +157,12 @@ export class GenerativeAgentBridge {
       prose: mockMatch.prose,
       components: []
     });
+
+    return {
+      text: mockMatch.prose,
+      prose: mockMatch.prose,
+      lang: mockMatch.targetLang
+    };
   }
 
   async _streamFromSimulatedEngine(promptText, renderer, activeLang = 'en') {
@@ -203,6 +209,12 @@ export class GenerativeAgentBridge {
     });
 
     renderer.handleEvent({ type: 'COMPLETE', prose: prose });
+
+    return {
+      text: prose,
+      prose: prose,
+      lang: activeLang
+    };
   }
 }
 

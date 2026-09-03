@@ -29,6 +29,7 @@ export class AgentBridgeService {
     return {
       intent,
       lang,
+      text: plan.prose,
       prose: plan.prose,
       cardsHtml: plan.cardsHtml,
       timestamp: new Date().toISOString()
