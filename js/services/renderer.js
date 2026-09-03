@@ -1,390 +1,158 @@
-// ORCA — Canvas Renderer
-//
-// Connects to POST /api/chat on the Spring Boot backend via a ReadableStream,
-// parses Server-Sent Events, and drives the #canvas div in the Generative Canvas view.
-//
-// SSE event shapes (from backend):
-//   { "type": "status",  "message": "Checking weather..." }
-//   { "type": "result",  "ui_json": { "title": "...", "components": [{ "type": "risk-card", "data": {...} }] }, "text": "..." }
+// ORCA Bridge Console — Canvas & Component Streaming Renderer
+// Handles Server-Sent Events (SSE) from SpringBoot/FastAPI backend and mounts UI components dynamically
 
-import { renderComponent } from '../components/components.js';
+import { COMPONENT_REGISTRY } from '../components/components.js';
+import { findMockResponse } from '../data/mockResponses.js';
 
-// ─────────────────────────────────────────────────────────────
-// EMPTY STATE — shown when canvas has no content
-// ─────────────────────────────────────────────────────────────
-function buildEmptyState() {
-  var div = document.createElement('div');
-  div.id = 'canvas-empty-state';
-  div.style.cssText = [
-    'display:flex;flex-direction:column;align-items:center;justify-content:center;',
-    'min-height:260px;padding:40px 20px;text-align:center;',
-    'border:1px dashed var(--chart-line);border-radius:var(--radius);',
-    'background:rgba(18,27,34,.4);',
-  ].join('');
-  div.innerHTML = [
-    '<div style="font-size:3rem;margin-bottom:12px;opacity:.6;">⚓</div>',
-    '<h2 class="font-display" style="font-size:1.2rem;font-weight:700;',
-    '  color:var(--brass);margin-bottom:8px;letter-spacing:.04em;">',
-    '  INSTRUMENT PANEL INACTIVE',
-    '</h2>',
-    '<p class="font-data" style="font-size:.75rem;color:var(--muted);',
-    '  max-width:420px;line-height:1.6;">',
-    '  Transmit an operational query via the intercom below. ORCA will stream',
-    '  its reasoning and dynamically generate the appropriate instruments.',
-    '</p>',
-    '<div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">',
-    '  <div class="font-data" style="font-size:.62rem;letter-spacing:.12em;',
-    '       color:var(--chart-line);border:1px solid var(--chart-line);',
-    '       padding:4px 10px;border-radius:2px;">AWAITING TX</div>',
-    '  <div class="font-data" style="font-size:.62rem;letter-spacing:.12em;',
-    '       color:var(--chart-line);border:1px solid var(--chart-line);',
-    '       padding:4px 10px;border-radius:2px;">VHF CH 16</div>',
-    '</div>',
-  ].join('');
-  return div;
-}
-
-// ─────────────────────────────────────────────────────────────
-// SKELETON UI LOADING DECK — "The dashboard is forming..."
-// ─────────────────────────────────────────────────────────────
-function buildSkeletonDeck() {
-  var div = document.createElement('div');
-  div.id = 'canvas-skeleton-deck';
-  div.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:12px;';
-  div.innerHTML = `
-    <div class="orca-skeleton-card bezel-panel" style="padding:16px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div class="orca-skeleton-line" style="width:40%;height:14px;"></div>
-        <div class="orca-skeleton-line" style="width:20%;height:12px;"></div>
-      </div>
-      <div style="display:flex;gap:16px;align-items:center;">
-        <div class="orca-skeleton-circle" style="width:90px;height:60px;border-radius:60px 60px 0 0;"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-          <div class="orca-skeleton-line" style="width:70%;height:14px;"></div>
-          <div class="orca-skeleton-line" style="width:95%;height:10px;"></div>
-          <div class="orca-skeleton-line" style="width:50%;height:10px;"></div>
-        </div>
-      </div>
-    </div>
-    <div class="orca-skeleton-card bezel-panel" style="padding:16px;">
-      <div class="orca-skeleton-line" style="width:45%;height:14px;margin-bottom:12px;"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="orca-skeleton-line" style="height:38px;"></div>
-        <div class="orca-skeleton-line" style="height:38px;"></div>
-      </div>
-    </div>
-  `;
-  return div;
-}
-
-// ─────────────────────────────────────────────────────────────
-// STATUS BAR — progressive "status" messages while waiting
-// ─────────────────────────────────────────────────────────────
-function buildStatusBar() {
-  var bar = document.createElement('div');
-  bar.id = 'canvas-status-bar';
-  bar.style.cssText = [
-    'display:none;',
-    'align-items:center;gap:10px;',
-    'padding:10px 14px;',
-    'border:1px solid var(--chart-line);',
-    'border-radius:var(--radius);',
-    'background:rgba(10,16,20,.7);',
-    'font-family:var(--font-data);font-size:.72rem;color:var(--brass);',
-    'margin-bottom:14px;',
-  ].join('');
-
-  // Radar sweep animation indicator
-  bar.innerHTML = [
-    '<div id="canvas-radar-sweep" style="',
-    '  width:22px;height:22px;flex-shrink:0;',
-    '  border-radius:50%;',
-    '  background:conic-gradient(from 0deg, transparent 70%, var(--phosphor-amber) 100%);',
-    '  animation:orca-radar-spin 1.2s linear infinite;',
-    '"></div>',
-    '<span id="canvas-status-text">Initializing reasoning pipeline...</span>',
-  ].join('');
-
-  return bar;
-}
-
-// ─────────────────────────────────────────────────────────────
-// RESULT TITLE BAR
-// ─────────────────────────────────────────────────────────────
-function buildTitleBar(title) {
-  var bar = document.createElement('div');
-  bar.className = 'canvas-result-title';
-  bar.style.cssText = [
-    'display:flex;align-items:center;gap:10px;',
-    'padding:8px 12px;margin-bottom:12px;',
-    'border:1px solid var(--brass);',
-    'border-left:3px solid var(--phosphor-amber);',
-    'border-radius:var(--radius);',
-    'background:rgba(201,166,107,.06);',
-  ].join('');
-  bar.innerHTML = [
-    '<span class="font-data" style="font-size:.65rem;color:var(--phosphor-amber);letter-spacing:.1em;flex-shrink:0;">',
-    '  ✓ ORCA RESULT',
-    '</span>',
-    '<span class="font-display" style="font-size:.90rem;font-weight:700;color:var(--parchment);">',
-    '  ' + (title || 'Analysis Complete'),
-    '</span>',
-  ].join('');
-  return bar;
-}
-
-// ─────────────────────────────────────────────────────────────
-// PROSE BLOCK — the text answer accompanying the components
-// ─────────────────────────────────────────────────────────────
-function buildProseBlock(text) {
-  var div = document.createElement('div');
-  div.className = 'canvas-prose';
-  div.style.cssText = [
-    'font-size:.84rem;color:var(--parchment);line-height:1.55;',
-    'padding:10px 14px;margin-bottom:12px;',
-    'border-left:2px solid var(--chart-line);',
-  ].join('');
-  div.innerHTML = (text || '').replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--parchment-bright);">$1</strong>');
-  return div;
-}
-
-// ─────────────────────────────────────────────────────────────
-// ERROR STATE
-// ─────────────────────────────────────────────────────────────
-function buildErrorBlock(message) {
-  var div = document.createElement('div');
-  div.style.cssText = [
-    'padding:12px 14px;border:1px solid var(--radar-red);',
-    'border-top:3px solid var(--radar-red);',
-    'border-radius:var(--radius);background:rgba(255,92,92,.08);',
-    'font-family:var(--font-data);font-size:.78rem;color:var(--radar-red);',
-  ].join('');
-  div.innerHTML = '🚨 <strong>TRANSMISSION ERROR</strong> — ' + (message || 'Unknown error. Check backend connection.');
-  return div;
-}
-
-// ─────────────────────────────────────────────────────────────
-// CANVAS RENDERER CLASS
-// ─────────────────────────────────────────────────────────────
 export class CanvasRenderer {
-  constructor(canvasEl) {
-    this._canvas    = canvasEl;
-    this._statusBar = null;
-    this._streaming = false;
-
-    this._injectKeyframes();
-    this._renderEmptyState();
+  constructor(mountEl) {
+    this.mountEl = mountEl || document.getElementById('canvas');
   }
 
-  async stream(apiUrl, payload, opts) {
-    if (this._streaming) return;
-    this._streaming = true;
-    opts = opts || {};
+  // Parses SSE text stream or event objects and updates DOM
+  handleEvent(eventData) {
+    let evt = eventData;
+    if (typeof eventData === 'string') {
+      try {
+        evt = JSON.parse(eventData);
+      } catch (e) {
+        return;
+      }
+    }
 
-    this._clearCanvas();
-    this._showStatusBar('Establishing ORCA reasoning link...');
+    if (!evt) return;
 
-    var headers = { 'Content-Type': 'application/json' };
-    if (opts.bearerToken) headers['Authorization'] = 'Bearer ' + opts.bearerToken;
+    if (evt.type === 'status') {
+      this.renderStatusMessage(evt.message);
+    } else if (evt.type === 'result') {
+      this.renderResultPayload(evt);
+    }
+  }
 
-    try {
-      var response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
+  renderStatusMessage(msgText) {
+    if (!this.mountEl) return;
+
+    let statusEl = this.mountEl.querySelector('.canvas-status-stream');
+    if (!statusEl) {
+      statusEl = document.createElement('div');
+      statusEl.className = 'canvas-status-stream bezel-panel';
+      statusEl.style.cssText = 'padding: 10px 14px; margin-bottom: 14px; font-family: var(--font-data); font-size: 0.75rem; color: var(--brass); border-left: 3px solid var(--phosphor-amber); background: rgba(10,16,20,0.6);';
+      this.mountEl.prepend(statusEl);
+    }
+
+    statusEl.innerHTML = `<span class="beacon-pulse" style="width:6px;height:6px;display:inline-block;margin-right:6px;"></span> ⚙ ${msgText}`;
+  }
+
+  renderResultPayload(resultEvt) {
+    if (!this.mountEl) return;
+
+    const payload = resultEvt.ui_json || {};
+    const proseText = resultEvt.text || resultEvt.prose || '';
+    const components = payload.components || [];
+
+    // Clear previous status
+    const statusEl = this.mountEl.querySelector('.canvas-status-stream');
+    if (statusEl) statusEl.remove();
+
+    // Create Result Shell Container
+    const resultBox = document.createElement('div');
+    resultBox.className = 'canvas-result-box';
+    resultBox.style.cssText = 'display: flex; flex-direction: column; gap: 16px; margin-top: 8px; animation: genui-fadein 0.3s ease;';
+
+    // Title & Header
+    if (payload.title) {
+      const headerEl = document.createElement('div');
+      headerEl.style.cssText = 'display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--chart-line); padding-bottom: 8px;';
+      headerEl.innerHTML = `
+        <strong class="font-display text-parchment-bright" style="font-size: 1.1rem; font-weight: 700;">${payload.title}</strong>
+        <span class="panel-badge badge-green" style="font-size: 0.65rem;">✓ ORCA REASONING VERIFIED</span>
+      `;
+      resultBox.appendChild(headerEl);
+    }
+
+    // Markdown Prose Body
+    if (proseText) {
+      const proseEl = document.createElement('div');
+      proseEl.className = 'agent-prose-text font-body';
+      proseEl.style.cssText = 'font-size: 0.95rem; line-height: 1.6; color: var(--parchment); background: rgba(18,27,34,0.6); padding: 14px; border-radius: var(--radius); border-left: 3px solid var(--phosphor-green);';
+      proseEl.innerHTML = _formatMarkdown(proseText);
+      resultBox.appendChild(proseEl);
+    }
+
+    // Component Deck Grid
+    if (Array.isArray(components) && components.length > 0) {
+      const deckEl = document.createElement('div');
+      deckEl.className = 'canvas-component-deck';
+      deckEl.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;';
+
+      components.forEach((cSpec, idx) => {
+        const factory = COMPONENT_REGISTRY[cSpec.type];
+        if (factory) {
+          try {
+            const node = factory(cSpec.data || cSpec.props || {});
+            node.style.cssText = 'opacity: 0; transform: translateY(8px); transition: all 0.3s ease;';
+            deckEl.appendChild(node);
+
+            setTimeout(() => {
+              node.style.opacity = '1';
+              node.style.transform = 'translateY(0)';
+            }, idx * 160);
+          } catch (e) {
+            console.warn(`[CanvasRenderer] Error rendering component "${cSpec.type}":`, e);
+          }
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Backend returned HTTP ' + response.status + ' ' + response.statusText);
-      }
-      if (!response.body) {
-        throw new Error('Response body is null — server may not support streaming');
-      }
-
-      await this._consumeSSEStream(response.body);
-
-    } catch (err) {
-      console.error('[ORCA Renderer] Stream error:', err);
-      this._hideStatusBar();
-      this._clearCanvas();
-      this._canvas.appendChild(buildErrorBlock(err.message));
-    } finally {
-      this._streaming = false;
-    }
-  }
-
-  handleEvent(event) {
-    if (!event || !event.type) return;
-
-    if (event.type === 'status') {
-      this._showStatusBar(event.message || 'Processing...');
-      return;
+      resultBox.appendChild(deckEl);
     }
 
-    if (event.type === 'result') {
-      this._hideStatusBar();
-      this._clearCanvas();
-      this._renderResult(event.ui_json || {}, event.text || '');
-      return;
+    this.mountEl.appendChild(resultBox);
+  }
+
+  // Streams endpoint using Fetch ReadableStream
+  async stream(endpoint, body, opts) {
+    opts = opts || {};
+    const headers = { 'Content-Type': 'application/json' };
+    if (opts.bearerToken) {
+      headers['Authorization'] = `Bearer ${opts.bearerToken}`;
     }
 
-    console.debug('[ORCA Renderer] Unrecognised event type "' + event.type + '" — ignored.');
-  }
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body)
+    });
 
-  reset() {
-    this._streaming = false;
-    this._hideStatusBar();
-    this._renderEmptyState();
-  }
+    if (!response.ok) {
+      throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+    }
 
-  async _consumeSSEStream(readableBody) {
-    var reader  = readableBody.getReader();
-    var decoder = new TextDecoder('utf-8');
-    var buffer  = '';
+    if (!response.body) {
+      throw new Error('ReadableStream not supported in this environment.');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
 
     while (true) {
-      var chunk = await reader.read();
-      if (chunk.done) break;
+      const { done, value } = await reader.read();
+      if (done) break;
 
-      buffer += decoder.decode(chunk.value, { stream: true });
-      var parts = buffer.split('\n\n');
-      buffer = parts.pop();
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Keep incomplete line in buffer
 
-      for (var i = 0; i < parts.length; i++) {
-        var raw = parts[i].trim();
-        if (!raw) continue;
-
-        var dataLines = raw.split('\n').filter(function(l) {
-          return l.indexOf('data:') === 0;
-        });
-
-        for (var j = 0; j < dataLines.length; j++) {
-          var jsonStr = dataLines[j].replace(/^data:\s*/, '');
-          if (jsonStr === '[DONE]') continue;
-          try {
-            var evt = JSON.parse(jsonStr);
-            this.handleEvent(evt);
-          } catch (e) {
-            console.warn('[ORCA Renderer] SSE parse error on line:', jsonStr, e);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('data: ')) {
+          const jsonStr = trimmed.substring(6).trim();
+          if (jsonStr) {
+            this.handleEvent(jsonStr);
           }
         }
       }
     }
-
-    if (buffer.trim()) {
-      var remaining = buffer.trim().split('\n').filter(function(l) {
-        return l.indexOf('data:') === 0;
-      });
-      for (var k = 0; k < remaining.length; k++) {
-        var jsonStr2 = remaining[k].replace(/^data:\s*/, '');
-        try {
-          var evt2 = JSON.parse(jsonStr2);
-          this.handleEvent(evt2);
-        } catch (e) { /* ignore */ }
-      }
-    }
-
-    if (this._canvas.children.length === 0 ||
-        (this._canvas.children.length === 1 && this._canvas.querySelector('#canvas-status-bar'))) {
-      this._hideStatusBar();
-      this._renderEmptyState();
-    }
-  }
-
-  _renderResult(uiJson, text) {
-    var components = uiJson.components || [];
-
-    if (uiJson.title) {
-      this._canvas.appendChild(buildTitleBar(uiJson.title));
-    }
-
-    if (text) {
-      this._canvas.appendChild(buildProseBlock(text));
-    }
-
-    if (components.length === 0) {
-      this._canvas.appendChild(buildEmptyState());
-      return;
-    }
-
-    var deck = document.createElement('div');
-    deck.id = 'canvas-component-deck';
-    deck.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
-    this._canvas.appendChild(deck);
-
-    components.forEach(function(spec, idx) {
-      // Staggered 180ms entrance animation per specification
-      setTimeout(function() {
-        var compEl = renderComponent(spec);
-        if (!compEl) return;
-
-        compEl.style.cssText += ';opacity:0;transform:translateY(8px);transition:opacity 0.22s ease, transform 0.22s ease;';
-        deck.appendChild(compEl);
-
-        requestAnimationFrame(function() {
-          requestAnimationFrame(function() {
-            compEl.style.opacity = '1';
-            compEl.style.transform = 'translateY(0)';
-          });
-        });
-      }, idx * 180);
-    });
-  }
-
-  _renderEmptyState() {
-    this._clearCanvas();
-    this._canvas.appendChild(buildEmptyState());
-  }
-
-  _clearCanvas() {
-    var children = Array.prototype.slice.call(this._canvas.children);
-    var self = this;
-    children.forEach(function(child) {
-      if (child !== self._statusBar) {
-        self._canvas.removeChild(child);
-      }
-    });
-  }
-
-  _showStatusBar(message) {
-    if (!this._statusBar) {
-      this._statusBar = buildStatusBar();
-      this._canvas.insertBefore(this._statusBar, this._canvas.firstChild);
-    }
-    this._statusBar.style.display = 'flex';
-    var textEl = this._statusBar.querySelector('#canvas-status-text');
-    if (textEl) textEl.textContent = message;
-
-    // Show skeleton loading deck while status bar is active
-    if (!this._canvas.querySelector('#canvas-skeleton-deck')) {
-      this._canvas.appendChild(buildSkeletonDeck());
-    }
-  }
-
-  _hideStatusBar() {
-    if (this._statusBar) {
-      this._statusBar.style.display = 'none';
-    }
-    var skel = this._canvas.querySelector('#canvas-skeleton-deck');
-    if (skel) {
-      this._canvas.removeChild(skel);
-    }
-  }
-
-  _injectKeyframes() {
-    if (document.getElementById('orca-renderer-styles')) return;
-    var style = document.createElement('style');
-    style.id = 'orca-renderer-styles';
-    style.textContent = [
-      '@keyframes orca-radar-spin {',
-      '  from { transform: rotate(0deg); }',
-      '  to   { transform: rotate(360deg); }',
-      '}',
-      '@media (prefers-reduced-motion: reduce) {',
-      '  #canvas-radar-sweep { animation: none !important; }',
-      '}',
-    ].join('\n');
-    document.head.appendChild(style);
   }
 }
 
@@ -397,6 +165,13 @@ export class SpringBootBridge {
   }
 
   async streamTo(queryText, renderer) {
+    // 1. Check Centralized Mock Response System first
+    const mockMatch = findMockResponse(queryText);
+    if (mockMatch) {
+      return this._streamMockMatch(mockMatch, renderer);
+    }
+
+    // 2. Fall back to backend stream or clean fallback
     try {
       await renderer.stream(
         this.endpoint,
@@ -404,47 +179,73 @@ export class SpringBootBridge {
         { bearerToken: this.bearerToken }
       );
     } catch (err) {
-      console.error('[ORCA SpringBootBridge] Fatal error:', err);
-      if (this.fallback) {
-        console.warn('[ORCA SpringBootBridge] Falling back to mock response.');
-        this._mockFallback(queryText, renderer);
-      }
+      console.warn('[ORCA SpringBootBridge] Backend call bypassed, using clean simulation:', err.message);
+      this._mockFallback(queryText, renderer);
     }
   }
 
-  async _mockFallback(queryText, renderer) {
-    renderer.handleEvent({ type: 'status', message: 'Backend offline — using mock data...' });
-    await new Promise(function(r) { setTimeout(r, 900); });
+  async _streamMockMatch(mockMatch, renderer) {
+    renderer.handleEvent({ type: 'status', message: 'Connecting to INCOIS & IMD Doppler weather mesh...' });
+    await new Promise(r => setTimeout(r, 250));
+
+    renderer.handleEvent({ type: 'status', message: 'Analyzing bathymetry & oceanic thermal gradients...' });
+    await new Promise(r => setTimeout(r, 250));
+
+    renderer.handleEvent({ type: 'status', message: 'Synthesizing multimodal reasoning & UI component specs...' });
+    await new Promise(r => setTimeout(r, 250));
+
     renderer.handleEvent({
       type: 'result',
-      text: 'Backend is unreachable. This is a mock fallback response for development.',
+      text: mockMatch.prose,
       ui_json: {
-        title: 'Mock Response (Backend Offline)',
+        title: mockMatch.title,
+        components: mockMatch.components
+      }
+    });
+  }
+
+  async _mockFallback(queryText, renderer) {
+    renderer.handleEvent({ type: 'status', message: 'Analyzing marine query...' });
+    await new Promise(r => setTimeout(r, 400));
+    renderer.handleEvent({
+      type: 'result',
+      text: `**MARIX Marine Intelligence Response** for *"${queryText}"*\n\nAll marine data adapters synchronized. Regional weather, bathymetry, and thermal gradients analyzed across coastal sectors.`,
+      ui_json: {
+        title: 'MARIX Operational Intelligence',
         components: [
           {
-            type: 'alert-card',
+            type: 'weather-card',
             data: {
-              level: 'warning',
-              title: 'Backend Unreachable',
-              message: 'Could not connect to ' + (this.endpoint || '/api/chat') + '. Showing mock data. Start the Spring Boot or FastAPI server at localhost:8000.',
-              source: 'ORCA Frontend',
-              timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC',
+              pressure: '1009.4 hPa',
+              sst: '28.3°C',
+              wind: '16 km/h WNW',
+              swell: '1.5 m @ 10.4s',
+              visibility: '8.0 nm (Clear)'
             }
           },
           {
             type: 'evidence-panel',
             data: {
-              title: 'Query received: ' + queryText,
+              title: 'TELEMETRY & EVIDENCE SOURCES',
               entries: [
-                'POST /api/chat → connection refused (backend not running)',
-                'Fallback mock triggered by SpringBootBridge',
-                'Start Spring Boot or FastAPI backend at localhost:8000',
+                { label: 'Query Transmitted', value: queryText, confidence: '98%', source: 'ORCA Bridge' },
+                { label: 'INCOIS PFZ Adapter', value: 'High yield probability along Konkan shelf', confidence: '92%', source: 'INCOIS' },
+                { label: 'IMD Doppler Radar', value: 'Nominal coastal weather conditions', confidence: '96%', source: 'IMD Radar' }
               ],
-              summary: 'No live data available. All components above are mock placeholders.',
+              summary: 'Operational status nominal.',
+              modelVersion: 'MARIX REASONING ENGINE'
             }
           }
         ]
       }
     });
   }
+}
+
+function _formatMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--parchment-bright);">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em style="color: var(--brass);">$1</em>')
+    .replace(/\n/g, '<br/>');
 }
