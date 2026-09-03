@@ -1,94 +1,81 @@
-// ORCA Marine Bridge Console — Generative Canvas (/#chat)
-// Dual-mode reasoning canvas with persistent tactical location, mini-map panel & voice-first multilingual chat
+// ORCA Marine Bridge Console — Persona Generative Chat Section (/#chat)
+// Multilingual, Voice-First, Generative UI Chat Canvas with Central Mock Marine Intelligence Integration
 
-import { GenerativeUIRenderer, GenerativeAgentBridge } from '../services/generativeUI.js';
-import { CanvasRenderer, SpringBootBridge } from '../services/renderer.js';
-import { getMarineIcon } from '../components/components.js';
+import { GenerativeAgentBridge, GenerativeUIRenderer } from '../services/generativeUI.js';
+import { SpringBootBridge, CanvasRenderer } from '../services/renderer.js';
 import { voiceService, FISHERMAN_I18N } from '../services/voiceService.js';
 
-export function renderChatView(container, { i18n, soundEngine, currentLang = 'en' }) {
-  const bridge       = new GenerativeAgentBridge();
-  const sbBridge     = new SpringBootBridge(); // Spring Boot SSE bridge
+export function renderChatView(container, { i18n, soundEngine, persona = 'fisherman', initialQuery = '' }) {
+  const bridge = new GenerativeAgentBridge();
+  const sbBridge = new SpringBootBridge();
 
-  // Parse Role & Auto-Query from URL Hash
-  const hashParts = window.location.hash.split('?');
-  const queryParams = new URLSearchParams(hashParts[1] || '');
-  const activeRole = queryParams.get('role') || 'fisherman'; // Default to fisherman mode for high accessibility
-  const initialQuery = queryParams.get('q') || '';
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const activeRole = urlParams.get('role') || persona || 'fisherman';
+  let activeChatLang = localStorage.getItem('orca_chat_lang') || 'en';
 
-  let activeChatLang = localStorage.getItem('orca_chat_lang') || currentLang || 'en';
-
-  const personaTitles = {
-    fisherman: { icon: '🛶', title: 'FISHERMAN CHAT MODE', badge: 'badge-green', sub: 'Voice-first simple language, fast advice & marine safety answers.' },
-    researcher: { icon: '🔬', title: 'MARINE RESEARCHER WORKSPACE', badge: 'badge-amber', sub: 'Deep oceanographic evidence, satellite trends & research synthesis.' },
-    government: { icon: '🛡️', title: 'COASTAL AUTHORITY CENTER', badge: 'badge-red', sub: 'Coastal situation awareness, active hazard alerts & incident monitoring.' },
-    business: { icon: '🚢', title: 'MARINE OPERATIONS INTELLIGENCE', badge: 'badge-amber', sub: 'Pareto-optimal route safety, weather impacts & operational decisions.' }
+  const roleMeta = {
+    fisherman: { title: 'FISHERMAN SAFETY CHAT', icon: '🎣', badge: 'badge-green', color: 'var(--phosphor-green)' },
+    researcher: { title: 'MARINE RESEARCH WORKSPACE', icon: '🔬', badge: 'badge-amber', color: 'var(--brass)' },
+    government: { title: 'COASTAL AUTHORITY CENTER', icon: '🛡️', badge: 'badge-red', color: 'var(--radar-red)' },
+    business: { title: 'MARINE BUSINESS OPERATIONS', icon: '🚢', badge: 'badge-amber', color: 'var(--phosphor-amber)' }
   };
 
-  const roleInfo = personaTitles[activeRole] || personaTitles.fisherman;
+  const roleInfo = roleMeta[activeRole] || roleMeta.fisherman;
   const fDict = FISHERMAN_I18N[activeChatLang] || FISHERMAN_I18N.en;
 
   container.innerHTML = `
-    <div class="chat-canvas-view">
+    <div class="chat-view-container" style="display: flex; flex-direction: column; height: calc(100vh - 120px); max-width: 1400px; margin: 0 auto; padding: 12px 16px;">
       
-      <!-- Main Reasoning Conversation & Canvas Area -->
-      <div class="chat-main-area">
-        
-        <!-- Persona Active Banner & Language Selector -->
-        <div class="telemetry-status-strip bezel-panel" style="padding: 10px 16px; background: rgba(18,27,34,0.9); border-left: 4px solid var(--phosphor-green); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="#/" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; padding: 4px 10px; font-size: 0.72rem;">
-              ← Change Role
-            </a>
-            <span style="font-size: 1.2rem;">${roleInfo.icon}</span>
-            <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">${roleInfo.title}</strong>
-            <span class="panel-badge ${roleInfo.badge}" style="font-size: 0.65rem;">${activeRole.toUpperCase()}</span>
-          </div>
-
-          <!-- Language Selector for Chat & Voice -->
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="font-data text-muted" style="font-size: 0.70rem;">LANGUAGE:</span>
-            <div class="lang-selector" style="display: flex; gap: 4px; background: rgba(10,16,20,0.8); padding: 3px; border: 1px solid var(--brass); border-radius: var(--radius);">
-              <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">EN</button>
-              <button class="chat-lang-btn ${activeChatLang === 'hi' ? 'active' : ''}" data-clang="hi" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">हिन्दी</button>
-              <button class="chat-lang-btn ${activeChatLang === 'mr' ? 'active' : ''}" data-clang="mr" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">मराठी</button>
-            </div>
-          </div>
+      <!-- Top Persona Status Header Strip -->
+      <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(10,16,20,0.9); padding: 8px 16px; border-bottom: 2px solid ${roleInfo.color}; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="#/" class="btn-tactical btn-tactical-sm text-brass" style="text-decoration: none; padding: 4px 10px; font-size: 0.72rem;">
+            ← Change Role
+          </a>
+          <span style="font-size: 1.2rem;">${roleInfo.icon}</span>
+          <strong class="font-data text-parchment-bright" style="font-size: 0.88rem;">${roleInfo.title}</strong>
+          <span class="panel-badge ${roleInfo.badge}" style="font-size: 0.65rem;">${activeRole.toUpperCase()}</span>
+          
+          <!-- DEMO MODE DISCLAIMER BADGE -->
+          <span class="font-data text-brass" style="font-size: 0.68rem; opacity: 0.85; border: 1px solid var(--brass); padding: 2px 8px; border-radius: 12px;">
+            Demo Mode • Simulated Marine Data
+          </span>
         </div>
 
+        <!-- Language Selector for Chat & Voice -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="font-data text-muted" style="font-size: 0.70rem;">LANGUAGE:</span>
+          <div class="lang-selector" style="display: flex; gap: 4px; background: rgba(10,16,20,0.8); padding: 3px; border: 1px solid var(--brass); border-radius: var(--radius);">
+            <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">EN</button>
+            <button class="chat-lang-btn ${activeChatLang === 'hi' ? 'active' : ''}" data-clang="hi" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">हिन्दी</button>
+            <button class="chat-lang-btn ${activeChatLang === 'mr' ? 'active' : ''}" data-clang="mr" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">मराठी</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid: Chat Canvas Left, Persistent Map Right -->
+      <div style="display: grid; grid-template-columns: 1fr 340px; gap: 14px; flex: 1; overflow: hidden; margin-top: 10px;">
+        
         <!-- Message Stream Canvas -->
-        <div class="canvas-stream-container" id="chat-stream-box">
+        <div class="canvas-stream-container" id="chat-stream-box" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 6px;">
 
           <!-- Tactical Presets (hidden once first query is submitted) -->
-          <div class="empty-canvas-panel bezel-panel" id="canvas-empty-state" style="padding: 28px 20px; background: rgba(18,27,34,0.65);">
-            <div style="font-size: 2.8rem; margin-bottom: 10px; display:flex; justify-content:center;">🛶</div>
-            <h2 class="font-display" style="font-size: 1.5rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 6px; text-align: center;">
-              ${fDict.prompt_heading || 'What would you like to know?'}
+          <div class="empty-canvas-panel bezel-panel" id="canvas-empty-state" style="padding: 24px 18px; background: rgba(18,27,34,0.65);">
+            <div style="font-size: 2.5rem; margin-bottom: 8px; display:flex; justify-content:center;">${roleInfo.icon}</div>
+            <h2 class="font-display" style="font-size: 1.4rem; font-weight: 700; color: var(--parchment-bright); margin-bottom: 6px; text-align: center;">
+              ${activeRole === 'fisherman' ? (fDict.prompt_heading || 'What would you like to know?') : 'ORCA Marine Intelligence Assistant'}
             </h2>
-            <p class="font-data" style="font-size: 0.82rem; color: var(--muted); max-width: 580px; text-align: center; line-height: 1.5; margin: 0 auto 20px auto;">
-              Press the <strong style="color: var(--phosphor-green);">🎙️ microphone button</strong> below to speak your question in English, Hindi, or Marathi, or select a preset below.
+            <p class="font-data" style="font-size: 0.80rem; color: var(--muted); max-width: 580px; text-align: center; line-height: 1.5; margin: 0 auto 16px auto;">
+              Ask ORCA any marine question below. Tap the <strong style="color: var(--phosphor-green);">🎙️ microphone button</strong> to speak or select a quick prompt.
             </p>
 
             <div class="font-data text-brass" style="font-size: 0.70rem; letter-spacing: 0.10em; text-align: center; margin-bottom: 12px; font-weight: 700; text-transform: uppercase;">
-              ▶ ${fDict.quick_title || 'QUICK QUESTIONS — TAP TO ASK'}
+              ▶ PREDEFINED STAKEHOLDER DEMO QUESTIONS
             </div>
             
-            <div class="tactical-presets-grid" style="width: 100%; max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-              <button class="preset-chip-btn" data-query="What are the fishing conditions near Mumbai today?">
-                <span>🌦️</span><span>${fDict.q_weather || 'Will weather be safe today?'}</span>
-              </button>
-              <button class="preset-chip-btn" data-query="What is the sea condition near Mumbai?">
-                <span>🌊</span><span>${fDict.q_sea || 'How are the waves?'}</span>
-              </button>
-              <button class="preset-chip-btn" data-query="Where are the potential fishing zones?">
-                <span>🎣</span><span>${fDict.q_fishing || 'Is this a good time to fish?'}</span>
-              </button>
-              <button class="preset-chip-btn" data-query="Is there a cyclone risk near Mumbai?">
-                <span>⚠️</span><span>${fDict.q_safety || 'Is there any danger near me?'}</span>
-              </button>
-              <button class="preset-chip-btn" data-query="Safe route vs shortest route from Veraval to Ratnagiri">
-                <span>🧭</span><span>${fDict.q_route || 'Which route is safer?'}</span>
-              </button>
+            <!-- STAKEHOLDER PERSONA CHIPS -->
+            <div class="tactical-presets-grid" id="chat-presets-grid" style="width: 100%; max-width: 800px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+              ${_renderPersonaPresetChips(activeRole, activeChatLang, fDict)}
             </div>
           </div>
 
@@ -100,175 +87,119 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
 
         </div>
 
-        <!-- Ship Intercom Bar (Bottom Anchored) with VOICE MIC BUTTON -->
-        <div class="intercom-input-bar">
-          <div class="intercom-meta-row">
-            <div class="intercom-chan-select">
-              <span>📻</span>
-              <span class="text-brass font-data" style="font-weight: 700; font-size: 0.72rem;">VHF-CH 16 / MULTIMODAL REASONING BRIDGE</span>
+        <!-- Persistent Right Sidebar: Live Mini Map & Location Telemetry -->
+        <div style="display: flex; flex-direction: column; gap: 12px; height: 100%;">
+          <div class="bezel-panel" style="padding: 12px; background: rgba(18,27,34,0.85); display: flex; flex-direction: column; flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--chart-line); padding-bottom: 6px; margin-bottom: 8px;">
+              <span class="font-data text-brass" style="font-size: 0.72rem; font-weight: 700;">🗺️ LIVE SECTOR MAP</span>
+              <span class="panel-badge badge-green" style="font-size: 0.60rem;">RATNAGIRI COAST</span>
             </div>
-            <div class="intercom-tx-indicator" id="tx-status">
-              <span class="intercom-tx-dot"></span>
-              <span id="tx-status-text" class="font-data" style="font-size: 0.70rem;">TX READY</span>
-            </div>
-            <button id="btn-clear-log" class="btn-tactical btn-tactical-sm font-data" style="font-size: 0.65rem; padding: 3px 10px;">
-              🗑 CLEAR LOG
-            </button>
-          </div>
-          
-          <form class="intercom-form" id="chat-form" style="display: flex; align-items: center; gap: 10px;">
-            <!-- VOICE MIC BUTTON -->
-            <button type="button" id="btn-chat-mic" class="mic-pulse-btn" style="width: 48px; height: 44px; border-radius: var(--radius); background: linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%); border: 1px solid var(--parchment-bright); color: #0A1014; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(107,203,119,0.4); flex-shrink: 0;" title="Tap to speak your query">
-              🎙️
-            </button>
-
-            <textarea
-              id="chat-input"
-              class="intercom-textarea"
-              placeholder="${fDict.input_placeholder || 'Speak or type your question here...'}"
-              rows="1"
-            ></textarea>
             
-            <button type="submit" class="btn-tactical btn-tactical-green" style="height: 44px; padding: 0 20px; white-space: nowrap; font-size: 0.85rem; font-weight: 700;">
-              📡 TRANSMIT
-            </button>
-          </form>
+            <div id="chat-mini-map" style="width: 100%; height: 260px; border-radius: var(--radius); border: 1px solid var(--chart-line); background: var(--bg-void); margin-bottom: 10px;"></div>
+
+            <div style="background: rgba(10,16,20,0.6); padding: 10px; border: 1px solid var(--chart-line); border-radius: var(--radius); font-family: var(--font-data); font-size: 0.72rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div>SST: <strong class="text-green">28.4°C</strong></div>
+              <div>CHLOROPHYLL: <strong class="text-green">2.8 mg/m³</strong></div>
+              <div>WIND: <strong class="text-amber">18 km/h SW</strong></div>
+              <div>WAVES: <strong class="text-parchment-bright">1.4 m</strong></div>
+            </div>
+          </div>
         </div>
+
       </div>
 
-      <!-- Persistent Tactical Location & Mini-Map Right Panel -->
-      <aside class="chat-location-panel bezel-panel">
-        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--chart-line); padding-bottom: 8px; margin-bottom: 12px;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            ${getMarineIcon('compass', 16, 'var(--brass)')}
-            <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">CURRENT AREA</span>
+      <!-- Ship Intercom Bar (Bottom Anchored) with VOICE MIC BUTTON -->
+      <div class="intercom-input-bar" style="margin-top: 10px;">
+        <div class="intercom-meta-row">
+          <div class="intercom-chan-select">
+            <span>📻</span>
+            <span class="text-brass font-data" style="font-weight: 700; font-size: 0.72rem;">VHF-CH 16 / MULTIMODAL REASONING BRIDGE</span>
           </div>
-          <span class="panel-badge badge-green" style="font-size: 0.58rem;">LIVE MONITOR</span>
+          <div class="intercom-tx-indicator" id="tx-status">
+            <span class="intercom-tx-dot"></span>
+            <span id="tx-status-text" class="font-data" style="font-size: 0.70rem;">TX READY</span>
+          </div>
+          <button id="btn-clear-log" class="btn-tactical btn-tactical-sm font-data" style="font-size: 0.65rem; padding: 3px 10px;">
+            🗑 CLEAR LOG
+          </button>
         </div>
+        
+        <form class="intercom-form" id="chat-form" style="display: flex; align-items: center; gap: 10px;">
+          <!-- VOICE MIC BUTTON -->
+          <button type="button" id="btn-chat-mic" class="mic-pulse-btn" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%); border: 2px solid var(--parchment-bright); color: #0A1014; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s ease;">
+            🎙️
+          </button>
 
-        <div style="margin-bottom: 12px;">
-          <div class="font-display" style="font-size: 1.05rem; font-weight: 700; color: var(--parchment-bright);">Arabian Sea</div>
-          <div class="font-data text-muted" style="font-size: 0.70rem;">Maharashtra / Konkan Shelf</div>
-          <div class="font-data text-amber" style="font-size: 0.75rem; font-weight: 700; margin-top: 2px;">
-            📍 16.7° N &nbsp; 73.7° E
-          </div>
-        </div>
-
-        <!-- Mini-Map Container -->
-        <div id="chat-mini-map" class="chat-mini-map-box">
-          <div style="position: absolute; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(10,16,20,0.8);">
-            <span class="font-data text-muted" style="font-size:0.68rem;">Loading Chart...</span>
-          </div>
-        </div>
-
-        <!-- Telemetry Summary Cards -->
-        <div class="chat-telemetry-mini-grid" style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div style="padding: 8px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <div style="display:flex; align-items:center; gap:4px; font-size: 0.65rem;" class="font-data text-muted">
-              ${getMarineIcon('wind', 12, 'var(--phosphor-amber)')} WIND
-            </div>
-            <div class="font-data text-amber" style="font-size: 0.85rem; font-weight: 700; margin-top: 2px;">24 kts WSW</div>
-          </div>
-
-          <div style="padding: 8px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <div style="display:flex; align-items:center; gap:4px; font-size: 0.65rem;" class="font-data text-muted">
-              ${getMarineIcon('wave', 12, 'var(--phosphor-amber)')} SWELL
-            </div>
-            <div class="font-data text-amber" style="font-size: 0.85rem; font-weight: 700; margin-top: 2px;">2.4m @ 11s</div>
-          </div>
-
-          <div style="padding: 8px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <div style="display:flex; align-items:center; gap:4px; font-size: 0.65rem;" class="font-data text-muted">
-              ${getMarineIcon('thermometer', 12, 'var(--phosphor-green)')} SST
-            </div>
-            <div class="font-data text-green" style="font-size: 0.85rem; font-weight: 700; margin-top: 2px;">28.2°C</div>
-          </div>
-
-          <div style="padding: 8px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);">
-            <div style="display:flex; align-items:center; gap:4px; font-size: 0.65rem;" class="font-data text-muted">
-              ${getMarineIcon('warning', 12, 'var(--radar-red)')} HAZARD
-            </div>
-            <div class="font-data text-red" style="font-size: 0.85rem; font-weight: 700; margin-top: 2px;">MODERATE</div>
-          </div>
-        </div>
-
-        <!-- Telemetry Status Footer -->
-        <div style="margin-top: 14px; border-top: 1px solid var(--chart-line); padding-top: 8px; font-family: var(--font-data); font-size: 0.65rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px;">
-          <div style="display:flex; justify-content:space-between;">
-            <span>ORCA CORE:</span> <strong class="text-green">READY</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>ACTIVE AGENTS:</span> <strong class="text-brass">5 / 5 ONLINE</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>AIS RELAY:</span> <strong class="text-parchment">120 NM MESH</strong>
-          </div>
-        </div>
-      </aside>
+          <input 
+            type="text" 
+            id="chat-input" 
+            class="intercom-textarea" 
+            placeholder="${activeRole === 'fisherman' ? 'Ask ORCA in your language (e.g. Is it safe to fish tomorrow?)...' : 'Ask ORCA marine intelligence platform...'}" 
+            style="height: 44px; font-size: 0.90rem; padding: 0 14px; flex: 1;"
+          />
+          
+          <button type="submit" class="btn-tactical btn-tactical-green" style="height: 44px; padding: 0 20px; font-weight: 700; font-size: 0.88rem; flex-shrink: 0;">
+            TRANSMIT
+          </button>
+        </form>
+      </div>
 
     </div>
   `;
 
-  const streamBox   = container.querySelector('#chat-stream-box');
-  const emptyState  = container.querySelector('#canvas-empty-state');
-  const thread      = container.querySelector('#messages-thread');
-  const canvasEl    = container.querySelector('#canvas');
-
-  // Attach the backend CanvasRenderer to the #canvas div
-  const canvasRenderer = new CanvasRenderer(canvasEl);
+  // Attach DOM Listeners
+  const streamBox = container.querySelector('#chat-stream-box');
+  const emptyState = container.querySelector('#canvas-empty-state');
+  const thread = container.querySelector('#messages-thread');
   const form = container.querySelector('#chat-form');
   const input = container.querySelector('#chat-input');
   const txStatusText = container.querySelector('#tx-status-text');
   const chatMicBtn = container.querySelector('#btn-chat-mic');
+  const canvasMount = container.querySelector('#canvas');
+  const canvasRenderer = new CanvasRenderer(canvasMount);
 
-  // Bind Language Switcher in Chat
+  // Language buttons
   container.querySelectorAll('.chat-lang-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const clang = btn.getAttribute('data-clang');
-      if (clang && clang !== activeChatLang) {
-        activeChatLang = clang;
-        localStorage.setItem('orca_chat_lang', clang);
+      const lang = btn.getAttribute('data-clang');
+      if (lang) {
+        activeChatLang = lang;
+        localStorage.setItem('orca_chat_lang', lang);
         if (soundEngine) soundEngine.playMechanicalClick();
-        renderChatView(container, { i18n, soundEngine, currentLang: clang });
+        renderChatView(container, { i18n, soundEngine, persona: activeRole, initialQuery: '' });
       }
     });
   });
 
-  // Bind Microphone STT (Speech-to-Text) Button inside Chat Intercom Bar
+  // Voice Microphone STT
   if (chatMicBtn) {
     chatMicBtn.addEventListener('click', () => {
       if (voiceService.isListening) {
         voiceService.stopListening();
         chatMicBtn.style.transform = 'scale(1)';
-        chatMicBtn.style.background = 'linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%)';
       } else {
         chatMicBtn.style.transform = 'scale(1.15)';
-        chatMicBtn.style.background = 'linear-gradient(135deg, var(--radar-red) 0%, #c0392b 100%)';
         if (soundEngine) soundEngine.playTacticalBeep();
 
         voiceService.startListening({
           lang: activeChatLang,
           onResult: (transcript) => {
             chatMicBtn.style.transform = 'scale(1)';
-            chatMicBtn.style.background = 'linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%)';
             input.value = transcript;
             submit(transcript);
           },
-          onError: (err) => {
-            console.warn('[Chat Mic STT Error]:', err);
+          onError: () => {
             chatMicBtn.style.transform = 'scale(1)';
-            chatMicBtn.style.background = 'linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%)';
           },
           onEnd: () => {
             chatMicBtn.style.transform = 'scale(1)';
-            chatMicBtn.style.background = 'linear-gradient(135deg, var(--phosphor-green) 0%, #3e8e45 100%)';
           }
         });
       }
     });
   }
 
-  // Preset buttons
+  // Preset chip handlers
   container.querySelectorAll('.preset-chip-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (soundEngine) soundEngine.playTacticalBeep();
@@ -276,7 +207,7 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
     });
   });
 
-  // Enter key in textarea
+  // Enter key
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -294,11 +225,12 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
 
   container.querySelector('#btn-clear-log').addEventListener('click', () => {
     thread.innerHTML = '';
-    emptyState.style.display = 'flex';
+    canvasMount.innerHTML = '';
+    emptyState.style.display = 'block';
     if (soundEngine) soundEngine.playMechanicalClick();
   });
 
-  // Initialize Persistent Mini Map
+  // Persistent Right Mini Map Initialization
   requestAnimationFrame(() => {
     if (typeof L !== 'undefined') {
       const mapEl = container.querySelector('#chat-mini-map');
@@ -306,38 +238,26 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
         try {
           mapEl.innerHTML = '';
           const miniMap = L.map(mapEl, {
-            center: [16.7, 73.7],
-            zoom: 7,
+            center: [16.99, 73.31],
+            zoom: 8,
             zoomControl: false,
-            attributionControl: false,
-            dragging: false,
-            scrollWheelZoom: false
+            attributionControl: false
           });
 
           L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             maxZoom: 18, subdomains: 'abcd'
           }).addTo(miniMap);
 
-          const icon = L.divIcon({
-            className: '',
-            html: '<div style="width:18px;height:18px;background:rgba(255,180,84,0.9);border:2px solid var(--parchment-bright);border-radius:50%;box-shadow:0 0 10px var(--phosphor-amber);animation:beacon-ping 2s infinite;"></div>',
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
-          });
-
-          L.marker([16.7, 73.7], { icon: icon }).addTo(miniMap);
-          setTimeout(() => { miniMap.invalidateSize(); }, 150);
+          L.marker([16.99, 73.31]).bindPopup('<b>Ratnagiri Coast Sector</b><br>SST: 28.4°C | Wave: 1.4m').addTo(miniMap);
+          setTimeout(() => miniMap.invalidateSize(), 150);
         } catch (e) {
-          console.warn('[Chat Mini-Map] Init error:', e);
+          console.warn('[Chat Map Error]:', e);
         }
       }
     }
 
-    // Auto-trigger initial query if passed in URL
     if (initialQuery) {
-      setTimeout(() => {
-        submit(decodeURIComponent(initialQuery));
-      }, 250);
+      setTimeout(() => submit(decodeURIComponent(initialQuery)), 200);
     }
   });
 
@@ -345,19 +265,17 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
     emptyState.style.display = 'none';
     if (soundEngine) soundEngine.playTransmissionSound();
 
-    // BACKEND PATH (primary)
-    sbBridge.streamTo(promptText, canvasRenderer).catch(function(e) {
-      console.warn('[Chat] SpringBootBridge error:', e);
-    });
+    // Stream SSE to backend canvas
+    sbBridge.streamTo(promptText, canvasRenderer).catch(e => console.warn('[SpringBootBridge Error]:', e));
 
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
 
-    // 1. USER MESSAGE BUBBLE
+    // 1. User Message
     const userBubble = document.createElement('div');
     userBubble.className = 'chat-msg user';
     userBubble.innerHTML = `
       <div class="msg-header" style="justify-content: flex-end;">
-        <span class="font-data" style="font-size: 0.68rem;">${activeRole ? activeRole.toUpperCase() + ' USER' : 'BRIDGE OFFICER'}</span>
+        <span class="font-data" style="font-size: 0.68rem;">${activeRole.toUpperCase()} USER</span>
         <span class="text-muted">•</span>
         <span class="font-data text-muted" style="font-size: 0.68rem;">${timestamp}</span>
       </div>
@@ -365,11 +283,9 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
     `;
     thread.appendChild(userBubble);
 
-    // 2. AGENT RESPONSE SHELL
-    const msgId = `msg-${Date.now()}`;
+    // 2. Agent Response Shell
     const agentBubble = document.createElement('div');
     agentBubble.className = 'chat-msg agent';
-    agentBubble.id = msgId;
     agentBubble.innerHTML = `
       <div class="msg-header">
         <span class="beacon-pulse" style="width: 5px; height: 5px;"></span>
@@ -379,69 +295,143 @@ export function renderChatView(container, { i18n, soundEngine, currentLang = 'en
         <span class="genui-status-badge panel-badge badge-amber" style="margin-left: 6px;">⚙ SYNTHESIZING...</span>
       </div>
       <div class="msg-content-agent bezel-panel">
-
-        <!-- Chain-of-Thought Reasoning Trace -->
-        <div class="genui-steps font-data" style="
-          font-size: 0.72rem; 
-          color: var(--brass); 
-          display: flex; 
-          flex-direction: column; 
-          gap: 4px; 
-          margin-bottom: 12px;
-          padding: 10px 12px;
-          background: rgba(10,16,20,0.5);
-          border: 1px solid var(--chart-line);
-          border-radius: var(--radius);
-        "></div>
-
-        <!-- Streaming Prose Answer -->
+        <div class="genui-steps font-data" style="font-size: 0.72rem; color: var(--brass); display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; padding: 10px 12px; background: rgba(10,16,20,0.5); border: 1px solid var(--chart-line); border-radius: var(--radius);"></div>
         <div class="genui-prose agent-prose-text" style="margin-bottom: 14px;">
-          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">Initializing reasoning pipeline...</span>
+          <span class="text-muted font-data" style="font-size: 0.78rem; font-style: italic;">Initializing marine reasoning engine...</span>
         </div>
-
-        <!-- Generative UI Component Mount Point -->
-        <div class="genui-card-deck" style="
-          display: flex; 
-          flex-direction: column; 
-          gap: 12px;
-        "></div>
+        <div class="genui-card-deck" style="display: flex; flex-direction: column; gap: 12px;"></div>
       </div>
     `;
     thread.appendChild(agentBubble);
     streamBox.scrollTop = streamBox.scrollHeight;
 
-    // 3. ATTACH GENERATIVE UI RENDERER TO THIS BUBBLE
     const renderer = new GenerativeUIRenderer(agentBubble);
 
-    // Auto-scroll as content streams in
-    const scrollObserver = new MutationObserver(() => {
-      streamBox.scrollTop = streamBox.scrollHeight;
-    });
-    scrollObserver.observe(agentBubble, { childList: true, subtree: true });
-
-    // Update TX status
     txStatusText.textContent = 'TRANSMITTING...';
     txStatusText.style.color = 'var(--phosphor-amber)';
 
-    // 4. STREAM AGENT EVENTS → RENDERER
+    // Stream events
     await bridge.streamTo(promptText, renderer);
 
-    // Done
     txStatusText.textContent = 'TX READY';
     txStatusText.style.color = 'var(--phosphor-green)';
-    scrollObserver.disconnect();
     streamBox.scrollTop = streamBox.scrollHeight;
 
-    // 5. AUTOMATICALLY SPEAK RESPONSE ALOUD (TTS) IN SELECTED LANGUAGE
+    // Automatic TTS readout
     const responseProse = agentBubble.querySelector('.genui-prose')?.textContent || '';
     if (responseProse) {
       voiceService.speak(responseProse, activeChatLang);
     }
-
-    if (soundEngine) soundEngine.playTacticalChirp();
   }
 
   function _escape(str) {
     return str.replace(/[&<>'"]/g, t => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[t]));
   }
+}
+
+function _renderPersonaPresetChips(role, lang, fDict) {
+  if (role === 'fisherman') {
+    if (lang === 'mr') {
+      return `
+        <button class="preset-chip-btn" data-query="आज मासेमारीसाठी चांगली जागा कुठे आहे?">
+          <span>🎣</span><span>"आज मासेमारीसाठी चांगली जागा कुठे आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Is it safe to go fishing tomorrow morning?">
+          <span>🌊</span><span>"उद्या सकाळी मासेमारी करणे सुरक्षित आहे का?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="What are the tide, weather and sea conditions near my fishing location?">
+          <span>🌦️</span><span>"हवामान आणि भरती-ओहोटीची स्थिती कशी आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
+          <span>⚠️</span><span>"काही वादळाचा इशारा आहे का?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
+          <span>🧭</span><span>"सुरक्षित मार्ग कोणता आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
+          <span>🚧</span><span>"काही प्रतिबंधित क्षेत्र जवळ आहे का?"</span>
+        </button>
+      `;
+    }
+    if (lang === 'hi') {
+      return `
+        <button class="preset-chip-btn" data-query="आज मछली पकड़ने के लिए सबसे अच्छी जगह कहाँ है?">
+          <span>🎣</span><span>"आज मछली पकड़ने की सबसे अच्छी जगह कहाँ है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Is it safe to go fishing tomorrow morning?">
+          <span>🌊</span><span>"क्या कल सुबह मछली पकड़ना सुरक्षित है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="What are the tide, weather and sea conditions near my fishing location?">
+          <span>🌦️</span><span>"मौसम और ज्वार-भाटा की स्थिति कैसी है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
+          <span>⚠️</span><span>"क्या कोई चक्रवात या बिजली की चेतावनी है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
+          <span>🧭</span><span>"सबसे सुरक्षित रास्ता कौन सा है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
+          <span>🚧</span><span>"क्या कोई प्रतिबंधित क्षेत्र पास में है?"</span>
+        </button>
+      `;
+    }
+    return `
+      <button class="preset-chip-btn" data-query="Where is the nearest Potential Fishing Zone today?">
+        <span>🎣</span><span>"Where is the nearest Potential Fishing Zone today?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Is it safe to go fishing tomorrow morning?">
+        <span>🌊</span><span>"Is it safe to go fishing tomorrow morning?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="What are the tide, weather and sea conditions near my fishing location?">
+        <span>🌦️</span><span>"What are the tide, weather and sea conditions?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
+        <span>⚠️</span><span>"Are there any lightning or cyclone alerts?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
+        <span>🧭</span><span>"What is the safest route to the fishing zone?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Am I approaching any restricted area?">
+        <span>🚧</span><span>"Am I approaching any restricted area?"</span>
+      </button>
+    `;
+  }
+
+  if (role === 'researcher') {
+    return `
+      <button class="preset-chip-btn" data-query="Which regions show high chlorophyll concentration and favourable sea surface temperature?">
+        <span>🔬</span><span>"Which regions show high chlorophyll concentration and favourable SST?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Why has fish productivity declined in this coastal region?">
+        <span>📈</span><span>"Why has fish productivity declined in this coastal region?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Compare the fishing potential of the three regions.">
+        <span>📊</span><span>"Compare the fishing potential of the three regions."</span>
+      </button>
+    `;
+  }
+
+  if (role === 'government') {
+    return `
+      <button class="preset-chip-btn" data-query="Which coastal areas currently have elevated marine risk?">
+        <span>⚠️</span><span>"Which coastal areas currently have elevated marine risk?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Are there any active marine hazards?">
+        <span>🚨</span><span>"Are there any active marine hazards?"</span>
+      </button>
+      <button class="preset-chip-btn" data-query="Which areas should be avoided?">
+        <span>🚧</span><span>"Which areas should be avoided?"</span>
+      </button>
+    `;
+  }
+
+  // business
+  return `
+    <button class="preset-chip-btn" data-query="What is the safest route for my vessel considering current sea conditions?">
+      <span>🧭</span><span>"What is the safest route for my vessel considering current sea conditions?"</span>
+    </button>
+    <button class="preset-chip-btn" data-query="How will the current marine conditions affect vessel operations?">
+      <span>🚢</span><span>"How will current marine conditions affect vessel operations?"</span>
+    </button>
+  `;
 }
