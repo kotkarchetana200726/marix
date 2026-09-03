@@ -1,5 +1,9 @@
-// ORCA Central Mock Marine Intelligence Dataset & Stakeholder Engine
-// Reference Location: Ratnagiri Coast, Maharashtra–Goa West Coast, Arabian Sea (16.99° N, 73.31° E)
+import { PFZ_ZONES as MOCK_PFZ, WEATHER_FORECAST as MOCK_WEATHER, HAZARDS as MOCK_HAZARDS, ROUTE_PRESETS as MOCK_ROUTES } from './mockData.js';
+
+export const PFZ_ZONES = MOCK_PFZ;
+export const WEATHER_FORECAST = MOCK_WEATHER;
+export const HAZARDS = MOCK_HAZARDS;
+export const ROUTE_PRESETS = MOCK_ROUTES;
 
 export const marineData = {
   location: {
