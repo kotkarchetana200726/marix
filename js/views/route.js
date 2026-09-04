@@ -1,10 +1,11 @@
 // ORCA Marine Bridge Console — Marine Business Persona (/#route)
 // Marine Operations Intelligence, Pareto Route Planner & Operational Risk Decision Support
 
-import { ROUTE_PRESETS } from '../data/mockData.js';
+import { mockDataService } from '../services/mockDataService.js';
 
 export function renderRouteView(container, { i18n, soundEngine }) {
-  let activePreset = ROUTE_PRESETS[0];
+  const ROUTE_PRESETS = mockDataService.getRoutePresets();
+  let activePreset = ROUTE_PRESETS[0] || {};
 
   container.innerHTML = `
     <div class="route-view-container" style="display: flex; flex-direction: column; gap: 16px;">

@@ -121,6 +121,8 @@ export function renderFishermanView(container, { i18n, soundEngine, currentLang 
         if (lang && lang !== activeLang) {
           activeLang = lang;
           setGlobalLanguage(lang);
+          localStorage.setItem('orca_fisherman_lang', lang);
+          localStorage.setItem('orca_chat_lang', lang);
           if (soundEngine) soundEngine.playMechanicalClick();
           renderContent();
         }
@@ -191,58 +193,44 @@ export function renderFishermanView(container, { i18n, soundEngine, currentLang 
 
       const mockMatch = findMockResponse(queryText, activeLang);
 
-      // Build Simple Verdict Content
-      let verdictTag = '🟢 SAFE';
-      let verdictTitle = activeLang === 'mr' ? '🟢 आज मासेमारीसाठी जाऊ शकता' : activeLang === 'hi' ? '🟢 आज मछली पकड़ने जा सकते हैं' : '🟢 SAFE TO GO FISHING TODAY';
+      // Build Simple Verdict Content dynamically from screen data
+      let verdictTitle = mockMatch?.verdict_title || mockMatch?.title || (
+        activeLang === 'mr' ? '🟢 आज मासेमारीसाठी जाऊ शकता' : activeLang === 'hi' ? '🟢 आज मछली पकड़ने जा सकते हैं' : '🟢 SAFE TO GO FISHING TODAY'
+      );
+      let simpleSentence = mockMatch?.simple_sentence || (
+        mockMatch?.prose ? mockMatch.prose.split('\n\n')[0].replace(/\*\*/g, '') : (
+          activeLang === 'mr' ? 'PFZ-01 ही मासे पकडण्यासाठी उत्तम जागा आहे.' : 'PFZ-01 is the best place to fish today.'
+        )
+      );
+      let bullets = (mockMatch?.bullets && mockMatch.bullets.length > 0) ? mockMatch.bullets : (
+        activeLang === 'mr'
+          ? ['📍 अंतर: १८ किमी नैऋत्य', '🐟 मासे मिळण्याची शक्यता: उत्तम (८७%)', '🌊 समुद्र: मध्यम शांत (१.४ मीटर लाटा)']
+          : activeLang === 'hi'
+          ? ['📍 दूरी: 18 किमी दक्षिण-पश्चिम', '🐟 मछली मिलने की संभावना: अच्छी (87%)', '🌊 समुद्र की स्थिति: मध्यम शांत (1.4 मीटर लहरें)']
+          : ['📍 Distance: 18 km Southwest', '🐟 Fishing Chance: Good (87%)', '🌊 Sea Condition: Moderate (1.4 m waves)']
+      );
+      let actionAdvice = mockMatch?.action_advice || (
+        activeLang === 'mr' ? 'निघण्यापूर्वी हवामानाची ताजी माहिती जरूर तपासा.' : activeLang === 'hi' ? 'निकलने से पहले मौसम की ताजा जानकारी जरूर देखें।' : 'Check weather forecast before departure.'
+      );
+
+      // Determine styling from verdict
       let verdictBg = 'rgba(107,203,119,0.15)';
       let verdictBorder = 'var(--phosphor-green)';
       let verdictColor = 'var(--phosphor-green)';
 
-      let simpleSentence = activeLang === 'mr'
-        ? 'PFZ-01 ही मासे पकडण्यासाठी उत्तम जागा आहे. ही जागा तुमच्या ठिकाणापासून सुमारे १८ किमी नैऋत्य दिशेला आहे.'
-        : activeLang === 'hi'
-        ? 'PFZ-01 मछली पकड़ने के लिए सबसे अच्छी जगह है। यह जगह आपके स्थान से लगभग 18 किमी दक्षिण-पश्चिम में है।'
-        : 'PFZ-01 is the best place to fish today. It is located 18 km southwest of your current location.';
-
-      let bullets = activeLang === 'mr'
-        ? ['📍 अंतर: १८ किमी नैऋत्य', '🐟 मासे मिळण्याची शक्यता: उत्तम (87%)', '🌊 समुद्र: मध्यम शांत (१.४ मीटर लाटा)']
-        : activeLang === 'hi'
-        ? ['📍 दूरी: 18 किमी दक्षिण-पश्चिम', '🐟 मछली मिलने की संभावना: अच्छी (87%)', '🌊 समुद्र की स्थिति: मध्यम शांत (1.4 मीटर लहरें)']
-        : ['📍 Distance: 18 km Southwest', '🐟 Fishing Chance: Good (87%)', '🌊 Sea Condition: Moderate (1.4 m waves)'];
-
-      let actionAdvice = activeLang === 'mr'
-        ? 'निघण्यापूर्वी हवामानाची ताजी माहिती जरूर तपासा.'
-        : activeLang === 'hi'
-        ? 'निकलने से पहले मौसम की ताजा जानकारी जरूर देखें।'
-        : 'Check weather forecast before departure.';
-
-      // Determine verdict type from query
-      const qLower = queryText.toLowerCase();
-      if (qLower.includes('cyclone') || qLower.includes('storm') || qLower.includes('तूफान') || qLower.includes('वादळ') || qLower.includes('धोका') || qLower.includes('खतरा')) {
-        verdictTitle = activeLang === 'mr' ? '🟢 सध्या वादळाचा धोका नाही' : activeLang === 'hi' ? '🟢 अभी तूफान का खतरा नहीं है' : '🟢 NO CYCLONE DANGER AT PRESENT';
-        simpleSentence = activeLang === 'mr'
-          ? 'तुमच्या परिसरात सध्या कोणताही वादळाचा इशारा नाही.'
-          : activeLang === 'hi'
-          ? 'आपके क्षेत्र में अभी तूफान की कोई चेतावनी नहीं है।'
-          : 'There is no active cyclone or storm alert in your immediate area.';
-        bullets = activeLang === 'mr'
-          ? ['🌬️ वारा: सामान्य (१८ किमी/तास)', '🌊 लाटा: १.४ मीटर', '⚠️ धोका: कमी']
-          : activeLang === 'hi'
-          ? ['🌬️ हवा: सामान्य (18 किमी/घंटा)', '🌊 लहरें: 1.4 मीटर', '⚠️ जोखिम: कम']
-          : ['🌬️ Wind: Normal (18 km/h)', '🌊 Waves: 1.4 m', '⚠️ Risk: Low'];
-      } else if (qLower.includes('restricted') || qLower.includes('avoid') || qLower.includes('न जा') || qLower.includes('जाऊ नका')) {
-        verdictTitle = activeLang === 'mr' ? '🔴 या क्षेत्रात जाऊ नका' : activeLang === 'hi' ? '🔴 इस क्षेत्र में न जाएँ' : '🔴 DO NOT ENTER THIS AREA';
-        verdictBg = 'rgba(255,107,107,0.15)';
+      if (verdictTitle.includes('🔴') || (mockMatch?.id === 'RESTRICTED_ZONE')) {
+        verdictBg = 'rgba(255,92,92,0.15)';
         verdictBorder = 'var(--radar-red)';
         verdictColor = 'var(--radar-red)';
-        simpleSentence = activeLang === 'mr'
-          ? 'मालवण सागरी संरक्षित क्षेत्रात मासेमारीस मनाई आहे.'
-          : activeLang === 'hi'
-          ? 'मालवण समुद्री संरक्षित क्षेत्र में मछली पकड़ना मना है।'
-          : 'Malvan Marine Protected Area is restricted for fishing.';
+      } else if (verdictTitle.includes('🟡') || verdictTitle.includes('⚠️')) {
+        verdictBg = 'rgba(255,180,84,0.15)';
+        verdictBorder = 'var(--phosphor-amber)';
+        verdictColor = 'var(--phosphor-amber)';
       }
 
-      const voiceText = `${verdictTitle.replace(/🟢|🟡|🔴/g, '')}. ${simpleSentence} ${actionAdvice}`;
+      // Natural speech text representing exactly what is displayed on the screen
+      const cleanVerdict = verdictTitle.replace(/🟢|🟡|🔴|🌊|🎣|🌪️|🔬|🚢|⚠️/g, '').trim();
+      const voiceText = mockMatch?.speech_text || `${cleanVerdict}. ${simpleSentence}. ${actionAdvice}`;
 
       respBox.style.display = 'block';
       respBox.innerHTML = `
@@ -278,10 +266,19 @@ export function renderFishermanView(container, { i18n, soundEngine, currentLang 
             <div id="fisherman-simple-map" style="width: 100%; height: 240px; border-radius: var(--radius); border: 1px solid var(--brass); background: var(--bg-void);"></div>
           </div>
 
-          <!-- AUDIO REPLAY BUTTON -->
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button id="btn-fisherman-replay" class="btn-tactical btn-tactical-green" style="padding: 10px 18px; font-size: 0.90rem; font-weight: 700;">
-              🔊 ${activeLang === 'mr' ? 'उत्तर पुन्हा ऐका' : activeLang === 'hi' ? 'उत्तर पुनः सुनें' : 'Listen Answer Again'}
+          <!-- AUDIO CONTROLS: REPLAY, PAUSE, STOP, NEW CHAT -->
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button id="btn-fisherman-replay" class="btn-tactical btn-tactical-green" style="padding: 10px 18px; font-size: 0.90rem; font-weight: 700; cursor: pointer;">
+              🔊 ${activeLang === 'mr' ? 'उत्तर पुन्हा ऐका' : activeLang === 'hi' ? 'उत्तर पुनः सुनें' : 'Listen Again'}
+            </button>
+            <button id="btn-fisherman-pause" class="btn-tactical text-amber" style="padding: 10px 18px; font-size: 0.90rem; font-weight: 700; border-color: var(--phosphor-amber); cursor: pointer;">
+              ⏸️ ${activeLang === 'mr' ? 'थांबवा (Pause)' : activeLang === 'hi' ? 'रोकें (Pause)' : 'Pause Voice'}
+            </button>
+            <button id="btn-fisherman-stop" class="btn-tactical text-red" style="padding: 10px 18px; font-size: 0.90rem; font-weight: 700; border-color: var(--radar-red); cursor: pointer;">
+              ⏹️ ${activeLang === 'mr' ? 'आवाज बंद करा' : activeLang === 'hi' ? 'आवाज बंद करें' : 'Stop Voice'}
+            </button>
+            <button id="btn-fisherman-new-chat" class="btn-tactical font-data text-brass" style="padding: 10px 18px; font-size: 0.90rem; font-weight: 700; border-color: var(--brass); margin-left: auto; cursor: pointer;">
+              ✨ ${activeLang === 'mr' ? '+ नवीन प्रश्न (New Chat)' : activeLang === 'hi' ? '+ नया प्रश्न (New Chat)' : '+ New Question'}
             </button>
           </div>
 
@@ -320,13 +317,54 @@ export function renderFishermanView(container, { i18n, soundEngine, currentLang 
         }
       });
 
-      // Speak ONLY the simple human answer (no technical logs!)
+      // Speak ONLY the simple human answer
       voiceService.speak(voiceText, activeLang);
 
       const replayBtn = respBox.querySelector('#btn-fisherman-replay');
+      const pauseBtn = respBox.querySelector('#btn-fisherman-pause');
+      const stopBtn = respBox.querySelector('#btn-fisherman-stop');
+
       if (replayBtn) {
         replayBtn.addEventListener('click', () => {
           voiceService.speak(voiceText, activeLang);
+          if (pauseBtn) {
+            pauseBtn.innerHTML = `⏸️ ${activeLang === 'mr' ? 'थांबवा (Pause)' : activeLang === 'hi' ? 'रोकें (Pause)' : 'Pause Voice'}`;
+          }
+        });
+      }
+
+      if (pauseBtn) {
+        pauseBtn.addEventListener('click', () => {
+          const isPaused = voiceService.togglePause();
+          if (isPaused) {
+            pauseBtn.innerHTML = `▶️ ${activeLang === 'mr' ? 'पुढे ऐका (Resume)' : activeLang === 'hi' ? 'आगे सुनें (Resume)' : 'Resume Voice'}`;
+            pauseBtn.classList.add('text-green');
+            pauseBtn.classList.remove('text-amber');
+          } else {
+            pauseBtn.innerHTML = `⏸️ ${activeLang === 'mr' ? 'थांबवा (Pause)' : activeLang === 'hi' ? 'रोकें (Pause)' : 'Pause Voice'}`;
+            pauseBtn.classList.add('text-amber');
+            pauseBtn.classList.remove('text-green');
+          }
+        });
+      }
+
+      if (stopBtn) {
+        stopBtn.addEventListener('click', () => {
+          voiceService.stopSpeaking();
+          if (pauseBtn) {
+            pauseBtn.innerHTML = `⏸️ ${activeLang === 'mr' ? 'थांबवा (Pause)' : activeLang === 'hi' ? 'रोकें (Pause)' : 'Pause Voice'}`;
+          }
+        });
+      }
+
+      const newChatBtn = respBox.querySelector('#btn-fisherman-new-chat');
+      if (newChatBtn) {
+        newChatBtn.addEventListener('click', () => {
+          voiceService.stopSpeaking();
+          respBox.style.display = 'none';
+          respBox.innerHTML = '';
+          if (soundEngine) soundEngine.playMechanicalClick();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       }
 

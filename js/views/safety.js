@@ -1,10 +1,12 @@
 // ORCA Marine Bridge Console — Government & Coastal Authority Persona (/#safety)
 // Coastal Intelligence Center, Risk Gauges, Alert feeds, and Situation Summary
 
-import { MONITORED_ZONES, ACTIVE_ALERTS } from '../data/mockData.js';
+import { mockDataService } from '../services/mockDataService.js';
 import { createRiskGaugeHTML } from '../components/riskGauge.js';
 
 export function renderSafetyView(container, { i18n, soundEngine }) {
+  const MONITORED_ZONES = mockDataService.getMonitoredZones();
+  const ACTIVE_ALERTS = mockDataService.getActiveAlerts();
   const gaugesHtml = MONITORED_ZONES.map((zone, idx) => {
     const gauge = createRiskGaugeHTML({
       id: `safety-zone-gauge-${idx}`,

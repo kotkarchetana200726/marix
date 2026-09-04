@@ -5,6 +5,7 @@ import { GenerativeAgentBridge, GenerativeUIRenderer } from '../services/generat
 import { SpringBootBridge, CanvasRenderer } from '../services/renderer.js';
 import { voiceService, FISHERMAN_I18N, prepareSpeechText } from '../services/voiceService.js';
 import { detectOrResolveLanguage } from '../data/mockResponses.js';
+import { setGlobalLanguage } from '../data/translations.js';
 
 export function renderChatView(container, { i18n, soundEngine, persona = 'fisherman', initialQuery = '' }) {
   const bridge = new GenerativeAgentBridge();
@@ -12,7 +13,7 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
 
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const activeRole = urlParams.get('role') || persona || 'fisherman';
-  let activeChatLang = localStorage.getItem('orca_chat_lang') || 'en';
+  let activeChatLang = localStorage.getItem('orca_chat_lang') || localStorage.getItem('orca_fisherman_lang') || 'en';
 
   const roleMeta = {
     fisherman: { title: 'FISHERMAN SAFETY CHAT', icon: '🎣', badge: 'badge-green', color: 'var(--phosphor-green)' },
@@ -42,13 +43,23 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
           </span>
         </div>
 
-        <!-- Language Selector for Chat & Voice -->
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="font-data text-muted" style="font-size: 0.70rem;">RESPONSE LANGUAGE:</span>
-          <div class="lang-selector" style="display: flex; gap: 4px; background: rgba(10,16,20,0.8); padding: 3px; border: 1px solid var(--brass); border-radius: var(--radius);">
-            <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">English</button>
-            <button class="chat-lang-btn ${activeChatLang === 'hi' ? 'active' : ''}" data-clang="hi" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">हिन्दी</button>
-            <button class="chat-lang-btn ${activeChatLang === 'mr' ? 'active' : ''}" data-clang="mr" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">मराठी</button>
+        <!-- Actions: New Chat Button, Voice Pause Button & Language Selector -->
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button id="btn-top-voice-pause" class="btn-tactical text-amber font-data" style="display: none; padding: 5px 12px; font-size: 0.74rem; font-weight: 700; cursor: pointer; align-items: center; gap: 6px;">
+            <span>⏸️</span> <span id="top-voice-pause-label">Pause Voice</span>
+          </button>
+          
+          <button id="btn-canvas-new-chat" class="btn-tactical btn-tactical-green font-data" style="padding: 5px 14px; font-size: 0.74rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>✨</span> <span>+ NEW CHAT</span>
+          </button>
+          
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="font-data text-muted" style="font-size: 0.70rem;">LANGUAGE:</span>
+            <div class="lang-selector" style="display: flex; gap: 4px; background: rgba(10,16,20,0.8); padding: 3px; border: 1px solid var(--brass); border-radius: var(--radius);">
+              <button class="chat-lang-btn ${activeChatLang === 'en' ? 'active' : ''}" data-clang="en" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">English</button>
+              <button class="chat-lang-btn ${activeChatLang === 'hi' ? 'active' : ''}" data-clang="hi" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">हिन्दी</button>
+              <button class="chat-lang-btn ${activeChatLang === 'mr' ? 'active' : ''}" data-clang="mr" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 700;">मराठी</button>
+            </div>
           </div>
         </div>
       </div>
@@ -76,6 +87,25 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
             <!-- STAKEHOLDER PERSONA CHIPS -->
             <div class="tactical-presets-grid" id="chat-presets-grid" style="width: 100%; max-width: 800px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
               ${_renderPersonaPresetChips(activeRole, activeChatLang, fDict)}
+            </div>
+          </div>
+
+          <!-- Canvas Action Strip (Active during conversation) -->
+          <div id="canvas-actions-strip" style="display: none; justify-content: space-between; align-items: center; background: rgba(10,16,20,0.9); border: 1px solid var(--chart-line); border-radius: var(--radius); padding: 6px 12px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="beacon-pulse" style="width: 6px; height: 6px;"></span>
+              <span class="font-data text-brass" style="font-size: 0.72rem; font-weight: 700;">CANVAS CONVERSATION</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" id="btn-strip-voice-pause" class="btn-tactical text-amber font-data" style="display: none; padding: 4px 10px; font-size: 0.70rem; font-weight: 700; cursor: pointer;">
+                ⏸️ Pause Voice
+              </button>
+              <button type="button" id="btn-strip-voice-stop" class="btn-tactical text-red font-data" style="display: none; padding: 4px 10px; font-size: 0.70rem; font-weight: 700; cursor: pointer;">
+                ⏹️ Stop
+              </button>
+              <button type="button" id="btn-strip-new-chat" class="btn-tactical btn-tactical-green font-data" style="padding: 4px 12px; font-size: 0.70rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <span>✨</span> <span>+ NEW CHAT</span>
+              </button>
             </div>
           </div>
 
@@ -119,9 +149,23 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
             <span class="intercom-tx-dot"></span>
             <span id="tx-status-text" class="font-data" style="font-size: 0.70rem;">TX READY</span>
           </div>
-          <button id="btn-clear-log" class="btn-tactical btn-tactical-sm font-data" style="font-size: 0.65rem; padding: 3px 10px;">
-            🗑 CLEAR LOG
-          </button>
+
+          <!-- Active Voice Reading Controls (Pause / Stop) -->
+          <div id="chat-voice-pill" style="display: none; align-items: center; gap: 6px; background: rgba(10,16,20,0.85); border: 1px solid var(--brass); border-radius: var(--radius); padding: 3px 10px;">
+            <span class="beacon-pulse" style="width: 5px; height: 5px; background: var(--phosphor-green);"></span>
+            <span id="chat-voice-status" class="font-data text-green" style="font-size: 0.68rem; font-weight: 700;">VOICE: READING</span>
+            <button type="button" id="btn-global-voice-pause" class="btn-tactical btn-tactical-sm text-amber" style="padding: 2px 8px; font-size: 0.65rem; cursor: pointer;">⏸️ Pause</button>
+            <button type="button" id="btn-global-voice-stop" class="btn-tactical btn-tactical-sm text-red" style="padding: 2px 8px; font-size: 0.65rem; cursor: pointer;">⏹️ Stop</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+            <button type="button" id="btn-new-chat-bottom" class="btn-tactical btn-tactical-green font-data" style="font-size: 0.68rem; padding: 3px 12px; font-weight: 700; cursor: pointer;">
+              ✨ + NEW CHAT
+            </button>
+            <button type="button" id="btn-clear-log" class="btn-tactical btn-tactical-sm font-data" style="font-size: 0.65rem; padding: 3px 10px; cursor: pointer;">
+              🗑 CLEAR LOG
+            </button>
+          </div>
         </div>
         
         <form class="intercom-form" id="chat-form" style="display: flex; align-items: center; gap: 10px;">
@@ -165,6 +209,8 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
       if (lang) {
         activeChatLang = lang;
         localStorage.setItem('orca_chat_lang', lang);
+        localStorage.setItem('orca_fisherman_lang', lang);
+        setGlobalLanguage(lang);
         if (soundEngine) soundEngine.playMechanicalClick();
         renderChatView(container, { i18n, soundEngine, persona: activeRole, initialQuery: '' });
       }
@@ -223,11 +269,99 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     submit(text);
   });
 
-  container.querySelector('#btn-clear-log').addEventListener('click', () => {
+  // Central New Chat / Canvas Reset Handler
+  function resetToNewChat() {
+    voiceService.stopSpeaking();
     thread.innerHTML = '';
     canvasMount.innerHTML = '';
     emptyState.style.display = 'block';
+    const canvasStrip = container.querySelector('#canvas-actions-strip');
+    if (canvasStrip) canvasStrip.style.display = 'none';
+    input.value = '';
+    txStatusText.textContent = 'TX READY';
+    txStatusText.style.color = 'var(--phosphor-green)';
+    const voicePill = container.querySelector('#chat-voice-pill');
+    if (voicePill) voicePill.style.display = 'none';
+    const topVoiceBtn = container.querySelector('#btn-top-voice-pause');
+    if (topVoiceBtn) topVoiceBtn.style.display = 'none';
     if (soundEngine) soundEngine.playMechanicalClick();
+    input.focus();
+  }
+
+  // Bind All New Chat triggers across canvas & toolbar
+  ['#btn-canvas-new-chat', '#btn-strip-new-chat', '#btn-new-chat-bottom', '#btn-clear-log'].forEach(selector => {
+    const el = container.querySelector(selector);
+    if (el) el.addEventListener('click', resetToNewChat);
+  });
+
+  // Global & Canvas Voice Controls
+  const globalPauseBtn = container.querySelector('#btn-global-voice-pause');
+  const globalStopBtn = container.querySelector('#btn-global-voice-stop');
+  const topVoicePauseBtn = container.querySelector('#btn-top-voice-pause');
+  const stripVoicePauseBtn = container.querySelector('#btn-strip-voice-pause');
+  const stripVoiceStopBtn = container.querySelector('#btn-strip-voice-stop');
+
+  function handleVoiceTogglePause() {
+    voiceService.togglePause();
+  }
+
+  if (globalPauseBtn) globalPauseBtn.addEventListener('click', handleVoiceTogglePause);
+  if (topVoicePauseBtn) topVoicePauseBtn.addEventListener('click', handleVoiceTogglePause);
+  if (stripVoicePauseBtn) stripVoicePauseBtn.addEventListener('click', handleVoiceTogglePause);
+
+  if (globalStopBtn) globalStopBtn.addEventListener('click', () => voiceService.stopSpeaking());
+  if (stripVoiceStopBtn) stripVoiceStopBtn.addEventListener('click', () => voiceService.stopSpeaking());
+
+  // Listen to voiceService state changes to update all pause buttons seamlessly
+  voiceService.onStateChange((state) => {
+    const voicePill = container.querySelector('#chat-voice-pill');
+    const voiceStatus = container.querySelector('#chat-voice-status');
+    const topVoiceBtn = container.querySelector('#btn-top-voice-pause');
+    const topPauseLabel = container.querySelector('#top-voice-pause-label');
+    const stripPause = container.querySelector('#btn-strip-voice-pause');
+    const stripStop = container.querySelector('#btn-strip-voice-stop');
+
+    if (state.speaking) {
+      if (voicePill) voicePill.style.display = 'inline-flex';
+      if (topVoiceBtn) topVoiceBtn.style.display = 'inline-flex';
+      if (stripPause) stripPause.style.display = 'inline-flex';
+      if (stripStop) stripStop.style.display = 'inline-flex';
+
+      if (state.paused) {
+        if (voiceStatus) {
+          voiceStatus.textContent = 'VOICE: PAUSED';
+          voiceStatus.className = 'font-data text-amber';
+        }
+        if (globalPauseBtn) globalPauseBtn.textContent = '▶️ Resume';
+        if (topPauseLabel) topPauseLabel.textContent = 'Resume Voice';
+        if (stripPause) stripPause.textContent = '▶️ Resume Voice';
+        container.querySelectorAll('.btn-chat-pause').forEach(btn => {
+          btn.innerHTML = '▶️ Resume';
+        });
+      } else {
+        if (voiceStatus) {
+          voiceStatus.textContent = 'VOICE: READING';
+          voiceStatus.className = 'font-data text-green';
+        }
+        if (globalPauseBtn) globalPauseBtn.textContent = '⏸️ Pause';
+        if (topPauseLabel) topPauseLabel.textContent = 'Pause Voice';
+        if (stripPause) stripPause.textContent = '⏸️ Pause Voice';
+        container.querySelectorAll('.btn-chat-pause').forEach(btn => {
+          btn.innerHTML = '⏸️ Pause';
+        });
+      }
+    } else {
+      if (voicePill) voicePill.style.display = 'none';
+      if (topVoiceBtn) topVoiceBtn.style.display = 'none';
+      if (stripPause) stripPause.style.display = 'none';
+      if (stripStop) stripStop.style.display = 'none';
+      if (globalPauseBtn) globalPauseBtn.textContent = '⏸️ Pause';
+      if (topPauseLabel) topPauseLabel.textContent = 'Pause Voice';
+      if (stripPause) stripPause.textContent = '⏸️ Pause Voice';
+      container.querySelectorAll('.btn-chat-pause').forEach(btn => {
+        btn.innerHTML = '⏸️ Pause';
+      });
+    }
   });
 
   // Persistent Right Mini Map Initialization
@@ -263,6 +397,9 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
 
   async function submit(promptText) {
     emptyState.style.display = 'none';
+    const canvasStrip = container.querySelector('#canvas-actions-strip');
+    if (canvasStrip) canvasStrip.style.display = 'flex';
+
     if (soundEngine) soundEngine.playTransmissionSound();
 
     const resolvedLang = detectOrResolveLanguage(promptText, activeChatLang);
@@ -291,12 +428,24 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     const agentBubble = document.createElement('div');
     agentBubble.className = 'chat-msg agent';
     agentBubble.innerHTML = `
-      <div class="msg-header">
+      <div class="msg-header" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
         <span class="beacon-pulse" style="width: 5px; height: 5px;"></span>
         <span class="font-data text-brass" style="font-weight: 700; font-size: 0.72rem;">${isFisherman ? 'ORCA MARINE ASSISTANT' : 'ORCA REASONING AGENT'} [${resolvedLang.toUpperCase()}]</span>
         <span class="text-muted">•</span>
         <span class="font-data text-muted" style="font-size: 0.68rem;">${timestamp}</span>
         <span class="genui-status-badge panel-badge badge-amber" style="margin-left: 6px;">⚙ ${resolvedLang === 'mr' ? 'उत्तर तयार होत आहे...' : resolvedLang === 'hi' ? 'उत्तर तैयार हो रहा है...' : 'SYNTHESIZING...'}</span>
+        
+        <div class="agent-voice-toolbar" style="margin-left: auto; display: none; align-items: center; gap: 5px;">
+          <button class="btn-chat-speak btn-tactical btn-tactical-sm text-green" style="padding: 2px 8px; font-size: 0.68rem; cursor: pointer;">
+            🔊 ${resolvedLang === 'mr' ? 'ऐका' : resolvedLang === 'hi' ? 'सुनें' : 'Listen'}
+          </button>
+          <button class="btn-chat-pause btn-tactical btn-tactical-sm text-amber" style="padding: 2px 8px; font-size: 0.68rem; cursor: pointer;">
+            ⏸️ ${resolvedLang === 'mr' ? 'थांबवा' : resolvedLang === 'hi' ? 'रोकें' : 'Pause'}
+          </button>
+          <button class="btn-chat-stop btn-tactical btn-tactical-sm text-red" style="padding: 2px 8px; font-size: 0.68rem; cursor: pointer;">
+            ⏹️ ${resolvedLang === 'mr' ? 'बंद करा' : resolvedLang === 'hi' ? 'बंद करें' : 'Stop'}
+          </button>
+        </div>
       </div>
       <div class="msg-content-agent bezel-panel">
         <!-- HIDE TECHNICAL STEPS LOGS FOR FISHERMAN -->
@@ -316,16 +465,44 @@ export function renderChatView(container, { i18n, soundEngine, persona = 'fisher
     txStatusText.style.color = 'var(--phosphor-amber)';
 
     // Stream events matching exact language contract
-    await bridge.streamTo(promptText, renderer, resolvedLang);
+    const streamResult = await bridge.streamTo(promptText, renderer, resolvedLang);
 
     txStatusText.textContent = 'TX READY';
     txStatusText.style.color = 'var(--phosphor-green)';
     streamBox.scrollTop = streamBox.scrollHeight;
 
-    // Automatic TTS readout in exact same language
+    // Reveal Audio Toolbar
+    const voiceToolbar = agentBubble.querySelector('.agent-voice-toolbar');
+    if (voiceToolbar) voiceToolbar.style.display = 'inline-flex';
+
+    // Automatic TTS readout of exact screen data
     const responseProse = agentBubble.querySelector('.genui-prose')?.textContent || '';
-    if (responseProse) {
-      voiceService.speak(responseProse, resolvedLang);
+    const screenSpeechText = streamResult?.speech_text || responseProse;
+
+    if (screenSpeechText) {
+      voiceService.speak(screenSpeechText, resolvedLang);
+    }
+
+    const speakBtn = agentBubble.querySelector('.btn-chat-speak');
+    if (speakBtn) {
+      speakBtn.addEventListener('click', () => {
+        const latestProse = agentBubble.querySelector('.genui-prose')?.textContent || '';
+        voiceService.speak(streamResult?.speech_text || latestProse, resolvedLang);
+      });
+    }
+
+    const pauseBtn = agentBubble.querySelector('.btn-chat-pause');
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', () => {
+        voiceService.togglePause();
+      });
+    }
+
+    const stopBtn = agentBubble.querySelector('.btn-chat-stop');
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => {
+        voiceService.stopSpeaking();
+      });
     }
   }
 
@@ -341,16 +518,16 @@ function _renderPersonaPresetChips(role, lang, fDict) {
         <button class="preset-chip-btn" data-query="आज मासेमारीसाठी चांगली जागा कुठे आहे?">
           <span>🎣</span><span>"आज मासेमारीसाठी चांगली जागा कुठे आहे?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Is it safe to go fishing tomorrow morning?">
+        <button class="preset-chip-btn" data-query="उद्या सकाळी मासेमारी करणे सुरक्षित आहे का?">
           <span>🌊</span><span>"उद्या सकाळी मासेमारी करणे सुरक्षित आहे का?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="What are the tide, weather and sea conditions near my fishing location?">
+        <button class="preset-chip-btn" data-query="हवामान आणि भरती-ओहोटीची स्थिती कशी आहे?">
           <span>🌦️</span><span>"हवामान आणि भरती-ओहोटीची स्थिती कशी आहे?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
+        <button class="preset-chip-btn" data-query="काही वादळाचा किंवा विजांचा इशारा आहे का?">
           <span>⚠️</span><span>"काही वादळाचा किंवा विजांचा इशारा आहे का?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
+        <button class="preset-chip-btn" data-query="सुरक्षित मार्ग कोणता आहे?">
           <span>🧭</span><span>"सुरक्षित मार्ग कोणता आहे?"</span>
         </button>
       `;
@@ -360,16 +537,16 @@ function _renderPersonaPresetChips(role, lang, fDict) {
         <button class="preset-chip-btn" data-query="आज मछली पकड़ने के लिए सबसे अच्छी जगह कहाँ है?">
           <span>🎣</span><span>"आज मछली पकड़ने की सबसे अच्छी जगह कहाँ है?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Is it safe to go fishing tomorrow morning?">
+        <button class="preset-chip-btn" data-query="क्या कल सुबह मछली पकड़ना सुरक्षित है?">
           <span>🌊</span><span>"क्या कल सुबह मछली पकड़ना सुरक्षित है?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="What are the tide, weather and sea conditions near my fishing location?">
+        <button class="preset-chip-btn" data-query="मौसम और ज्वार-भाटा की स्थिति कैसी है?">
           <span>🌦️</span><span>"मौसम और ज्वार-भाटा की स्थिति कैसी है?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="Are there any lightning or cyclone alerts in my area?">
+        <button class="preset-chip-btn" data-query="क्या कोई चक्रवात या बिजली की चेतावनी है?">
           <span>⚠️</span><span>"क्या कोई चक्रवात या बिजली की चेतावनी है?"</span>
         </button>
-        <button class="preset-chip-btn" data-query="What is the safest route to the fishing zone?">
+        <button class="preset-chip-btn" data-query="सबसे सुरक्षित रास्ता कौन सा है?">
           <span>🧭</span><span>"सबसे सुरक्षित रास्ता कौन सा है?"</span>
         </button>
       `;
@@ -394,6 +571,32 @@ function _renderPersonaPresetChips(role, lang, fDict) {
   }
 
   if (role === 'researcher') {
+    if (lang === 'mr') {
+      return `
+        <button class="preset-chip-btn" data-query="कोणत्या भागात जास्त क्लोरोफिल आणि अनुकूल तापमान आहे?">
+          <span>🔬</span><span>"कोणत्या भागात जास्त क्लोरोफिल आणि अनुकूल तापमान आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="या भागात माशांची उत्पादकता का कमी झाली आहे?">
+          <span>📈</span><span>"या भागात माशांची उत्पादकता का कमी झाली आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="तीनही क्षेत्रांमधील मासेमारी क्षमतेची तुलना करा.">
+          <span>📊</span><span>"तीनही क्षेत्रांमधील मासेमारी क्षमतेची तुलना करा."</span>
+        </button>
+      `;
+    }
+    if (lang === 'hi') {
+      return `
+        <button class="preset-chip-btn" data-query="किन क्षेत्रों में उच्च क्लोरोफिल और अनुकूल तापमान है?">
+          <span>🔬</span><span>"किन क्षेत्रों में उच्च क्लोरोफिल और अनुकूल तापमान है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="इस तटीय क्षेत्र में मछली उत्पादकता क्यों कम हुई है?">
+          <span>📈</span><span>"इस तटीय क्षेत्र में मछली उत्पादकता क्यों कम हुई है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="तीनों क्षेत्रों की मत्स्य क्षमता की तुलना करें।">
+          <span>📊</span><span>"तीनों क्षेत्रों की मत्स्य क्षमता की तुलना करें।"</span>
+        </button>
+      `;
+    }
     return `
       <button class="preset-chip-btn" data-query="Which regions show high chlorophyll concentration and favourable sea surface temperature?">
         <span>🔬</span><span>"Which regions show high chlorophyll concentration and favourable SST?"</span>
@@ -408,6 +611,26 @@ function _renderPersonaPresetChips(role, lang, fDict) {
   }
 
   if (role === 'government') {
+    if (lang === 'mr') {
+      return `
+        <button class="preset-chip-btn" data-query="कोणत्या किनारी भागात सध्या जास्त सागरी धोका आहे?">
+          <span>⚠️</span><span>"कोणत्या किनारी भागात सध्या जास्त सागरी धोका आहे?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="काही सक्रिय सागरी धोके किंवा प्रतिबंधित क्षेत्रे आहेत का?">
+          <span>🚨</span><span>"काही सक्रिय सागरी धोके किंवा प्रतिबंधित क्षेत्रे आहेत का?"</span>
+        </button>
+      `;
+    }
+    if (lang === 'hi') {
+      return `
+        <button class="preset-chip-btn" data-query="किन तटीय क्षेत्रों में वर्तमान में उच्च समुद्री जोखिम है?">
+          <span>⚠️</span><span>"किन तटीय क्षेत्रों में वर्तमान में उच्च समुद्री जोखिम है?"</span>
+        </button>
+        <button class="preset-chip-btn" data-query="क्या कोई सक्रिय समुद्री खतरे या प्रतिबंधित क्षेत्र हैं?">
+          <span>🚨</span><span>"क्या कोई सक्रिय समुद्री खतरे या प्रतिबंधित क्षेत्र हैं?"</span>
+        </button>
+      `;
+    }
     return `
       <button class="preset-chip-btn" data-query="Which coastal areas currently have elevated marine risk?">
         <span>⚠️</span><span>"Which coastal areas currently have elevated marine risk?"</span>
@@ -418,6 +641,20 @@ function _renderPersonaPresetChips(role, lang, fDict) {
     `;
   }
 
+  if (lang === 'mr') {
+    return `
+      <button class="preset-chip-btn" data-query="सध्याच्या समुद्राच्या स्थितीत माझ्या जहाजासाठी सर्वात सुरक्षित मार्ग कोणता आहे?">
+        <span>🧭</span><span>"माझ्या जहाजासाठी सर्वात सुरक्षित मार्ग कोणता आहे?"</span>
+      </button>
+    `;
+  }
+  if (lang === 'hi') {
+    return `
+      <button class="preset-chip-btn" data-query="वर्तमान समुद्री परिस्थितियों में मेरे जहाज के लिए सबसे सुरक्षित मार्ग कौन सा है?">
+        <span>🧭</span><span>"मेरे जहाज के लिए सबसे सुरक्षित मार्ग कौन सा है?"</span>
+      </button>
+    `;
+  }
   return `
     <button class="preset-chip-btn" data-query="What is the safest route for my vessel considering current sea conditions?">
       <span>🧭</span><span>"What is the safest route for my vessel considering current sea conditions?"</span>

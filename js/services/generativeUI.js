@@ -161,7 +161,8 @@ export class GenerativeAgentBridge {
     return {
       text: mockMatch.prose,
       prose: mockMatch.prose,
-      lang: mockMatch.targetLang
+      lang: mockMatch.targetLang,
+      speech_text: mockMatch.speech_text
     };
   }
 
@@ -210,10 +211,17 @@ export class GenerativeAgentBridge {
 
     renderer.handleEvent({ type: 'COMPLETE', prose: prose });
 
+    const speech_text = activeLang === 'mr'
+      ? `रत्नागिरी आणि कोकण किनारी भागातील समुद्राची स्थिती मध्यम आहे. समुद्राचे तापमान २८.४ अंश असून लाटांची उंची सुमारे १.४ मीटर आहे. प्रवास करण्यापूर्वी ताजी माहिती तपासा.`
+      : activeLang === 'hi'
+      ? `रत्नागिरी और कोंकण तटीय क्षेत्र में समुद्र की स्थिति मध्यम है। समुद्र का तापमान 28.4 डिग्री और लहरों की ऊँचाई 1.4 मीटर है। जाने से पहले जानकारी की जाँच करें।`
+      : `Sea conditions across Ratnagiri sector are moderate. Sea Surface Temperature is 28.4 degrees with 1.4 metre wave swells. Check latest advisory before departure.`;
+
     return {
       text: prose,
       prose: prose,
-      lang: activeLang
+      lang: activeLang,
+      speech_text: speech_text
     };
   }
 }

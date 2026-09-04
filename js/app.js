@@ -2,6 +2,7 @@
 // Manages global state, Web Audio API sound synthesis, i18n localization, and route orchestration
 
 import { I18N } from './data/mockData.js';
+import { mockDataService } from './services/mockDataService.js';
 import { Router } from './router.js';
 import { renderLandingView } from './views/landing.js';
 import { renderFishermanView } from './views/fisherman.js';
@@ -124,6 +125,7 @@ class OrcaBridgeApp {
   }
 
   init() {
+    mockDataService.ensureLoaded();
     this.bindStaticUI();
     this.startLiveClocks();
 

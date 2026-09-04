@@ -1,11 +1,18 @@
 // ORCA Marine Bridge Console — Data Adapters & Agent Config (/#admin)
 // Sensor adapter registry, ping actions, and live AI Agent endpoint bridge settings
 
-import { DATA_ADAPTERS } from '../data/mockData.js';
+import { mockDataService } from '../services/mockDataService.js';
 import { AgentBridgeService } from '../services/agentBridge.js';
 
 export function renderAdminView(container, { i18n, soundEngine }) {
   const bridge = new AgentBridgeService();
+  const rawAdapters = mockDataService.getAdapters();
+  const DATA_ADAPTERS = rawAdapters.length ? rawAdapters : [
+    { name: "INCOIS Satellite PFZ Feed", protocol: "REST / GeoJSON", status: "SIMULATED", latency: "142 ms", packets: 14200, lastSync: "2 mins ago" },
+    { name: "NOAA Coral Reef Watch SST", protocol: "ERDDAP NetCDF", status: "SIMULATED", latency: "210 ms", packets: 84500, lastSync: "5 mins ago" },
+    { name: "IMD Doppler Weather Radar", protocol: "WMS / Tile Server", status: "SIMULATED", latency: "98 ms", packets: 31200, lastSync: "1 min ago" },
+    { name: "AIS Marine Transponder Stream", protocol: "WebSocket / NMEA", status: "SIMULATED", latency: "45 ms", packets: 249000, lastSync: "Real-time" }
+  ];
 
   const adaptersRows = DATA_ADAPTERS.map((adp, idx) => `
     <tr id="row-adp-${idx}">

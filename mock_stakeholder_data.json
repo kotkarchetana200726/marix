@@ -1,0 +1,1382 @@
+{
+  "system": {
+    "version": "2.1.0",
+    "name": "ORCA MARIX Marine Intelligence Console",
+    "updated_at": "2026-09-04T08:52:00Z",
+    "status": "OPERATIONAL",
+    "mock_mode": true
+  },
+  "stakeholders": {
+    "fisherman": {
+      "id": "fisherman",
+      "name": "Artisanal & Commercial Fishermen",
+      "role_tag": "🎣 FISHERMAN MODE",
+      "description": "Voice-first marine safety, potential fishing zone (PFZ) aggregation, wave forecast & catch economics",
+      "default_location": {
+        "port": "Ratnagiri Harbor",
+        "coordinates": [
+          16.99,
+          73.31
+        ]
+      },
+      "pfz_zones": [
+        {
+          "id": "pfz-01",
+          "name": "Ratnagiri Southwest PFZ-01",
+          "name_mr": "रत्नागिरी नैऋत्य मासेमारी क्षेत्र (PFZ-01)",
+          "name_hi": "रत्नागिरी दक्षिण-पश्चिम मत्स्य क्षेत्र (PFZ-01)",
+          "coordinates": [
+            16.85,
+            73.18
+          ],
+          "latLonStr": "16°51'N, 73°10'E",
+          "distanceKm": 18,
+          "distanceNm": 9.7,
+          "depthM": 48,
+          "sstAnomaly": "-1.4°C (Upwelling Front)",
+          "sstCurrent": "27.9°C",
+          "chlorophyll": "4.7 mg/m³",
+          "biomassIndex": "94 / 100",
+          "confidence": "87%",
+          "targetSpecies": [
+            "Indian Mackerel (बांगडा)",
+            "Sardinella (तारली)",
+            "Kingfish (सुरमई)"
+          ],
+          "expiryHours": 18,
+          "fuelSavingsEst": "28%",
+          "advisory": "High biological productivity 18 km SW of Ratnagiri. Optimal fishing window 04:00 - 11:00 AM."
+        },
+        {
+          "id": "pfz-02",
+          "name": "Ratnagiri-Devgad Pelagic Edge",
+          "name_mr": "रत्नागिरी-देवगड सागरी पट्टा",
+          "name_hi": "रत्नागिरी-देवगढ़ समुद्री क्षेत्र",
+          "coordinates": [
+            16.55,
+            72.85
+          ],
+          "latLonStr": "16°33'N, 72°51'E",
+          "distanceKm": 32,
+          "distanceNm": 17.3,
+          "depthM": 48,
+          "sstAnomaly": "-0.9°C",
+          "sstCurrent": "27.3°C",
+          "chlorophyll": "2.8 mg/m³",
+          "biomassIndex": "88 / 100",
+          "confidence": "91%",
+          "targetSpecies": [
+            "Seer Fish (सुरमई)",
+            "Squid / Cephalopods"
+          ],
+          "expiryHours": 24,
+          "fuelSavingsEst": "22%",
+          "advisory": "Strong thermal gradient at 50m depth contour. Moderate current."
+        },
+        {
+          "id": "pfz-03",
+          "name": "Porbandar Offshore Front Beta",
+          "name_mr": "पोरबंदर ऑफशोअर क्षेत्र बीटा",
+          "name_hi": "पोरबंदर अपतटीय क्षेत्र बीटा",
+          "coordinates": [
+            21.25,
+            69.1
+          ],
+          "latLonStr": "21°15'N, 69°06'E",
+          "distanceKm": 76,
+          "distanceNm": 41.0,
+          "depthM": 82,
+          "sstAnomaly": "-1.1°C",
+          "sstCurrent": "27.1°C",
+          "chlorophyll": "3.1 mg/m³",
+          "biomassIndex": "90 / 100",
+          "confidence": "89%",
+          "targetSpecies": [
+            "Ribbon Fish",
+            "Croakers",
+            "Pomfret (पापलेट)"
+          ],
+          "expiryHours": 12,
+          "fuelSavingsEst": "34%",
+          "advisory": "High fish concentration. Exercise caution near northern swell boundary."
+        }
+      ],
+      "target_species": [
+        {
+          "name_en": "Indian Mackerel",
+          "name_mr": "बांगडा",
+          "name_hi": "बांगड़ा",
+          "rate_per_kg_inr": 240,
+          "abundance": "High"
+        },
+        {
+          "name_en": "Oil Sardine",
+          "name_mr": "तारली",
+          "name_hi": "तारली",
+          "rate_per_kg_inr": 160,
+          "abundance": "Peak"
+        },
+        {
+          "name_en": "Seer Fish / Kingfish",
+          "name_mr": "सुरमई",
+          "name_hi": "सुरमई",
+          "rate_per_kg_inr": 680,
+          "abundance": "Moderate"
+        },
+        {
+          "name_en": "Silver Pomfret",
+          "name_mr": "पापलेट",
+          "name_hi": "पापलेट",
+          "rate_per_kg_inr": 920,
+          "abundance": "High"
+        },
+        {
+          "name_en": "Penaeid Prawns",
+          "name_mr": "कोळंबी",
+          "name_hi": "झींगा",
+          "rate_per_kg_inr": 550,
+          "abundance": "Peak"
+        }
+      ],
+      "tides_today": [
+        {
+          "type": "High Tide",
+          "time": "08:14 AM",
+          "height": "3.8m"
+        },
+        {
+          "type": "Low Tide",
+          "time": "02:05 PM",
+          "height": "0.6m"
+        },
+        {
+          "type": "High Tide",
+          "time": "08:35 PM",
+          "height": "3.9m"
+        }
+      ],
+      "safety_verdict": {
+        "status": "SAFE",
+        "verdict_en": "SAFE FOR COASTAL FISHING",
+        "verdict_mr": "किनारी मासेमारीसाठी सुरक्षित",
+        "verdict_hi": "तटीय मछली पकड़ने के लिए सुरक्षित",
+        "recommended_departure": "05:30 AM",
+        "recommended_return": "03:00 PM"
+      },
+      "fuel_economics": {
+        "avg_fuel_saved_percent": 28,
+        "avg_inr_saved_per_trip": 4800
+      }
+    },
+    "captain_route": {
+      "id": "captain_route",
+      "name": "Ship Captain & Marine Route Planner",
+      "role_tag": "🚢 MARINE BUSINESS & SHIPPING OPERATOR",
+      "description": "Pareto optimal route selection, vessel telemetry, fuel consumption & hazard avoidance",
+      "vessel_telemetry": {
+        "name": "INS SAGAR VIKRAM (FLAGSHIP)",
+        "speed": "14.2 knots",
+        "heading": "184° SSW",
+        "engine_load": "74%",
+        "fuel_rate": "145 L/h",
+        "draft": "3.8m",
+        "risk_score": 19,
+        "status": "NOMINAL ON PATROL"
+      },
+      "route_presets": [
+        {
+          "id": "rt-veraval-ratnagiri",
+          "name": "Veraval to Ratnagiri (Arabian Sea Crossing)",
+          "origin": {
+            "name": "Veraval Port, Gujarat",
+            "coords": [
+              20.9,
+              70.36
+            ]
+          },
+          "destination": {
+            "name": "Ratnagiri Port, Maharashtra",
+            "coords": [
+              16.98,
+              73.28
+            ]
+          },
+          "shortest": {
+            "distanceNm": 312,
+            "etaHours": "26h 30m",
+            "riskScore": 84,
+            "riskText": "CRITICAL DANGER",
+            "riskColor": "var(--radar-red)",
+            "fuelEstLiters": "3,850 L",
+            "hazardSummary": "Direct line intersects Cyclone Varuna gale core and 5.5m breaking swells.",
+            "waypoints": [
+              [
+                20.9,
+                70.36
+              ],
+              [
+                20.1,
+                70.8
+              ],
+              [
+                19.0,
+                71.5
+              ],
+              [
+                17.8,
+                72.4
+              ],
+              [
+                16.98,
+                73.28
+              ]
+            ]
+          },
+          "safe": {
+            "distanceNm": 348,
+            "etaHours": "29h 15m",
+            "riskScore": 19,
+            "riskText": "OPTIMAL SAFE CORRIDOR",
+            "riskColor": "var(--phosphor-green)",
+            "fuelEstLiters": "3,320 L (Favorable Currents & Less Resistance)",
+            "hazardSummary": "Diverts east along coastal bathymetric lee, skirts high swell perimeter.",
+            "waypoints": [
+              [
+                20.9,
+                70.36
+              ],
+              [
+                20.6,
+                71.4
+              ],
+              [
+                19.5,
+                72.5
+              ],
+              [
+                18.4,
+                72.8
+              ],
+              [
+                17.5,
+                73.1
+              ],
+              [
+                16.98,
+                73.28
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "disaster_safety": {
+      "id": "disaster_safety",
+      "name": "Disaster Management & Safety Officer",
+      "role_tag": "🛡️ DISASTER MANAGEMENT & SAFETY OFFICER",
+      "description": "Active storm advisories, emergency alerts, regional risk gauges, search & rescue (SAR) grids",
+      "active_alerts": [
+        {
+          "id": "ALT-2026-8801",
+          "severity": "CRITICAL",
+          "category": "CYCLONE / GALE",
+          "title": "Severe Storm Warning — North Arabian Sea (Sector 2A)",
+          "description": "Deep Depression accelerating NE at 14 kts. Sustained surface winds 45-55 kts with gusts to 65 kts. Wave heights 4.8m to 6.1m.",
+          "timestamp": "2026-08-26 07:15:00 UTC",
+          "source": "IMD Marine Radar / INCOIS Wave Buoy 2304",
+          "coordinates": "20°48'N, 68°30'E",
+          "actionRequired": "Immediate course diversion to Ratnagiri or Mumbai anchorage. All small craft return to harbor.",
+          "riskGaugeScore": 88
+        },
+        {
+          "id": "ALT-2026-8802",
+          "severity": "HIGH",
+          "category": "ROGUE WAVE HAZARD",
+          "title": "High Energy Swell Alert — Saurashtra Coastline",
+          "description": "Long-period swell (16.4s) generating breaker heights over 4.2m on shallow reefs and harbor bars during rising tide.",
+          "timestamp": "2026-08-26 06:40:12 UTC",
+          "source": "INCOIS Coastal Buoy System (SW-04)",
+          "coordinates": "21°37'N, 69°36'E",
+          "actionRequired": "Exercise extreme caution when crossing harbour approaches. Avoid nearshore bars.",
+          "riskGaugeScore": 68
+        }
+      ],
+      "hazard_zones": [
+        {
+          "id": "hazard-cyclone-01",
+          "name": "Tropical Depression 'VARUNA' Core",
+          "type": "CYCLONE_DANGER",
+          "severity": "CRITICAL",
+          "color": "#FF5C5C",
+          "center": [
+            20.8,
+            68.5
+          ],
+          "radiusKm": 160000,
+          "windMax": "55 kts (Severe)",
+          "waveHeightMax": "5.8m (Phenomenal)",
+          "pressure": "988 hPa",
+          "advisory": "NO VESSEL MOVEMENT PERMITTED. Port warning signal No. 8 hoisted at Okha and Porbandar."
+        }
+      ],
+      "emergency_contacts": [
+        {
+          "agency": "Coast Guard MRCC Mumbai",
+          "phone": "+91-22-24388000",
+          "vhf_channel": "CH 16 / CH 70",
+          "status": "24/7 ACTIVE"
+        },
+        {
+          "agency": "INCOIS Coastal Emergency Cell",
+          "phone": "+91-40-23895000",
+          "vhf_channel": "CH 16",
+          "status": "24/7 ACTIVE"
+        },
+        {
+          "agency": "Ratnagiri Maritime Port Control",
+          "phone": "+91-2352-222304",
+          "vhf_channel": "CH 12",
+          "status": "24/7 ACTIVE"
+        }
+      ]
+    },
+    "marine_researcher": {
+      "id": "marine_researcher",
+      "name": "Oceanographer & Marine Researcher",
+      "role_tag": "🔬 OCEANOGRAPHER & MARINE SCIENTIST",
+      "description": "Multispectral chlorophyll-a data, sea surface temperature (SST) anomalies, upwelling fronts",
+      "sst_telemetry": {
+        "current_avg_sst": "27.8°C",
+        "anomaly": "+0.4°C vs 10-Yr Mean",
+        "thermocline_depth": "24m",
+        "upwelling_index": "High (8.4 m³/s/100m)",
+        "salinity_psu": "35.6 PSU"
+      },
+      "historical_sst_trend": [
+        {
+          "day": "-30d",
+          "sst": 26.9,
+          "chlorophyll": 2.1
+        },
+        {
+          "day": "-20d",
+          "sst": 27.2,
+          "chlorophyll": 2.5
+        },
+        {
+          "day": "-10d",
+          "sst": 27.6,
+          "chlorophyll": 3.1
+        },
+        {
+          "day": "Today",
+          "sst": 27.8,
+          "chlorophyll": 3.8
+        }
+      ]
+    },
+    "system_admin": {
+      "id": "system_admin",
+      "name": "System Administrator & Data Engineer",
+      "role_tag": "💻 DATA ADAPTERS & SYSTEM HEALTH",
+      "description": "Data adapter registry, live vs mock connection state, API latency & pipeline metrics",
+      "adapters": [
+        {
+          "id": "incois-pfz",
+          "name": "INCOIS Satellite PFZ Feed",
+          "protocol": "REST / GeoJSON",
+          "status": "ONLINE",
+          "latency": "142 ms",
+          "uptime": "99.94%",
+          "mode": "SIMULATED",
+          "last_sync": "2 mins ago",
+          "records_processed": 14200
+        },
+        {
+          "id": "noaa-sst",
+          "name": "NOAA Coral Reef Watch SST",
+          "protocol": "ERDDAP NetCDF",
+          "status": "ONLINE",
+          "latency": "210 ms",
+          "uptime": "99.88%",
+          "mode": "SIMULATED",
+          "last_sync": "5 mins ago",
+          "records_processed": 84500
+        },
+        {
+          "id": "imd-radar",
+          "name": "IMD Doppler Weather Radar",
+          "protocol": "WMS / Tile Server",
+          "status": "ONLINE",
+          "latency": "98 ms",
+          "uptime": "100.0%",
+          "mode": "SIMULATED",
+          "last_sync": "1 min ago",
+          "records_processed": 31200
+        },
+        {
+          "id": "ais-transponder",
+          "name": "AIS Marine Vessel Stream",
+          "protocol": "WebSocket / NMEA",
+          "status": "ONLINE",
+          "latency": "45 ms",
+          "uptime": "99.98%",
+          "mode": "SIMULATED",
+          "last_sync": "Real-time",
+          "records_processed": 249000
+        }
+      ]
+    }
+  },
+  "monitored_zones": [
+    {
+      "id": "zone-arabian-north",
+      "name": "Arabian Sea North",
+      "subtext": "Offshore Gujarat / Porbandar Basin",
+      "coordinates": "21.62° N, 69.34° E",
+      "riskScore": 78,
+      "status": "CRITICAL",
+      "riskColor": "var(--radar-red)",
+      "sst": "29.4°C (+1.8° Anomaly)",
+      "wind": "38 kts (Gale Force)",
+      "swell": "4.2m Rough",
+      "alertsCount": 3,
+      "activeVessels": 42,
+      "trend": "Escalating"
+    },
+    {
+      "id": "zone-mumbai-high",
+      "name": "Mumbai High & Konkan Shelf",
+      "subtext": "Zone 4 Marine Traffic Corridor",
+      "coordinates": "18.98° N, 72.82° E",
+      "riskScore": 54,
+      "status": "ADVISORY",
+      "riskColor": "var(--phosphor-amber)",
+      "sst": "28.1°C (Normal)",
+      "wind": "22 kts (Moderate)",
+      "swell": "2.4m Moderate",
+      "alertsCount": 1,
+      "activeVessels": 118,
+      "trend": "Stable"
+    },
+    {
+      "id": "zone-malabar",
+      "name": "Malabar & Lakshadweep Sea",
+      "subtext": "Deep Sea Pelagic Fishing Grounds",
+      "coordinates": "10.15° N, 75.20° E",
+      "riskScore": 18,
+      "status": "OPTIMAL",
+      "riskColor": "var(--phosphor-green)",
+      "sst": "27.2°C (Upwelling Front)",
+      "wind": "11 kts (Light Breeze)",
+      "swell": "1.1m Calm",
+      "alertsCount": 0,
+      "activeVessels": 84,
+      "trend": "Optimal"
+    }
+  ],
+  "mock_responses": [
+    {
+      "id": "RESTRICTED_ZONE",
+      "match_keywords": [
+        "restricted",
+        "avoid",
+        "sanctuary",
+        "malvan",
+        "protected",
+        "danger zone",
+        "जाऊ नका",
+        "न जा",
+        "मनाई",
+        "मालवण",
+        "बंदी",
+        "संरक्षित",
+        "निषिद्ध",
+        "न जाएं",
+        "प्रतिबंधित",
+        "अभयारण्य"
+      ],
+      "steps": {
+        "en": [
+          "[01] Querying Marine Protected Areas (MPA) register...",
+          "[02] Overlaying Malvan Sanctuary GPS polygon...",
+          "[03] Verifying shallow reef navigation hazard...",
+          "[04] Issuing navigational restriction warning..."
+        ],
+        "mr": [
+          "[01] सागरी संरक्षित क्षेत्रांची नोंद तपासली जात आहे...",
+          "[02] मालवण सागरी अभयारण्याच्या सीमा पडताळल्या जात आहेत...",
+          "[03] उथळ खडकाळ भागातील धोक्यांची खातरजमा केली जात आहे...",
+          "[04] सागरी प्रवेश निर्बंध इशारा तयार केला जात आहे..."
+        ],
+        "hi": [
+          "[01] समुद्री संरक्षित क्षेत्रों के रिकॉर्ड की जाँच की जा रही है...",
+          "[02] मालवण समुद्री अभयारण्य की सीमाओं का सत्यापन किया जा रहा है...",
+          "[03] उथली चट्टानों के खतरे की पुष्टि की जा रही है...",
+          "[04] प्रतिबंध चेतावनी तैयार की जा रही है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🔴 RESTRICTED AREA",
+          "verdict_title": "🔴 Do Not Enter: Malvan Marine Protected Sanctuary",
+          "simple_sentence": "Fishing and unauthorized vessel entry are STRICTLY PROHIBITED inside the Malvan Marine Sanctuary and coastal coral reef zone.",
+          "bullets": [
+            "🔴 Restriction Status: STRICTLY PROHIBITED",
+            "📍 Protected Area: Malvan Marine Sanctuary (Sindhudurg)",
+            "🪸 Hazard: Coral reefs & shallow rocks < 2.5m depth",
+            "👮 Enforcement: Patrolled by Maharashtra Coastal Police"
+          ],
+          "action_advice": "Divert at least 4 NM offshore to avoid prosecution and hull damage.",
+          "speech_text": "Restricted area, do not enter. Fishing and unauthorized vessel entry are strictly prohibited inside the Malvan Marine Sanctuary. Coral reefs and shallow rocks pose grounding hazards. Divert at least 4 nautical miles offshore.",
+          "title": "🔴 Restricted Marine Zone Warning (Malvan Sanctuary)",
+          "prose": "WARNING: **RESTRICTED MARINE AREA**.\n\nAll commercial trawling and net casting are **STRICTLY PROHIBITED** inside the Malvan Marine Sanctuary (Sindhudurg).\n\n### 📋 RESTRICTION SUMMARY\n- 🔴 **Zone**: **Malvan Coral Reef Sanctuary**\n- ⚠️ **Hazard**: **Grounding hazard on shallow coral shoals (<2.5m)**\n- 👮 **Enforcement**: **Coastal Security Police patrol active**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "Malvan MPA Restriction Notice",
+                "score": 92,
+                "status": "PROHIBITED / RESTRICTED",
+                "color": "#FF5C5C",
+                "wind": "14 kts",
+                "swell": "1.2m",
+                "advisory": "Entry prohibited. Heavy penalties and vessel seizure for unauthorized entry."
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🔴 प्रवेशास मनाई",
+          "verdict_title": "🔴 या क्षेत्रात जाण्यास मनाई: मालवण सागरी संरक्षित अभयारण्य",
+          "simple_sentence": "मालवण सागरी संरक्षित क्षेत्र (Malvan MPA) आणि प्रवाळ खडकांच्या भागात मासेमारी करण्यास कायद्याने सक्त मनाई आहे.",
+          "bullets": [
+            "🔴 निर्बंध स्थिती: मासेमारीस सक्त मनाई",
+            "📍 संरक्षित क्षेत्र: मालवण सागरी अभयारण्य (सिंधुदुर्ग)",
+            "🪸 धोका: उथळ प्रवाळ खडक, बोट अडकण्याचा धोका (<२.५m)",
+            "👮 गस्त: महाराष्ट्र सागरी पोलीस आणि वन विभाग गस्त"
+          ],
+          "action_advice": "कायदेशीर कारवाई आणि बोटीचे नुकसान टाळण्यासाठी या क्षेत्रापासून ४ सागरी मैल दूर राहा.",
+          "speech_text": "या क्षेत्रात जाण्यास मनाई आहे. मालवण सागरी संरक्षित क्षेत्रात मासेमारी करण्यास कायद्याने सक्त मनाई आहे. या भागात उथळ प्रवाळ खडक असल्याने बोट अडकण्याचा मोठा धोका आहे. कृपया या क्षेत्रापासून कमीत कमी ४ सागरी मैल दूर राहा.",
+          "title": "🔴 सागरी संरक्षित क्षेत्र निर्बंध (मालवण)",
+          "prose": "कडक इशारा: **या सागरी क्षेत्रात प्रवेशास बंदी आहे**.\n\nमालवण सागरी अभयारण्याच्या (सिंधुदुर्ग) हद्दीत कोणत्याही प्रकारची मासेमारी करणे **कायद्याने गुन्हा** आहे.\n\n### 📋 निर्बंध माहिती\n- 🔴 **क्षेत्र**: **मालवण प्रवाळ सागरी अभयारण्य**\n- ⚠️ **धोका**: **उथळ खडक, बोट फुटण्याचा धोका (<२.५m)**\n- 👮 **कारवाई**: **सागरी पोलिसांकडून कडक गस्त आणि बोट जप्ती**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "मालवण सागरी अभयारण्य निर्बंध",
+                "score": 92,
+                "status": "प्रवेशास सक्त मनाई",
+                "color": "#FF5C5C",
+                "wind": "१४ गाठी",
+                "swell": "१.२ मीटर",
+                "advisory": "संरक्षित क्षेत्रात मासेमारी करण्यास बंदी. उल्लंघन केल्यास कायदेशीर कारवाई होईल."
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🔴 प्रवेश वर्जित",
+          "verdict_title": "🔴 इस क्षेत्र में प्रवेश वर्जित: मालवण समुद्री संरक्षित अभयारण्य",
+          "simple_sentence": "मालवण समुद्री संरक्षित क्षेत्र (Malvan MPA) और मूंगा चट्टानों के क्षेत्र में मछली पकड़ना कानूनन सख्त मना है।",
+          "bullets": [
+            "🔴 प्रतिबंध स्थिति: मछली पकड़ने पर सख्त प्रतिबंध",
+            "📍 संरक्षित क्षेत्र: मालवण समुद्री अभयारण्य (सिंधुदुर्ग)",
+            "🪸 खतरा: उथली चट्टानें, नौका टकराने का खतरा (<2.5m)",
+            "👮 निगरानी: तटीय सुरक्षा पुलिस द्वारा गश्त"
+          ],
+          "action_advice": "कानूनी कार्रवाई और नौका क्षति से बचने के लिए इस क्षेत्र से कम से कम 4 मील दूर रहें।",
+          "speech_text": "इस क्षेत्र में प्रवेश वर्जित है। मालवण समुद्री संरक्षित क्षेत्र में मछली पकड़ना कानूनन सख्त मना है। उथली चट्टानों के कारण नौका टकराने का खतरा है। कृपया इस क्षेत्र से 4 मील दूर रहें।",
+          "title": "🔴 प्रतिबंधित समुद्री क्षेत्र सूचना (मालवण)",
+          "prose": "सख्त चेतावनी: **प्रतिबंधित समुद्री क्षेत्र**।\n\nमालवण समुद्री अभयारण्य में मछली पकड़ना पूरी तरह से प्रतिबंधित है।\n\n### 📋 प्रतिबंध विवरण\n- 🔴 **क्षेत्र**: **मालवण प्रवाल अभयारण्य**\n- ⚠️ **खतरा**: **उथली चट्टानें (<2.5m)**\n- 👮 **निगरानी**: **तटीय पुलिस गश्त सक्रिय**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "मालवण समुद्री अभयारण्य प्रतिबंध",
+                "score": 92,
+                "status": "प्रवेश वर्जित",
+                "color": "#FF5C5C",
+                "wind": "14 नॉट",
+                "swell": "1.2 मीटर",
+                "advisory": "संरक्षित क्षेत्र में मछली पकड़ना मना है। उल्लंघन करने पर दंडात्मक कार्रवाई होगी।"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CYCLONE_ALERT",
+      "match_keywords": [
+        "cyclone",
+        "mumbai",
+        "sea state",
+        "storm",
+        "lightning",
+        "alert",
+        "warning",
+        "काही वादळाचा इशारा आहे का",
+        "वादळाचा इशारा",
+        "वादळ",
+        "चक्रवात",
+        "इशारा",
+        "वीज",
+        "धोका",
+        "क्या कोई चक्रवात या बिजली की चेतावनी है",
+        "चक्रवात चेतावनी",
+        "बिजली",
+        "तूफान"
+      ],
+      "steps": {
+        "en": [
+          "[01] Polling IMD Doppler Weather Radar network...",
+          "[02] Tracking Tropical Depression 'VARUNA' coordinates in North Arabian Sea...",
+          "[03] Checking local squall and lightning indicators for Konkan coast...",
+          "[04] Synthesizing storm alert bulletin..."
+        ],
+        "mr": [
+          "[01] हवामान खात्याच्या डॉप्लर रडारचे विश्लेषण करत आहे...",
+          "[02] अरबी समुद्रातील 'वरुण' चक्रवाताच्या केंद्राचा मागोवा घेत आहे...",
+          "[03] कोकण किनाऱ्यावरील विजा आणि वादळाची शक्यता तपासत आहे...",
+          "[04] वादळ इशारा अहवाल तयार करत आहे..."
+        ],
+        "hi": [
+          "[01] मौसम विभाग के रडार नेटवर्क की जाँच की जा रही है...",
+          "[02] अरब सागर में 'वरुण' चक्रवात की स्थिति का पता लगाया जा रहा है...",
+          "[03] कोंकण तट पर बिजली और तूफान की संभावना जांची जा रही है...",
+          "[04] तूफान चेतावनी बुलेटिन तैयार किया जा रहा है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🟢 NO LOCAL THREAT",
+          "verdict_title": "🟢 No Cyclone Danger Near Ratnagiri Coast",
+          "simple_sentence": "There is NO direct cyclone or lightning danger for the Ratnagiri and Konkan nearshore waters. Deep Depression 'VARUNA' is located 380 km northwest off Gujarat.",
+          "bullets": [
+            "🟢 Local Danger Level: NONE (Low coastal risk)",
+            "🌪️ Active Storm: Cyclone 'VARUNA' (380 km away off Gujarat)",
+            "🌬️ Local Winds: 18 km/h SW (Normal)",
+            "🌊 Local Waves: 1.4 m (Manageable)",
+            "⚠️ Distant Advisory: Stay clear of Gujarat offshore sector"
+          ],
+          "action_advice": "Nearshore artisanal fishing is permitted; avoid deep-sea northern transit.",
+          "speech_text": "No cyclone danger near Ratnagiri. There is no active cyclone or lightning danger for the local coast. Tropical Depression Varuna is 380 kilometres northwest off Gujarat. Local winds are 18 kilometres per hour and safe. Nearshore fishing is permitted.",
+          "title": "🌪️ Cyclone & Lightning Advisory (Ratnagiri / Konkan)",
+          "prose": "Good news: **NO DIRECT CYCLONE THREAT** currently affects the Ratnagiri coastal belt.\n\nWhile Tropical Depression 'VARUNA' remains active in the Northern Arabian Sea (offshore Porbandar), your local sector is experiencing stable conditions with only isolated breeze.\n\n### 📋 STORM TELEMETRY\n- 🟢 **Local Status**: **SAFE (Risk Score 24/100)**\n- 🌪️ **Distant System**: **Cyclone 'VARUNA' (380 km NW)**\n- 💨 **Local Wind**: **18 km/h SW (Gentle)**\n- 🌊 **Local Swell**: **1.4m Swell**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "Ratnagiri Sector Storm Safety",
+                "score": 24,
+                "status": "SAFE / NORMAL",
+                "color": "#6BCB77",
+                "wind": "18 km/h SW",
+                "swell": "1.4m",
+                "advisory": "No local cyclone threat. Normal nearshore operations approved."
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🟢 वादळाचा धोका नाही",
+          "verdict_title": "🟢 रत्नागिरी किनाऱ्यावर सध्या वादळाचा कोणताही धोका नाही",
+          "simple_sentence": "रत्नागिरी आणि कोकण किनाऱ्याजवळ सध्या कोणताही चक्रवात किंवा विजांचा थेट धोका नाही. 'वरुण' चक्रीवादळ गुजरात किनाऱ्यापासून ३८० किमी दूर उत्तर अरबी समुद्रात आहे.",
+          "bullets": [
+            "🟢 स्थानिक धोका: शून्य (धोका पातळी कमी)",
+            "🌪️ सक्रिय वादळ: 'वरुण' चक्रवात (गुजरातजवळ, ३८० किमी दूर)",
+            "🌬️ स्थानिक वारे: १८ किमी/तास (सामान्य)",
+            "🌊 लाटांची स्थिती: १.४ मीटर (मध्यम शांत)",
+            "⚠️ शिफारस: उत्तर समुद्रात लांब जाऊ नका, किनारी मासेमारी सुरक्षित"
+          ],
+          "action_advice": "स्थानिक किनारी भागात मासेमारी चालू ठेवू शकता; उत्तर दिशेला दूर जाणे टाळा.",
+          "speech_text": "रत्नागिरी किनाऱ्यावर वादळाचा कोणताही धोका नाही. तुमच्या परिसरात चक्रवात किंवा विजांचा इशारा नाही. वरुण चक्रीवादळ गुजरातच्या बाजूला ३८० किलोमीटर लांब आहे. स्थानिक वारे १८ किलोमीटर प्रति तास असून लाटा १.४ मीटर आहेत. किनारी मासेमारी सुरक्षित आहे.",
+          "title": "🌪️ वादळ व हवामान इशारा (रत्नागिरी / कोकण)",
+          "prose": "चांगली बातमी: रत्नागिरी किनाऱ्यावर **सध्या कोणताही वादळाचा धोका नाही**.\n\nउत्तर अरबी समुद्रात 'वरुण' चक्रवात सक्रिय असला तरी रत्नागिरी आणि दक्षिण कोकण किनारपट्टी यापासून **३८० किमी लांब** आणि सुरक्षित आहे.\n\n### 📋 स्थानिक परिस्थिती\n- 🟢 **स्थानिक स्थिती**: **सुरक्षित (धोका निर्देशांक २४/१००)**\n- 🌪️ **लांबचे वादळ**: **'वरुण' चक्रवात (३८० किमी उत्तर-पश्चिम)**\n- 💨 **वाऱ्याचा वेग**: **१८ किमी/तास नैऋत्य**\n- 🌊 **लाटांची उंची**: **१.४ मीटर**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "रत्नागिरी सागरी धोका मूल्यांकन",
+                "score": 24,
+                "status": "सुरक्षित (SAFE)",
+                "color": "#6BCB77",
+                "wind": "18 किमी/तास",
+                "swell": "1.4 मीटर",
+                "advisory": "स्थानिक चक्रीवादळाचा धोका नाही. किनारी मासेमारी चालू ठेवू शकता."
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🟢 तूफान का खतरा नहीं",
+          "verdict_title": "🟢 रत्नागिरी तट पर वर्तमान में चक्रवात का कोई खतरा नहीं है",
+          "simple_sentence": "रत्नागिरी और कोंकण तटीय क्षेत्र में अभी किसी चक्रवात या बिजली गिरने का कोई सीधा खतरा नहीं है। 'वरुण' तूफान गुजरात तट से 380 किमी दूर उत्तरी अरब सागर में है।",
+          "bullets": [
+            "🟢 स्थानीय खतरा: शून्य (सुरक्षित तटीय क्षेत्र)",
+            "🌪️ सक्रिय चक्रवात: 'वरुण' तूफान (गुजरात के पास, 380 किमी दूर)",
+            "🌬️ स्थानीय हवा: 18 किमी/घंटा (सामान्य)",
+            "🌊 स्थानीय लहरें: 1.4 मीटर (मध्यम शांत)",
+            "⚠️ सलाह: तटीय मछली पकड़ना सुरक्षित है; दूर उत्तर में न जाएँ"
+          ],
+          "action_advice": "स्थानीय तटीय क्षेत्र में मछली पकड़ना सुरक्षित है; गहरे उत्तरी समुद्र में न जाएं।",
+          "speech_text": "रत्नागिरी तट पर चक्रवात का कोई खतरा नहीं है। आपके क्षेत्र में तूफान या बिजली की कोई चेतावनी नहीं है। वरुण चक्रवात गुजरात के पास 380 किलोमीटर दूर है। स्थानीय हवा 18 किलोमीटर प्रति घंटा है। तटीय मछली पकड़ना सुरक्षित है।",
+          "title": "🌪️ चक्रवात और मौसम चेतावनी (रत्नागिरी / कोंकण)",
+          "prose": "राहत की खबर: रत्नागिरी तट पर **वर्तमान में चक्रवात का कोई खतरा नहीं है**।\n\n'वरुण' तूफान उत्तरी अरब सागर में 380 किमी दूर है। स्थानीय क्षेत्र में मौसम पूरी तरह सुरक्षित है।\n\n### 📋 वर्तमान स्थिति\n- 🟢 **स्थानीय स्थिति**: **सुरक्षित (जोखिम 24/100)**\n- 🌪️ **तूफान दूरी**: **380 किमी उत्तर-पश्चिम**\n- 💨 **हवा की गति**: **18 किमी/घंटा दक्षिण-पश्चिम**\n- 🌊 **लहरों की ऊँचाई**: **1.4 मीटर**",
+          "components": [
+            {
+              "type": "risk-card",
+              "data": {
+                "title": "रत्नागिरी समुद्री जोखिम मूल्यांकन",
+                "score": 24,
+                "status": "सुरक्षित (SAFE)",
+                "color": "#6BCB77",
+                "wind": "18 किमी/घंटा",
+                "swell": "1.4 मीटर",
+                "advisory": "चक्रवात का कोई स्थानीय खतरा नहीं। तटीय गतिविधियां जारी रख सकते हैं।"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SEA_SAFETY",
+      "match_keywords": [
+        "safe to go fishing tomorrow",
+        "safe tomorrow",
+        "is it safe",
+        "safe today",
+        "उद्या मासेमारी सुरक्षित",
+        "उद्या सुरक्षित",
+        "सुरक्षित आहे का",
+        "मासेमारी सुरक्षित",
+        "क्या कल सुबह मछली पकड़ना सुरक्षित",
+        "कल मछली पकड़ना सुरक्षित",
+        "सुरक्षित है"
+      ],
+      "steps": {
+        "en": [
+          "[01] Polling IMD Doppler Weather Radar & wave forecast models...",
+          "[02] Assessing swell period & surface wind gust projections...",
+          "[03] Evaluating maritime safety index for coastal sector...",
+          "[04] Formulating departure safety directive..."
+        ],
+        "mr": [
+          "[01] हवामान आणि लाटांच्या अंदाजांची तपासणी करत आहे...",
+          "[02] वाऱ्याचा वेग आणि लाटांच्या उंचीचे मूल्यमापन करत आहे...",
+          "[03] सागरी सुरक्षितता निर्देशांकाची पडताळणी करत आहे...",
+          "[04] प्रवासाची सुरक्षितता शिफारस तयार करत आहे..."
+        ],
+        "hi": [
+          "[01] मौसम और लहरों के पूर्वानुमान की जाँच की जा रही है...",
+          "[02] हवा की गति और लहरों की ऊँचाई का मूल्यांकन किया जा रहा है...",
+          "[03] समुद्री सुरक्षा सूचकांक की पुष्टि की जा रही है...",
+          "[04] प्रस्थान सुरक्षा सिफारिश तैयार की जा रही है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🟢 SAFE TO SAIL",
+          "verdict_title": "🟢 Safe to Go Fishing Tomorrow Morning",
+          "simple_sentence": "Fishing near the Ratnagiri coast tomorrow morning is SAFE. Coastal winds will stay around 18 km/h SW with manageable 1.4m wave swell.",
+          "bullets": [
+            "🟢 Final Decision: SAFE FOR COASTAL FISHING",
+            "🌬️ Wind Velocity: 18 km/h SW (Mild)",
+            "🌊 Wave Height: 1.4 metres (Moderate)",
+            "🌊 High Tide: 2:35 PM (3.8 metres)",
+            "⚠️ Advisory: Return to port before 3:30 PM as late winds pick up"
+          ],
+          "action_advice": "Sail early at 05:30 AM and complete operations by 03:00 PM.",
+          "speech_text": "Tomorrow morning fishing is safe. Winds will hover around 18 kilometres per hour with 1.4 metre swells. High tide occurs at 2:35 PM. Plan to return to shore before 3:30 PM.",
+          "title": "🟢 Marine Safety Directive — Tomorrow Morning",
+          "prose": "Fishing near the Ratnagiri coast tomorrow morning is **SAFE**.\n\nBetween 06:00 AM and 02:00 PM, wind speeds will hover around **18 km/h SW** with wave swells at **1.4 meters**. High tide is at **2:35 PM**.\n\n### 📋 KEY DECISION BULLETINS\n- 🟢 **Final Decision**: **SAFE FOR COASTAL FISHING**\n- 🌬️ **Wind Speed**: **18 km/h SW**\n- 🌊 **Wave Swell**: **1.4 m**\n- 🌊 **High Tide**: **2:35 PM**\n- ⚠️ **Advisory**: Isolated wind squalls possible after 4:00 PM. Return to shore by 3:00 PM.",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 km/h SW",
+                "swell": "1.4 m",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🟢 मासेमारीस सुरक्षित",
+          "verdict_title": "🟢 उद्या सकाळी मासेमारी करणे सुरक्षित आहे",
+          "simple_sentence": "उद्या सकाळी रत्नागिरी किनाऱ्याजवळ मासेमारी करणे सुरक्षित आहे. सकाळी ६ ते दुपारी २ दरम्यान वाऱ्याचा वेग १८ किमी/तास आणि लाटा १.४ मीटर राहतील.",
+          "bullets": [
+            "🟢 अंतिम निर्णय: किनारी मासेमारीसाठी सुरक्षित",
+            "🌬️ वाऱ्याचा वेग: १८ किमी/तास नैऋत्य",
+            "🌊 लाटांची उंची: १.४ मीटर (मध्यम)",
+            "🌊 मोठी भरती: दुपारी २:३५ वाजता",
+            "⚠️ इशारा: दुपारी ३:३० पूर्वी बंदरात परत या"
+          ],
+          "action_advice": "सकाळी ५:३० वाजता प्रस्थान करा आणि दुपारी ३:०० पर्यंत किनाऱ्यावर परता.",
+          "speech_text": "उद्या सकाळी मासेमारी करणे सुरक्षित आहे. सकाळी वाऱ्याचा वेग १८ किलोमीटर प्रति तास आणि लाटा १.४ मीटर राहतील. दुपारची भरती २ वाजून ३५ मिनिटांनी आहे. दुपारी ३ वाजेपर्यंत किनाऱ्यावर परत येण्याची शिफारस आहे.",
+          "title": "🟢 समुद्र प्रवास सुरक्षितता शिफारस",
+          "prose": "उद्या सकाळी रत्नागिरी किनाऱ्याजवळ मासेमारी करणे **सुरक्षित आहे**.\n\nसकाळी 06:00 ते दुपारी 14:00 दरम्यान वाऱ्याचा वेग **18 किमी/तास** आणि लाटांची उंची **1.4 मीटर** राहण्याचा अंदाज आहे. मोठी भरती दुपारी 2:35 वाजता आहे.\n\n### 📋 मुख्य निर्णय माहिती\n- 🟢 **अंतिम निर्णय**: **किनारी मासेमारीसाठी सुरक्षित**\n- 🌬️ **वाऱ्याचा वेग**: **18 किमी/तास नैऋत्य**\n- 🌊 **लाटांची उंची**: **1.4 मीटर**\n- 🌊 **भरतीची वेळ**: **दुपारी 2:35 वाजता (मोठी भरती)**\n- ⚠️ **इशारा**: संध्याकाळी 16:00 नंतर किंचित वादळी वारे वाहण्याची शक्यता असल्याने दुपारी 15:00 पूर्वी किनाऱ्यावर परतण्याचा सल्ला दिला जातो.",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 किमी/तास नैऋत्य",
+                "swell": "1.4 मीटर",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🟢 मछली पकड़ने के लिए सुरक्षित",
+          "verdict_title": "🟢 कल सुबह मछली पकड़ना सुरक्षित है",
+          "simple_sentence": "कल सुबह रत्नागिरी तट के पास मछली पकड़ना सुरक्षित है। सुबह 6 से दोपहर 2 बजे के बीच हवा की गति 18 किमी/घंटा और लहरें 1.4 मीटर रहेंगी।",
+          "bullets": [
+            "🟢 अंतिम निर्णय: तटीय मछली पकड़ने के लिए सुरक्षित",
+            "🌬️ हवा की गति: 18 किमी/घंटा दक्षिण-पश्चिम",
+            "🌊 लहरों की ऊँचाई: 1.4 मीटर",
+            "🌊 उच्च ज्वार: दोपहर 2:35 बजे",
+            "⚠️ सलाह: दोपहर 3:00 बजे से पहले लौट आएं"
+          ],
+          "action_advice": "सुबह 5:30 बजे निकलें और दोपहर 3 बजे तक बंदरगाह लौटें।",
+          "speech_text": "कल सुबह मछली पकड़ना सुरक्षित है। सुबह हवा की गति 18 किलोमीटर प्रति घंटा और लहरें 1.4 मीटर रहेंगी। दोपहर 2 बजकर 35 मिनट पर उच्च ज्वार है। दोपहर 3 बजे से पहले लौटने की सलाह है।",
+          "title": "🟢 समुद्र यात्रा सुरक्षा सिफारिश",
+          "prose": "कल सुबह रत्नागिरी तट के पास मछली पकड़ना **सुरक्षित है**।\n\nसुबह 06:00 से दोपहर 14:00 बजे के बीच हवा की गति **18 किमी/घंटा** और लहरों की ऊँचाई **1.4 मीटर** रहने का अनुमान है। उच्च ज्वार दोपहर 2:35 बजे आएगा।\n\n### 📋 मुख्य निर्णय बुलेटिन\n- 🟢 **अंतिम निर्णय**: **तटीय मछली पकड़ने के लिए सुरक्षित**\n- 🌬️ **हवा की गति**: **18 किमी/घंटा दक्षिण-पश्चिम**\n- 🌊 **लहरों की ऊँचाई**: **1.4 मीटर**\n- 🌊 **ज्वार का समय**: **दोपहर 2:35 बजे (उच्च ज्वार)**\n- ⚠️ **चेतावनी**: शाम 16:00 बजे के बाद हल्की हवाएं चलने की संभावना है, इसलिए दोपहर 15:00 बजे से पहले लौटने की सलाह दी जाती है।",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 किमी/घंटा दक्षिण-पश्चिम",
+                "swell": "1.4 मीटर",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TIDE_WEATHER",
+      "match_keywords": [
+        "tide",
+        "weather and tide",
+        "tide conditions",
+        "swell",
+        "wave conditions",
+        "sea state",
+        "हवामान आणि भरती",
+        "भरती",
+        "ओहोटी",
+        "लाटांची स्थिती",
+        "लाट",
+        "लाटा",
+        "मौसम और ज्वार",
+        "ज्वार",
+        "भाटा",
+        "लहरें",
+        "समुद्र की स्थिति"
+      ],
+      "steps": {
+        "en": [
+          "[01] Ingesting tide table predictions for Ratnagiri sector...",
+          "[02] Checking IMD coastal wave buoy telemetry...",
+          "[03] Calculating sea surface temperature & wind speed...",
+          "[04] Compiling sea and tide bulletin..."
+        ],
+        "mr": [
+          "[01] भरती-ओहोटीच्या वेळांची तपासणी केली जात आहे...",
+          "[02] समुद्रातील लाटांची उंची आणि वाऱ्याचा वेग तपासला जात आहे...",
+          "[03] समुद्राचे तापमान मोजले जात आहे...",
+          "[04] भरती-ओहोटी माहिती तयार केली जात आहे..."
+        ],
+        "hi": [
+          "[01] ज्वार-भाटा के समय की जाँच की जा रही है...",
+          "[02] समुद्र की लहरों और हवा की गति का आकलन किया जा रहा है...",
+          "[03] समुद्र का तापमान दर्ज किया जा रहा है...",
+          "[04] समुद्री बुलेटिन तैयार किया जा रहा है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🌊 MODERATE & CALM",
+          "verdict_title": "🌊 Tide & Sea State: Moderate with 1.4m Swells",
+          "simple_sentence": "Sea conditions near Ratnagiri are moderate and calm. Next major high tide is expected at 2:35 PM with 3.8 metre water level.",
+          "bullets": [
+            "🌊 Wave Swell: 1.4 metres (Gentle swell)",
+            "🌬️ Wind Velocity: 18 km/h SW (Safe breeze)",
+            "🌊 Next High Tide: 2:35 PM (3.8 metres)",
+            "🌊 Next Low Tide: 8:45 PM (0.6 metres)",
+            "🌡️ Sea Surface Temp: 28.4°C"
+          ],
+          "action_advice": "Check vessel mooring lines before the 2:35 PM high tide surge.",
+          "speech_text": "Tide and sea conditions. Sea conditions near Ratnagiri are moderate and calm with 1.4 metre swells. Wind is 18 kilometres per hour from southwest. Next major high tide is at 2:35 PM with 3.8 metres height. Check vessel mooring lines.",
+          "title": "🌊 Tide & Sea Conditions (Ratnagiri Coast)",
+          "prose": "Sea state across the Ratnagiri coastal sector remains **MODERATE & CALM**.\n\n### 📋 CURRENT TIDE & SEA TELEMETRY\n- 🌊 **Wave Height**: **1.4 m Swell (Gentle)**\n- 🌬️ **Wind Speed**: **18 km/h SW**\n- 🌊 **High Tide**: **2:35 PM (3.8m)**\n- 🌊 **Low Tide**: **8:45 PM (0.6m)**\n- 🌡️ **SST**: **28.4°C**\n- 🧭 **Barometer**: **1009.4 hPa (Stable)**",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 km/h SW",
+                "swell": "1.4 m",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🌊 मध्यम शांत समुद्र",
+          "verdict_title": "🌊 हवामान आणि भरती-ओहोटी: समुद्र मध्यम शांत (१.४m लाटा)",
+          "simple_sentence": "रत्नागिरी किनाऱ्याजवळ समुद्र मध्यम शांत आहे. लाटांची उंची सुमारे १.४ मीटर असून दुपारची मोठी भरती दुपारी २ वाजून ३५ मिनिटांनी (३.८ मीटर) आहे.",
+          "bullets": [
+            "🌊 लाटांची उंची: १.४ मीटर (मध्यम शांत)",
+            "🌬️ वाऱ्याचा वेग: १८ किमी/तास नैऋत्य",
+            "🌊 मोठी भरती: दुपारी २:३५ वाजता (३.८ मीटर)",
+            "🌊 ओहोटीची वेळ: रात्री ८:४५ वाजता (०.६ मीटर)",
+            "🌡️ समुद्राचे तापमान: २८.४°C"
+          ],
+          "action_advice": "भरतीच्या वेळी बोटी किनाऱ्यावर सुरक्षित बांधून ठेवा.",
+          "speech_text": "हवामान आणि भरती ओहोटी स्थिती. रत्नागिरी किनाऱ्यावर समुद्र मध्यम शांत आहे. लाटांची उंची १.४ मीटर आहे. वाऱ्याचा वेग १८ किलोमीटर प्रति तास नैऋत्य दिशेकडून आहे. दुपारची मोठी भरती २ वाजून ३५ मिनिटांनी आहे. भरतीच्या वेळी बोटी सुरक्षित बांधून ठेवा.",
+          "title": "🌊 हवामान आणि भरती-ओहोटी स्थिती (रत्नागिरी)",
+          "prose": "रत्नागिरी किनारी भागात समुद्र सध्या **मध्यम शांत** आहे.\n\n### 📋 सद्य भरती आणि हवामान तपशील\n- 🌊 **लाटांची उंची**: **१.४ मीटर (मध्यम शांत)**\n- 🌬️ **वाऱ्याचा वेग**: **१८ किमी/तास नैऋत्य**\n- 🌊 **मोठी भरती**: **दुपारी २:३५ वाजता (३.८ मीटर)**\n- 🌊 **ओहोटी**: **रात्री ८:४५ वाजता (०.६ मीटर)**\n- 🌡️ **समुद्राचे तापमान**: **२८.४°C**\n- 🧭 **हवेचा दाब**: **१००९.४ hPa (स्थिर)**",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 किमी/तास नैऋत्य",
+                "swell": "1.4 मीटर",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🌊 मध्यम शांत समुद्र",
+          "verdict_title": "🌊 मौसम और ज्वार-भाटा: समुद्र मध्यम शांत (1.4m लहरें)",
+          "simple_sentence": "रत्नागिरी तट के पास समुद्र मध्यम शांत है। लहरों की ऊँचाई 1.4 मीटर है और दोपहर का उच्च ज्वार 2 बजकर 35 मिनट (3.8 मीटर) पर आएगा।",
+          "bullets": [
+            "🌊 लहरों की ऊँचाई: 1.4 मीटर (मध्यम)",
+            "🌬️ हवा की गति: 18 किमी/घंटा दक्षिण-पश्चिम",
+            "🌊 उच्च ज्वार: दोपहर 2:35 बजे (3.8 मीटर)",
+            "🌊 निम्न ज्वार (भाटा): रात 8:45 बजे (0.6 मीटर)",
+            "🌡️ समुद्र का तापमान: 28.4°C"
+          ],
+          "action_advice": "ज्वार के समय अपनी नौकाओं को तट पर सुरक्षित बांधकर रखें।",
+          "speech_text": "मौसम और ज्वार-भाटा स्थिति। रत्नागिरी तट पर समुद्र मध्यम शांत है। लहरों की ऊँचाई 1.4 मीटर है। हवा 18 किलोमीटर प्रति घंटा दक्षिण-पश्चिम से चल रही है। उच्च ज्वार दोपहर 2 बजकर 35 मिनट पर आएगा। नौकाओं को सुरक्षित रखें।",
+          "title": "🌊 मौसम और ज्वार-भाटा स्थिति (रत्नागिरी)",
+          "prose": "रत्नागिरी तटीय क्षेत्र में समुद्र वर्तमान में **मध्यम शांत** है।\n\n### 📋 ज्वार और मौसम विवरण\n- 🌊 **लहरों की ऊँचाई**: **1.4 मीटर**\n- 🌬️ **हवा की गति**: **18 किमी/घंटा दक्षिण-पश्चिम**\n- 🌊 **उच्च ज्वार**: **दोपहर 2:35 बजे (3.8 मीटर)**\n- 🌊 **निम्न ज्वार**: **रात 8:45 बजे (0.6 मीटर)**\n- 🌡️ **समुद्र का तापमान**: **28.4°C**",
+          "components": [
+            {
+              "type": "weather-card",
+              "data": {
+                "sst": "28.4°C",
+                "wind": "18 किमी/घंटा दक्षिण-पश्चिम",
+                "swell": "1.4 मीटर",
+                "pressure": "1009.4 hPa"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ROUTE_OPTIMIZE",
+      "match_keywords": [
+        "route",
+        "veraval",
+        "ratnagiri",
+        "safe route vs shortest",
+        "मार्ग",
+        "रास्ता"
+      ],
+      "steps": {
+        "en": [
+          "[01] Accessing vessel draft & power telemetry...",
+          "[02] Overlaying IMD gale contours & shoal depth charts...",
+          "[03] Computing Pareto optimal safe vs shortest trajectory...",
+          "[04] Generating navigational route comparison..."
+        ],
+        "mr": [
+          "[01] जहाजाचे ड्राफ्ट आणि इंधन तपशील तपासले जात आहेत...",
+          "[02] वादळाचे क्षेत्र आणि खोल पाण्याच्या मार्गाचा नकाशा जोडला जात आहे...",
+          "[03] सुरक्षित आणि सर्वात कमी अंतराच्या मार्गांची तुलना केली जात आहे...",
+          "[04] मार्ग शिफारस पत्रक तयार केले जात आहे..."
+        ],
+        "hi": [
+          "[01] जहाज के ड्राफ्ट और ईंधन विवरण की जाँच की जा रही है...",
+          "[02] तूफान के क्षेत्र और गहरे पानी के मार्ग का मानचित्र जोड़ा जा रहा है...",
+          "[03] सुरक्षित और सबसे छोटे मार्ग की तुलना की जा रही है...",
+          "[04] मार्ग सिफारिश दस्तावेज तैयार किया जा रहा है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🚢 SAFE CORRIDOR RECOMMENDED",
+          "verdict_title": "🚢 Safe Route Recommended: Veraval → Ratnagiri (348 NM)",
+          "simple_sentence": "The Pareto Optimal safe route avoids Cyclone Varuna's gale core and saves 530 Liters of fuel by riding favorable coastal currents.",
+          "bullets": [
+            "🛡️ Safe Corridor Distance: 348 NM (Risk Score 19/100)",
+            "⚠️ Direct Route Hazard: Intersects 5.5m breaking swells (Risk 84/100)",
+            "⛽ Net Fuel Savings: 530 Liters saved via tail current",
+            "⏱️ ETA: 29 hours 15 minutes"
+          ],
+          "action_advice": "Follow waypoint track 12 NM offshore to clear shallow banks.",
+          "speech_text": "Safe route recommended: Veraval to Ratnagiri. The safe coastal corridor is 348 nautical miles with risk score 19. It avoids Cyclone Varuna and saves 530 litres of fuel. Follow waypoint track 12 miles offshore.",
+          "title": "🚢 Pareto Route Analysis: Veraval → Ratnagiri",
+          "prose": "ORCA Route Optimization recommends taking the **SAFE COASTAL CORRIDOR** (348 NM).\n\nWhile the Direct Route is 36 NM shorter, it cuts through the high-risk eyewall of Tropical Depression 'VARUNA' with 5.5m swells and severe vessel stress.\n\n### 📋 ROUTE METRICS COMPARISON\n- 🛡️ **Safe Route Risk Score**: **19 / 100 (OPTIMAL)**\n- ⚠️ **Shortest Route Risk Score**: **84 / 100 (CRITICAL DANGER)**\n- ⛽ **Fuel Consumption**: **3,320 L (Safe)** vs **3,850 L (Shortest)** — *Saved 530 L via tail currents!*",
+          "components": [
+            {
+              "type": "route-card",
+              "data": {
+                "title": "Veraval to Ratnagiri Navigation Assessment",
+                "safeNm": 348,
+                "shortestNm": 312,
+                "safeRisk": 19,
+                "shortestRisk": 84,
+                "fuelSavings": "530 Liters (13.7%)",
+                "verdict": "CHOOSE SAFE ROUTE — Skirts gale zone & saves fuel."
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🚢 सुरक्षित मार्ग शिफारस",
+          "verdict_title": "🚢 सुरक्षित किनारी मार्ग निवडा: वेरावल → रत्नागिरी (३४८ NM)",
+          "simple_sentence": "ओर्का सिस्टीम सुरक्षित किनारपट्टी मार्ग वापरण्याची शिफारस करते. हा मार्ग 'वरुण' चक्रवातापासून बचाव करतो आणि अनुकूल प्रवाहामुळे ५३० लिटर इंधन वाचवतो.",
+          "bullets": [
+            "🛡️ सुरक्षित मार्ग अंतर: ३४८ सागरी मैल (धोका १९/१०० - उत्तम)",
+            "⚠️ थेट मार्ग धोका: ५.५ मीटर उंच लाटा आणि वादळ (धोका ८४/१००)",
+            "⛽ इंधन बचत: ५३० लिटर इंधनाची बचत",
+            "⏱️ प्रवासाची वेळ: २९ तास १५ मिनिटे"
+          ],
+          "action_advice": "उथळ भाग टाळण्यासाठी किनाऱ्यापासून १२ सागरी मैल अंतराचा सुरक्षित मार्ग धरा.",
+          "speech_text": "वेरावल ते रत्नागिरी प्रवासासाठी सुरक्षित किनारी मार्ग निवडा. हा मार्ग ३४८ सागरी मैल असून धोका निर्देशांक फक्त १९ आहे. हा मार्ग वादळापासून बचाव करतो आणि ५३० लिटर इंधन वाचवतो. सुरक्षित प्रवासासाठी हाच मार्ग धरा.",
+          "title": "🚢 मार्ग विश्लेषण: वेरावल → रत्नागिरी",
+          "prose": "ओर्का नेव्हिगेशन सिस्टीम **सुरक्षित किनारपट्टी मार्ग (348 NM)** वापरण्याची शिफारस करते.\n\nजरी थेट मार्ग 36 NM लहान असला तरी तो 'वरुण' चक्रवाताच्या मुख्य धोकादायक क्षेत्रातून जातो जिथे 5.5 मीटर उंच लाटा आहेत.\n\n### 📋 मार्ग तुलना\n- 🛡️ **सुरक्षित मार्ग धोका निर्देशांक**: **19 / 100 (उत्तम)**\n- ⚠️ **लहान मार्ग धोका निर्देशांक**: **84 / 100 (अत्यंत धोकादायक)**\n- ⛽ **इंधन बचत**: **530 लिटर बचत** (अनुकूल प्रवाहामुळे!)",
+          "components": [
+            {
+              "type": "route-card",
+              "data": {
+                "title": "वेरावल ते रत्नागिरी मार्ग मूल्यांकन",
+                "safeNm": 348,
+                "shortestNm": 312,
+                "safeRisk": 19,
+                "shortestRisk": 84,
+                "fuelSavings": "530 लिटर (13.7%)",
+                "verdict": "सुरक्षित मार्ग निवडा — वादळापासून बचाव आणि इंधनाची बचत."
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🚢 सुरक्षित मार्ग सिफारिश",
+          "verdict_title": "🚢 सुरक्षित तटीय मार्ग चुनें: वेरावल → रत्नागिरी (348 NM)",
+          "simple_sentence": "ओर्का नेविगेशन सिस्टम सुरक्षित तटीय मार्ग चुनने की सिफारिश करती है। यह मार्ग 'वरुण' चक्रवात से बचाता है और 530 लीटर ईंधन की बचत करता है।",
+          "bullets": [
+            "🛡️ सुरक्षित मार्ग दूरी: 348 समुद्री मील (जोखिम 19/100)",
+            "⚠️ सीधा मार्ग खतरा: 5.5 मीटर ऊंची लहरें (जोखिम 84/100)",
+            "⛽ ईंधन बचत: 530 लीटर बचत",
+            "⏱️ अनुमानित समय: 29 घंटे 15 मिनट"
+          ],
+          "action_advice": "गहरे पानी के ट्रैक का पालन करें।",
+          "speech_text": "वेरावल से रत्नागिरी के लिए सुरक्षित तटीय मार्ग चुनें। यह मार्ग 348 समुद्री मील है और जोखिम केवल 19 है। यह तूफान से बचाता है और 530 लीटर ईंधन बचाता है।",
+          "title": "🚢 मार्ग विश्लेषण: वेरावल → रत्नागिरी",
+          "prose": "ओर्का नेविगेशन सिस्टम **सुरक्षित तटीय मार्ग (348 NM)** चुनने की सिफारिश करती है।\n\n### 📋 मार्ग तुलना\n- 🛡️ **सुरक्षित मार्ग जोखिम स्कोर**: **19 / 100 (उत्कृष्ट)**\n- ⚠️ **छोटा मार्ग जोखिम स्कोर**: **84 / 100 (अत्यधिक खतरनाक)**\n- ⛽ **ईंधन की बचत**: **530 लीटर बचत**",
+          "components": [
+            {
+              "type": "route-card",
+              "data": {
+                "title": "वेरावल से रत्नागिरी मार्ग मूल्यांकन",
+                "safeNm": 348,
+                "shortestNm": 312,
+                "safeRisk": 19,
+                "shortestRisk": 84,
+                "fuelSavings": "530 लीटर (13.7%)",
+                "verdict": "सुरक्षित मार्ग चुनें — तूफान से बचाव और ईंधन की बचत।"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "RESEARCH_SST",
+      "match_keywords": [
+        "sst",
+        "chlorophyll",
+        "upwelling",
+        "temperature",
+        "तापमान",
+        "क्लोरोफिल"
+      ],
+      "steps": {
+        "en": [
+          "[01] Fetching NOAA AVHRR Sea Surface Temperature grid...",
+          "[02] Integrating Sentinel-3 OLCI multispectral chlorophyll-a layer...",
+          "[03] Computing thermal anomaly & upwelling index along Konkan shelf...",
+          "[04] Synthesizing oceanographic research analysis..."
+        ],
+        "mr": [
+          "[01] उपग्रह समुद्राच्या पृष्ठभागाचे तापमान डेटा प्राप्त करत आहे...",
+          "[02] क्लोरोफिल-ए थराचे विश्लेषण जोडले जात आहे...",
+          "[03] कोकण किनारपट्टीच्या अपवेलिंग निर्देशांकाची गणना करत आहे...",
+          "[04] महासागर संशोधन निष्कर्ष तयार केला जात आहे..."
+        ],
+        "hi": [
+          "[01] उपग्रह समुद्र सतह तापमान डेटा प्राप्त किया जा रहा है...",
+          "[02] क्लोरोफिल-ए परत का विश्लेषण जोड़ा जा रहा है...",
+          "[03] कोंकण तट के अपवेलिंग सूचकांक की गणना की जा रही है...",
+          "[04] महासागर अनुसंधान निष्कर्ष तैयार किया जा रहा है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🔬 ACTIVE UPWELLING FRONT",
+          "verdict_title": "🔬 Active Coastal Upwelling Front Detected (Konkan)",
+          "simple_sentence": "Oceanographic analysis indicates strong coastal upwelling along Konkan Shelf with a -1.4°C thermal gradient and 4.7 mg/m³ chlorophyll bloom.",
+          "bullets": [
+            "🌡️ Mean SST: 27.8°C (+0.4°C 10-Yr Anomaly)",
+            "🌿 Peak Chlorophyll-a: 4.7 mg/m³ (Ratnagiri SW)",
+            "🌊 Thermocline Depth: 24 metres",
+            "📈 Upwelling Index: High (8.4 m³/s per 100m)"
+          ],
+          "action_advice": "High pelagic feeding activity expected along the 50m isobath.",
+          "speech_text": "Active coastal upwelling front detected. Sea surface temperature shows a 1.4 degree Celsius cold anomaly with a 4.7 milligram chlorophyll bloom. High fish feeding activity along the 50 metre depth contour.",
+          "title": "🔬 SST & Upwelling Anomaly Analysis",
+          "prose": "Oceanographic analysis indicates an **active coastal upwelling front** along the Konkan Shelf.\n\nSea Surface Temperature (SST) shows a **-1.4°C cold anomaly** (26.8°C vs 28.2°C mean) paired with a sharp chlorophyll-a spike to **3.8 mg/m³**.\n\n### 📋 OCEANOGRAPHIC TELEMETRY\n- 🌡️ **Mean SST**: **27.8°C (+0.4°C 10-Yr Anomaly)**\n- 🌿 **Peak Chlorophyll**: **4.7 mg/m³ (Ratnagiri SW)**\n- 🌊 **Thermocline Depth**: **24 meters**\n- 📈 **Upwelling Index**: **8.4 m³/s per 100m coastline**",
+          "components": [
+            {
+              "type": "sst-card",
+              "data": {
+                "title": "Konkan Thermal Front Anomaly",
+                "sstAvg": "27.8°C",
+                "sstAnomaly": "-1.4°C Front",
+                "chlorophyllPeak": "4.7 mg/m³",
+                "thermocline": "24m",
+                "upwellingIndex": "High (8.4 m³/s/100m)"
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🔬 अपवेलिंग प्रक्रिया सक्रिय",
+          "verdict_title": "🔬 कोकण किनारपट्टीवर सक्रिय अपवेलिंग आणि तापमान विसंगती",
+          "simple_sentence": "सागरी संशोधनानुसार कोकण किनारपट्टीवर सक्रिय अपवेलिंग प्रक्रिया सुरू आहे. समुद्राचे तापमान -१.४°C थंड असून क्लोरोफिल ४.७ mg/m³ पर्यंत वाढले आहे.",
+          "bullets": [
+            "🌡️ सरासरी तापमान: २७.८°C (+०.४°C विसंगती)",
+            "🌿 क्लोरोफिल प्रमाण: ४.७ mg/m³ (रत्नागिरी नैऋत्य)",
+            "🌊 थर्मोक्लाइन खोली: २४ मीटर",
+            "📈 अपवेलिंग निर्देशांक: उच्च (८.४ m³/s)"
+          ],
+          "action_advice": "५० मीटर खोलीच्या पट्ट्यात माशांची मोठी पैदास आणि हालचाल अपेक्षित आहे.",
+          "speech_text": "कोकण किनारपट्टीवर सक्रिय अपवेलिंग आणि तापमान विसंगती. समुद्राचे तापमान २७.८ अंश असून क्लोरोफिलचे प्रमाण ४.७ आहे. ५० मीटर खोलीच्या भागात मासेमारीसाठी उत्तम संधी आहे.",
+          "title": "🔬 समुद्र तापमान आणि अपवेलिंग विश्लेषण",
+          "prose": "सागरी संशोधनानुसार कोकण किनारपट्टीवर **सक्रिय अपवेलिंग (Upwelling)** प्रक्रीया सुरू आहे.\n\nसमुद्राचे तापमान **-1.4°C थंड** (26.8°C) नोंदवले गेले असून क्लोरोफिलचे प्रमाण **3.8 mg/m³** पर्यंत वाढले आहे.\n\n### 📋 महासागरीय डेटा\n- 🌡️ **सरासरी तापमान**: **27.8°C**\n- 🌿 **क्लोरोफिल प्रमाण**: **4.7 mg/m³ (रत्नागिरी)**\n- 🌊 **थर्मोक्लाइन खोली**: **24 मीटर**\n- 📈 **अपवेलिंग निर्देशांक**: **उच्च (8.4 m³/s)**",
+          "components": [
+            {
+              "type": "sst-card",
+              "data": {
+                "title": "कोकण किनारी तापमान विसंगती",
+                "sstAvg": "27.8°C",
+                "sstAnomaly": "-1.4°C फ्रंट",
+                "chlorophyllPeak": "4.7 mg/m³",
+                "thermocline": "24m",
+                "upwellingIndex": "उच्च (8.4 m³/s)"
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🔬 सक्रिय अपवेलिंग",
+          "verdict_title": "🔬 कोंकण तट पर सक्रिय अपवेलिंग और तापमान विसंगति",
+          "simple_sentence": "समुद्री अनुसंधान के अनुसार कोंकण तट पर सक्रिय अपवेलिंग जारी है। समुद्र का तापमान -1.4°C ठंडा दर्ज हुआ है और क्लोरोफिल 4.7 mg/m³ तक पहुंचा है।",
+          "bullets": [
+            "🌡️ औसत तापमान: 27.8°C",
+            "🌿 क्लोरोफिल स्तर: 4.7 mg/m³",
+            "🌊 थर्मोक्लाइन गहराई: 24 मीटर",
+            "📈 अपवेलिंग सूचकांक: उच्च (8.4 m³/s)"
+          ],
+          "action_advice": "50 मीटर गहराई के क्षेत्र में मछलियों की भारी गतिविधि देखी जा सकती है।",
+          "speech_text": "कोंकण तट पर सक्रिय अपवेलिंग प्रक्रिया जारी है। समुद्र का तापमान 27.8 डिग्री है और क्लोरोफिल का स्तर 4.7 है। 50 मीटर गहराई के क्षेत्र में मछली पकड़ने के अच्छे अवसर हैं।",
+          "title": "🔬 समुद्र तापमान और अपवेलिंग विश्लेषण",
+          "prose": "समुद्री अनुसंधान के अनुसार कोंकण तट के साथ **सक्रिय अपवेलिंग (Upwelling)** प्रक्रिया जारी है।\n\n### 📋 महासागरीय डेटा\n- 🌡️ **औसत तापमान**: **27.8°C**\n- 🌿 **क्लोरोफिल का स्तर**: **4.7 mg/m³ (रत्नागिरी)**\n- 🌊 **थर्मोक्लाइन गहराई**: **24 मीटर**\n- 📈 **अपवेलिंग सूचकांक**: **उच्च (8.4 m³/s)**",
+          "components": [
+            {
+              "type": "sst-card",
+              "data": {
+                "title": "कोंकण तटीय तापमान विसंगति",
+                "sstAvg": "27.8°C",
+                "sstAnomaly": "-1.4°C फ्रंट",
+                "chlorophyllPeak": "4.7 mg/m³",
+                "thermocline": "24m",
+                "upwellingIndex": "उच्च (8.4 m³/s)"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "FISH_PFZ",
+      "match_keywords": [
+        "nearest potential fishing zone",
+        "fishing zone today",
+        "where is the nearest",
+        "best place to fish",
+        "where to fish",
+        "fishing",
+        "pfz",
+        "fish",
+        "mackerel",
+        "surmai",
+        "मासेमारीसाठी चांगली जागा",
+        "मासेमारी",
+        "मासे",
+        "कुठे",
+        "जागा",
+        "मछली",
+        "पकड़ने",
+        "जगह"
+      ],
+      "steps": {
+        "en": [
+          "[01] Querying INCOIS satellite multispectral chlorophyll imagery...",
+          "[02] Correlating sea surface temperature (SST) gradients...",
+          "[03] Evaluating weather, wave swell & wind vectors...",
+          "[04] Identifying optimal high-yield fishing zone..."
+        ],
+        "mr": [
+          "[01] उपग्रह क्लोरोफिल चित्रांचे विश्लेषण केले जात आहे...",
+          "[02] समुद्राच्या पृष्ठभागाच्या तापमानाचा अंदाज घेतला जात आहे...",
+          "[03] हवामान आणि समुद्राच्या परिस्थितीचे मूल्यमापन केले जात आहे...",
+          "[04] सर्वोत्तम मासेमारी क्षेत्र निश्चित केले जात आहे..."
+        ],
+        "hi": [
+          "[01] उपग्रह क्लोरोफिल छवियों का विश्लेषण किया जा रहा है...",
+          "[02] समुद्र की सतह के तापमान का आकलन किया जा रहा है...",
+          "[03] मौसम और समुद्री परिस्थितियों का मूल्यांकन किया जा रहा है...",
+          "[04] सर्वोत्तम मत्स्य क्षेत्र की पहचान की जा रही है..."
+        ]
+      },
+      "answers": {
+        "en": {
+          "verdict_tag": "🟢 HIGH YIELD",
+          "verdict_title": "🟢 Optimal Fishing Area: PFZ-01 (18 km Southwest)",
+          "simple_sentence": "The optimal location for fishing today is PFZ-01, situated 18 km southwest of Ratnagiri. Plankton bloom and temperature gradients are ideal for schooling fish.",
+          "bullets": [
+            "📍 Distance & Direction: 18 km Southwest",
+            "🐟 Target Species: Indian Mackerel, Sardines, Kingfish",
+            "🎣 Catch Probability: High (87% confidence)",
+            "🌊 Sea Swell: 1.4 metres (Moderate)",
+            "⛽ Fuel Savings: 28% estimated savings"
+          ],
+          "action_advice": "Depart between 04:00 AM and 06:00 AM for peak morning catch window.",
+          "speech_text": "Optimal fishing area: PFZ-01. Located 18 kilometres southwest of Ratnagiri. High probability for Indian Mackerel, Sardines, and Kingfish. Sea swell is 1.4 metres with moderate waves. Estimated 28 percent fuel savings. Depart between 4 AM and 6 AM for peak catch.",
+          "title": "🎣 Potential Fishing Zone (PFZ-01)",
+          "prose": "The optimal location for fishing today is **PFZ-01**, situated **18 km Southwest** off the Ratnagiri coast.\n\nSatellite telemetry confirms high chlorophyll-a concentration (4.7 mg/m³) and ideal SST of 27.9°C.\n\n### 📋 KEY DECISION BULLETINS\n- 🎣 **Fishing Potential**: **HIGH (87%)**\n- 📍 **Distance**: **18 km Southwest**\n- 🐟 **Target Species**: **Mackerel, Sardinella, Kingfish**\n- 🌿 **Chlorophyll-a**: **4.7 mg/m³**\n- 🌡️ **SST**: **27.9°C**\n- 🌊 **Sea State**: **Moderate (1.4m waves)**\n- ⛽ **Fuel Savings**: **28% vs Blind Trawling**",
+          "components": [
+            {
+              "type": "pfz-card",
+              "data": {
+                "name": "Ratnagiri Southwest PFZ-01",
+                "latLonStr": "16°51'N, 73°10'E",
+                "sstAnomaly": "27.9°C",
+                "chlorophyll": "4.7 mg/m³",
+                "confidence": "87%",
+                "targetSpecies": [
+                  "Indian Mackerel",
+                  "Sardinella",
+                  "Kingfish"
+                ],
+                "distanceNm": "18 km SW",
+                "depthM": 48,
+                "fuelSavingsEst": "28%",
+                "advisory": "High biological productivity 18 km SW of Ratnagiri. Proceed with standard safety protocols."
+              }
+            }
+          ]
+        },
+        "mr": {
+          "verdict_tag": "🟢 उत्तम मासेमारी",
+          "verdict_title": "🟢 आज मासेमारीसाठी सर्वोत्तम जागा: PFZ-01 (१८ किमी नैऋत्य)",
+          "simple_sentence": "आज मासेमारीसाठी सर्वात चांगला परिसर तुमच्या सध्याच्या ठिकाणापासून सुमारे १८ किमी नैऋत्य दिशेला असलेला PFZ-01 आहे. या भागात बांगडा आणि सुरमई माशांचे मुबलक प्रमाण आहे.",
+          "bullets": [
+            "📍 अंतर आणि दिशा: १८ किमी नैऋत्य (Southwest)",
+            "🐟 प्रमुख मासे: बांगडा, तारली, सुरमई",
+            "🎣 मासे मिळण्याची शक्यता: उत्तम (८७% विश्वास)",
+            "🌊 समुद्राची स्थिती: मध्यम शांत (१.४ मीटर लाटा)",
+            "⛽ इंधन बचत: २८% बचत अपेक्षित"
+          ],
+          "action_advice": "सकाळी ४ ते ६ च्या दरम्यान प्रवासाला निघणे अधिक फायदेशीर ठरेल.",
+          "speech_text": "आज मासेमारीसाठी सर्वोत्तम जागा: पी एफ झेड एक. हे क्षेत्र तुमच्या ठिकाणापासून सुमारे १८ किलोमीटर नैऋत्य दिशेला आहे. बांगडा, तारली आणि सुरमई माशांचे प्रमाण भरपूर आहे. मासे मिळण्याची शक्यता ८७ टक्के आहे. समुद्रात १.४ मीटरच्या मध्यम लाटा आहेत. निघण्यापूर्वी ताजे हवामान तपासा.",
+          "title": "🎣 संभाव्य मासेमारी क्षेत्र (PFZ-01)",
+          "prose": "आज मासेमारीसाठी सर्वात चांगला परिसर तुमच्या सध्याच्या ठिकाणापासून **सुमारे १८ किमी नैऋत्य दिशेला (Southwest)** असलेला PFZ-01 आहे.\n\nया भागात क्लोरोफिलचे प्रमाण जास्त असून समुद्राचे तापमान मासेमारीसाठी अत्यंत अनुकूल आहे.\n\n### 📋 मुख्य माहिती आणि शिफारस\n- 🎣 **मासेमारीची शक्यता**: **उच्च (८७%)**\n- 📍 **अंतर**: **१८ किमी नैऋत्य**\n- 🐟 **प्रमुख मासे**: **बांगडा, तारली, सुरमई**\n- 🌿 **क्लोरोफिलचे प्रमाण**: **४.७ mg/m³**\n- 🌡️ **समुद्राच्या पृष्ठभागाचे तापमान**: **२७.९°C**\n- 🌊 **समुद्राची स्थिती**: **मध्यम (लाटा १.४m)**\n- ⛽ **इंधन बचत**: **२८% बचत**",
+          "components": [
+            {
+              "type": "pfz-card",
+              "data": {
+                "name": "रत्नागिरी नैऋत्य मासेमारी क्षेत्र (PFZ-01)",
+                "latLonStr": "16°51'N, 73°10'E",
+                "sstAnomaly": "27.9°C",
+                "chlorophyll": "4.7 mg/m³",
+                "confidence": "87%",
+                "targetSpecies": [
+                  "बांगडा (Mackerel)",
+                  "तारली (Sardinella)",
+                  "सुरमई"
+                ],
+                "distanceNm": "18 किमी नैऋत्य",
+                "depthM": 48,
+                "fuelSavingsEst": "28%",
+                "advisory": "रत्नागिरीच्या नैऋत्येला 18 किमी अंतरावर अनुकूल मासेमारी स्थिती."
+              }
+            }
+          ]
+        },
+        "hi": {
+          "verdict_tag": "🟢 उत्तम मत्स्य क्षेत्र",
+          "verdict_title": "🟢 आज मछली पकड़ने के लिए सर्वोत्तम स्थान: PFZ-01 (18 किमी दक्षिण-पश्चिम)",
+          "simple_sentence": "आज मछली पकड़ने के लिए सबसे अच्छा क्षेत्र रत्नागिरी से लगभग 18 किमी दक्षिण-पश्चिम में स्थित PFZ-01 है। यहाँ बांगड़ा और सुरमई मछलियाँ प्रचुर मात्रा में उपलब्ध हैं।",
+          "bullets": [
+            "📍 दूरी और दिशा: 18 किमी दक्षिण-पश्चिम",
+            "🐟 प्रमुख मछलियाँ: बांगड़ा, तारली, सुरमई",
+            "🎣 मछली मिलने की संभावना: उच्च (87%)",
+            "🌊 समुद्र की स्थिति: मध्यम शांत (1.4 मीटर लहरें)",
+            "⛽ ईंधन की बचत: 28% अनुमानित बचत"
+          ],
+          "action_advice": "सुबह 4 से 6 बजे के बीच प्रस्थान करना सबसे उपयुक्त रहेगा।",
+          "speech_text": "आज मछली पकड़ने के लिए सर्वोत्तम स्थान: पी एफ जेट एक। यह क्षेत्र आपके स्थान से लगभग 18 किलोमीटर दक्षिण-पश्चिम में है। बांगड़ा और सुरमई मछली मिलने की संभावना 87 प्रतिशत है। समुद्र में 1.4 मीटर लहरें हैं। निकलने से पहले ताजा मौसम जरूर देखें।",
+          "title": "🎣 संभावित मत्स्य पालन क्षेत्र (PFZ-01)",
+          "prose": "आज मछली पकड़ने के लिए सबसे अच्छा क्षेत्र आपके वर्तमान स्थान से **लगभग 18 किलोमीटर दक्षिण-पश्चिम (Southwest)** दिशा में स्थित PFZ-01 है।\n\n### 📋 मुख्य जानकारी और सिफारिश\n- 🎣 **मछली पकड़ने की संभावना**: **उच्च (87%)**\n- 📍 **दूरी**: **18 किमी दक्षिण-पश्चिम**\n- 🐟 **प्रमुख मछलियाँ**: **बांगड़ा, तारली, सुरमई**\n- 🌿 **क्लोरोफिल का स्तर**: **4.7 mg/m³**\n- 🌡️ **समुद्र सतह तापमान**: **27.9°C**\n- 🌊 **समुद्र की स्थिति**: **मध्यम (लहरें 1.4m)**",
+          "components": [
+            {
+              "type": "pfz-card",
+              "data": {
+                "name": "रत्नागिरी दक्षिण-पश्चिम मत्स्य क्षेत्र (PFZ-01)",
+                "latLonStr": "16°51'N, 73°10'E",
+                "sstAnomaly": "27.9°C",
+                "chlorophyll": "4.7 mg/m³",
+                "confidence": "87%",
+                "targetSpecies": [
+                  "बांगड़ा (Mackerel)",
+                  "तारली (Sardinella)",
+                  "सुरमई"
+                ],
+                "distanceNm": "18 किमी दक्षिण-पश्चिम",
+                "depthM": 48,
+                "fuelSavingsEst": "28%",
+                "advisory": "रत्नागिरी के 18 किमी दक्षिण-पश्चिम में अच्छी मछली पकड़ने की संभावना है।"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
